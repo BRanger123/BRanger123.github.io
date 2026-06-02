@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>CSG</title>
+        <link rel="stylesheet" href="website.css">
+    </head>
+    <body id="body"> 
+        <div id="menu">
+            <h1>Welcome to CSG.html</h1>
+            <h2>Press M to go back here at any time!</h2><br>
+            <div class="buttonContainer">
+                <button id="startButton" onclick="websiteGoTo('levelsMenu')">Start</button><br>
+                <button id="settingsButton" onclick="websiteGoTo('settings')">Settings</button><br>
+                <button id="quitButton" onclick="exiting=true, websiteGoTo('exitGame')">Exit</button><br>
+            </div>
+        </div>
+
+        <div id="gameWindow" style="display: none">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <div id="levelsMenu" style="display: none">
+            <h1>Level Select</h1>
+            <h2>Level 1 is my favourite</h2>
+            <div class="buttonContainer">
+                <button onclick="playLevel(1)">Level 1</button><br>
+                <button onclick="playLevel(2)">Level 2</button><br>
+            </div>
+        </div>
+
+        <div id="settings" style="display: none">
+            <h1>Settings</h1>
+            <h2>I forgot what I was going to add here:</h2>
+            <h3>Maybe a way to change the font:</h3>
+            <h4>But I quite like this one:</h4>
+            <h5>My favourite is Century Gothic:</h5>
+            <h6>Would you like comic sans?:</h6>
+            <input>
+            <button></button>
+        </div>
+
+        <script type="module" src="website.js"></script>
+        <script>
+            let levelGlobal = -1            //Global variables must use hydration
+            let currentDivId = "menu"
+            let exiting = false
+            let exitCounter = 0
+            //Now define functions for website navigation and level loading
+
+            var input = document.getElementById("body")
+            input.addEventListener("keypress", function(event) {
+                const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
+                if (event.key === "m" && exiting == false) {
+                    event.preventDefault()
+                    document.getElementById('gameWindow').style.display = 'none'
+                    websiteGoTo('menu')
+                }
+                else if (gameIsVisible) {
+                    // Ignore gameplay keys while the game is running.
+                    return
+                }
+                else {
+                    if (exitCounter >= 6) {
+                        document.getElementById('exitMessage1').style.display = 'none'
+                        document.getElementById('exitMessage2').style.display = 'none'
+                        document.getElementById('exitMessage3').style.display = 'none'
+                        document.getElementById('exitMessage4').style.display = 'none'
+                        document.getElementById('exitMessage5').style.display = 'none'
+                        document.getElementById('exitMessage6').style.display = 'none'
+                        document.getElementById('exitMessage7').style.display = 'inline-block'
+                        document.getElementById('gameWindow').style.display = 'none'
+                        websiteGoTo('menu')
+                    }
+                    else {
+                        exitCounter++
+                        document.getElementById(`exitMessage${exitCounter}`).style.display = "inline-block"
+                    }
+                }
+            })
+
+            function websiteGoTo(divId){
+                document.getElementById(currentDivId).style.display = "none"        //When called, must use div id in '' for function call
+                document.getElementById(divId).style.display = "inline-block"
+                currentDivId = divId
+            }
+            
+            function playLevel(level) {
+                document.getElementById(currentDivId).style.display = 'none'
+                document.getElementById('gameWindow').style.display = 'inline-block'
+                levelGlobal = level
+                go("startButton")
+            }
+
+            document.getElementById('gameWindow').style.display = 'none'            //Must be called for some reason so page does not have scroll bar on load
+            websiteGoTo('menu')
+        </script>
+        <div id="exitGame" style="display: none">
+            <h1>Goodbye!</h1>
+            <h2 id="exitMessage7" style="display: none">Go away!</h2><br>
+            <h2 id="exitMessage1" style="display: none">You pressed exit,</h2><br>
+            <h2 id="exitMessage2" style="display: none">what did you think would happen?</h2><br>
+            <h2 id="exitMessage3" style="display: none">I'm not letting you go back.</h2><br>
+            <h2 id="exitMessage4" style="display: none">Seriously!</h2><br>
+            <h2 id="exitMessage5" style="display: none">...</h2><br>
+            <h2 id="exitMessage6" style="display: none">Fine, go.</h2><br>
+        </div>
+    </body>
+</html>
