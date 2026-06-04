@@ -358,7 +358,7 @@ scene(2, () => {
     onKeyDown("a", () => player.move(-player.speed, 0))
     onKeyDown("s", () => player.move(0, player.speed))
     onKeyDown("d", () => player.move(player.speed, 0))
-    onKeyDown("e", () => bullet())
+    onKeyDown("b", () => bullet())
     onKeyPress("k", () => addKaboom(player.pos))
     onClick(() => gunTest.fireWeapon())
 
