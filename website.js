@@ -55,7 +55,7 @@ scene(1, () => {
         "                                                      ",
         "                                                      ",
         "                                                      ",
-        "    ========                           ==             ",
+        "    ========                           =====          ",
         "               ============                           ",
         "                                    ======            ",
         "                                                      ",
@@ -69,15 +69,6 @@ scene(1, () => {
         "                =                                     ",
         "                    =========           ===           ",
         "   =======                                            ",
-        "                             ======                   ",
-        "                      =                       ====    ",
-        "       =========                       =====          ",
-        "                                                      ",
-        "                  ====            ========            ",
-        "    ====                                              ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
     ],
     {
         //Define the size of tile block
@@ -162,51 +153,6 @@ scene(2, () => {
     setBackground(rgb(247, 247, 247))
     let score = 0
     let enemiesDied = 0
-    addLevel([
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-    ],
-    {
-        //Define the size of tile block
-        tileWidth: 32,
-        tileHeight: 32,
-        //Define what each symbol means, by a function returning a component list (what will be passed to add())
-        tiles: {
-            "=": () => [
-                rect(32, 32),
-                area(),
-                body({ isStatic: true }),
-                color(0, 0, 0),
-                "tile",
-            ]
-        }
-    })
     function bullet() {
         let direction = toWorld(mousePos()).sub(player.pos).unit()
         const bullet = add([
@@ -342,7 +288,9 @@ scene(2, () => {
             enemies.push(spawnEnemy())
             enemiesDied++
             enemiesDiedLabel.text = `Kills: ${enemiesDied}`
+            //if (enemiesDied % 10 == 0){
 
+            //}
         })
         return enemy
     }

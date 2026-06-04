@@ -37,6 +37,10 @@
             <h2>Press M to go back to the menu</h2>
         </div>
 
+        <div id="upgrade">
+
+        </div>
+
         <script type="module" src="website.js"></script>
         <script>
             let levelGlobal = -1            //Global variables must load first
@@ -50,7 +54,7 @@
                 const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
                 if (event.key === "m" && exiting == false) {
                     event.preventDefault()
-                    playLevel(-1)
+                    playLevel(levelGlobal)
                     document.getElementById('gameWindow').style.display = 'none'
                     websiteGoTo('menu')
                 }
@@ -87,6 +91,7 @@
                 document.getElementById(currentDivId).style.display = 'none'
                 document.getElementById('gameWindow').style.display = 'inline-block'
                 levelGlobal = level
+                currentDivId = "gameWindow"
                 go("startButton")
             }
 
