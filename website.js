@@ -7,8 +7,8 @@ const canvas = document.getElementById('gameCanvas')
 //Initialize kaboom with canvas element
 kaboom({
     canvas: canvas,
-    width: 1900,
-    height: 900,
+    width: 1600,
+    height: 800,
     background: [255, 255, 255],
 })
 
@@ -381,6 +381,126 @@ scene(2, () => {
     })
 })
 
+scene(3, () => {
+    setGravity(1600)
+    setCursor("default")
+    addLevel([
+        "                                                      ",
+        "                                                      ",
+        "                                                      ",
+        "                                                      ",
+        "                                                      ",
+        "                                                      ",
+        "                                                      ",
+        "                                                      ",
+        "                      =                               ",
+        "                      =                               ",
+        "                      =            =       =          ",
+        "                      =                               ",
+        "                      =                               ",
+        "               ==     =          ==         ==        ",
+        "                      =            =========          ",
+        "                      =                               ",
+        "             e                                        ",
+        "======================================================",
+    ],
+    {
+        // define the size of tile block
+        tileWidth: 32,
+        tileHeight: 32,
+        // define what each symbol means, by a function returning a component list (what will be passed to add())
+        tiles: {
+            "=": () => [
+                rect(32, 32),
+                area(),
+                body({ isStatic: true }),
+                color(127, 200, 200),
+                "tile",
+            ],
+            "e": () => [
+                rect(32, 32),
+                area(),
+                body({ isStatic: true }),
+                color(10, 200, 10),
+                "goal",
+            ]
+        }
+    })
+    loadBean()
+    const player = add([
+        sprite("bean"),  //Renders as a sprite
+        pos(200, 80),    //Position in world
+        area(),          //Has a collider
+        body(),          //Responds to physics and gravity
+        "player",
+        "friendly",
+        {
+            dir: RIGHT,
+            dead: false,
+            speed: 300,
+        },
+    ])
+    const controls = add([
+        text("Press e to place blocks"),
+        pos(center().x-250, 24),
+        color(0, 0, 0),
+    ])
+    const credits = add([
+        text("designed by Frank"),
+        pos(width()-450, height()-100),
+        color(0, 0, 0),
+    ])
+    onKeyPress("space", () => {
+        if (player.isGrounded()) {
+            player.jump()
+        }
+        if (rand() < 0.05) {
+            addKaboom(player.pos)
+            if (blocks > 0) {
+                for (let i=0; i<10; i++) {
+                    add([
+                        pos(player.pos.x+50, player.pos.y),
+                        rect(32, 32),
+                        area(),
+                        body({ isStatic: false }),
+                        color(255, 100, 0),
+                        outline(4),
+                    ])
+                }
+            }
+            blocks = 0
+            blockLabel.text = `you tripped`
+        }
+    })
+    onKeyDown("a", () => {player.move(-player.speed, 0)})
+    onKeyDown("d", () => {player.move(+player.speed, 0)})
+    onKeyDown("s", () => {shake()})
+    let blocks = 5
+    const blockLabel = add([
+        text(`Blocks: ${blocks}`),
+        pos(24, 24),
+        color(0, 0, 0),
+    ])
+    onKeyPress("e", () => {
+        if (blocks >0) {
+            add([
+                pos(player.pos.x+50, player.pos.y),
+                rect(32, 32),
+                area(),
+                body({ isStatic: false }),
+                color(255, 100, 0),
+                outline(4),
+            ])
+            blocks -= 1
+            blockLabel.text = `Blocks: ${blocks}`
+        }
+    })
+    onCollide("player", "goal", () => {
+        go("winScreen")
+    })
+})
+
+
 scene("deathScreen", (score) => {
     add([
         text("Press M to return to menu"),
@@ -398,5 +518,20 @@ scene("deathScreen", (score) => {
         text(`Score: ${score || 0}`),       //If the game does not pass a score, the score will be 0 instead of undefined
         pos(24, 24),
         color(0, 0, 0),
+    ])
+})
+
+scene("winScreen", () => {
+    add([
+        text("Press M to return to menu"),
+        pos(center()),
+        anchor("center"),
+        color(0, 0, 255),
+    ])
+    add([
+        text("You won!"),
+        pos(center().x, center().y-100),
+        anchor("center"),
+        color(0, 0, 255),
     ])
 })

@@ -6,8 +6,8 @@
     </head>
     <body id="body"> 
         <div id="menu">
-            <h1>Welcome to my website</h1>
-            <h2>By Barnaby Ranger</h2>
+            <h1>Bricklet</h1>
+            <h3>By Barnaby Ranger</h3>
             <h2>Press M to go back here at any time</h2><br>
             <div class="buttonContainer">
                 <button id="startButton" onclick="websiteGoTo('levelsMenu')">Start</button><br>
@@ -26,19 +26,21 @@
             <div class="buttonContainer">
                 <button onclick="playLevel(1)">Level 1</button><br>
                 <button onclick="playLevel(2)">Level 2</button><br>
+                <button onclick="playLevel(3)">Level 3</button><br>
             </div>
         </div>
 
         <div id="settings" style="display: none">
-            <h1>Settings</h1>
-            <h2>Version 1.3</h2>
+            <h1>Information</h1>
+            <h2>Version 1.4</h2>
             <h2>Now TLS certified!</h2>
+            <h2>Fun Fact: this used to be settings</h2>
             <h2>Press M to go back to the menu</h2>
         </div>
 
         <script type="module" src="website.js"></script>
         <script>
-            let levelGlobal = -1            //Global variables must use hydration
+            let levelGlobal = -1            //Global variables must load first
             let currentDivId = "menu"
             let exiting = false
             let exitCounter = 0
@@ -49,6 +51,7 @@
                 const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
                 if (event.key === "m" && exiting == false) {
                     event.preventDefault()
+                    playLevel(-1)
                     document.getElementById('gameWindow').style.display = 'none'
                     websiteGoTo('menu')
                 }
@@ -96,8 +99,8 @@
             <h2 id="exitMessage7" style="display: none">Go away!</h2><br>
             <h2 id="exitMessage1" style="display: none">You pressed exit,</h2><br>
             <h2 id="exitMessage2" style="display: none">what did you think would happen?</h2><br>
-            <h2 id="exitMessage3" style="display: none">I'm not letting you go back.</h2><br>
-            <h2 id="exitMessage4" style="display: none">Seriously!</h2><br>
+            <h2 id="exitMessage3" style="display: none"></h2><br>
+            <h2 id="exitMessage4" style="display: none"></h2><br>
             <h2 id="exitMessage5" style="display: none">...</h2><br>
             <h2 id="exitMessage6" style="display: none">Fine, go.</h2><br>
         </div>
