@@ -1,15 +1,15 @@
 //Import kaboom.js
 import kaboom from "https://unpkg.com/kaboom@3000.0.1/dist/kaboom.mjs"
 
-//Get the canvas element
-const canvas = document.getElementById('gameCanvas')
-
 //Initialize kaboom with canvas element
 kaboom({
-    canvas: canvas,
-    width: 1600,
-    height: 800,
     background: [255, 255, 255],
+    global: true,
+    width: 0.95*window.innerHeight*16/9,
+    height: 0.95*window.innerHeight,
+    clearColor: [1,1,1,1],
+    canvas: document.getElementById('gameCanvas'),
+    debug: true
 })
 
 scene("startButton", () => {
@@ -282,9 +282,9 @@ scene(2, () => {
         pos(24, height()-100),
         color(0, 0, 0),
     ])
-    const obj = add([
-        text("Survive!"),
-        pos(center().x-80, 24),
+    const controls = add([
+        text("Click to shoot"),
+        pos(center().x-145, 24),
         color(0, 0, 0),
     ])
     
@@ -322,7 +322,7 @@ scene(2, () => {
         ])
 
         enemy.on("death", () => {
-            if(Math.random()*1 < 0.2){
+            if(Math.random()*1 < 0.3){
                 addKaboom(enemy.pos)
                 if(player.pos.dist(enemy.pos) < 150){
                     player.hurt(20)
@@ -330,6 +330,7 @@ scene(2, () => {
                 }
             }
             destroy(enemy)
+            controls.text = ``
         })
 
         return enemy
@@ -398,10 +399,10 @@ scene(3, () => {
         "                      =            =       =          ",
         "                      =                               ",
         "                      =                               ",
-        "               ==     =          ==         ==        ",
+        "               ==     =          ==   eee   ==        ",
         "                      =            =========          ",
         "                      =                               ",
-        "             e                                        ",
+        "                                                      ",
         "======================================================",
     ],
     {
@@ -445,11 +446,13 @@ scene(3, () => {
         pos(center().x-250, 24),
         color(0, 0, 0),
     ])
+    /*
     const credits = add([
         text("designed by Frank"),
         pos(width()-450, height()-100),
         color(0, 0, 0),
     ])
+    */
     onKeyPress("space", () => {
         if (player.isGrounded()) {
             player.jump()
