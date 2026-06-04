@@ -1,15 +1,15 @@
 //Import kaboom.js
 import kaboom from "https://unpkg.com/kaboom@3000.0.1/dist/kaboom.mjs"
 
+//Get the canvas element
+const canvas = document.getElementById('gameCanvas')
+
 //Initialize kaboom with canvas element
 kaboom({
+    canvas: canvas,
+    width: window.innerWidth,
+    height: window.innerHeight,
     background: [255, 255, 255],
-    global: true,
-    width: 0.95*window.innerHeight*16/9,
-    height: 0.95*window.innerHeight,
-    clearColor: [1,1,1,1],
-    canvas: document.getElementById('gameCanvas'),
-    debug: true
 })
 
 scene("startButton", () => {
@@ -287,11 +287,13 @@ scene(2, () => {
         pos(center().x-145, 24),
         color(0, 0, 0),
     ])
+    const obj = add([
+        timer()
+    ])
     
     // Make enemies
-    const enemyNum = 7
     const enemies = []
-    const minSpawnDist = 300
+    const minSpawnDist = 400
 
     function spawnEnemy() {
         let x, y
@@ -318,7 +320,7 @@ scene(2, () => {
             health(Math.random() * 150 + 20),
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
             "enemy",
-            { speed: Math.random() * 350 + 50 },
+            { speed: (Math.random() * 350) + 50 },
         ])
 
         enemy.on("death", () => {
@@ -331,14 +333,12 @@ scene(2, () => {
             }
             destroy(enemy)
             controls.text = ``
+            // enemies.push(spawnEnemy())
         })
-
         return enemy
     }
 
-    for (let i = 0; i < enemyNum; i++) {
-        enemies.push(spawnEnemy())
-    }
+    obj.loop(1, () => {enemies.push(spawnEnemy())})
 
     onUpdate(() => {
         score++
@@ -371,9 +371,6 @@ scene(2, () => {
     //player.onUpdate(() => {
     //    camPos(player.pos)
     //})
-    onDestroy("enemy", () => {
-        enemies.push(spawnEnemy())
-    })
 
     onDestroy("player", () => go("deathScreen", score))
     player.on("death", () => {

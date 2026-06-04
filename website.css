@@ -47,3 +47,18 @@ button:active{
     border: 1px solid #ccc;
     background-color: #fff;
 }
+::-webkit-scrollbar{
+    display: none;
+}
+::-webkit-scrollbar-track{
+    display: none;
+}
+::-webkit-scrollbar-thumb{
+    display: none;
+}
+::-webkit-scrollbar-thumb:hover{
+    display: none;
+}
+::-webkit-scrollbar-thumb:active{
+    display: none;
+}
