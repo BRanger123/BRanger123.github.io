@@ -289,32 +289,51 @@ scene(2, () => {
     ])
     
     // Make enemies
-    let enemyNum = 7
+    const enemyNum = 7
     const enemies = []
-    for (let i = 0; i < enemyNum; i++) {
-        enemies.push(add([
+    const minSpawnDist = 300
+
+    function spawnEnemy() {
+        let x, y
+        let tries = 0
+
+        do {
+            x = Math.random() * width()
+            y = Math.random() * height()
+            tries++
+        } while (player && player.exists() && player.pos.dist(vec2(x, y)) < minSpawnDist && tries < 50)
+
+        const enemy = add([
             sprite("bean"),
-            pos(Math.random() * width(), Math.random() * height()),
+            pos(x, y),
             area(),
             body(),
-            health(Math.random()*50+20),
-            color(Math.random()*255, Math.random()*255, Math.random()*255),
+            health(Math.random() * 50 + 20),
+            color(Math.random() * 255, Math.random() * 255, Math.random() * 255),
             "enemy",
-            { speed: Math.random()*200+50 },
-        ]))
+            { speed: Math.random() * 200 + 50 },
+        ])
+
+        enemy.on("death", () => {
+            destroy(enemy)
+        })
+
+        return enemy
+    }
+
+    for (let i = 0; i < enemyNum; i++) {
+        enemies.push(spawnEnemy())
     }
 
     onUpdate(() => {
         score++
         scoreLabel.text = `Score: ${score}`
         healthLabel.text = `Health: ${player.hp()}`
+
         for (const enemy of enemies) {
             if (!enemy.exists()) {
                 continue
             }
-            enemy.on("death", () => {
-                destroy(enemy)
-            })
             const direction = player.pos.sub(enemy.pos).unit()
             enemy.move(direction.scale(enemy.speed))
         }
@@ -337,27 +356,27 @@ scene(2, () => {
     //player.onUpdate(() => {
     //    camPos(player.pos)
     //})
-    onDestroy("enemy", () => 
+    onDestroy("enemy", () => {
+        enemies.push(spawnEnemy())
+    })
 
-        enemies.push(add([
-            sprite("bean"),
-            pos(Math.random() * width(), Math.random() * height()),
-            area(),
-            body(),
-            health(Math.random()*50+20),
-            color(Math.random()*255, Math.random()*255, Math.random()*255),
-            "enemy",
-            { speed: Math.random()*200+50 },
-        ]))
-    )
     onDestroy("player", () => go("deathScreen", score))
-    player.on("death", () => {destroy(player), go("deathScreen", score)})
+    player.on("death", () => {
+        destroy(player)
+        go("deathScreen", score)
+    })
 })
 
 scene("deathScreen", (score) => {
     add([
-        text("You Died..."),
+        text("Press M to return to menu"),
         pos(center()),
+        anchor("center"),
+        color(255, 0, 0),
+    ])
+    add([
+        text("You died..."),
+        pos(center().x, center().y-100),
         anchor("center"),
         color(255, 0, 0),
     ])

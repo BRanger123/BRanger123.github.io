@@ -42,7 +42,7 @@ button:active{
     text-align: center;
 }
 #gameCanvas {
-    display: block;
+    display: inline-block;
     margin: 0 auto;
     border: 1px solid #ccc;
     background-color: #fff;
