@@ -302,19 +302,33 @@ scene(2, () => {
             y = Math.random() * height()
             tries++
         } while (player && player.exists() && player.pos.dist(vec2(x, y)) < minSpawnDist && tries < 50)
+        /*
+        while (player && player.exists() && player.pos.dist(vec2(x, y)) < minSpawnDist && tries < 50){
+            x = Math.random() * width()
+            y = Math.random() * height()
+            tries++
+        }
+        */
 
         const enemy = add([
             sprite("bean"),
             pos(x, y),
             area(),
             body(),
-            health(Math.random() * 50 + 20),
-            color(Math.random() * 255, Math.random() * 255, Math.random() * 255),
+            health(Math.random() * 150 + 20),
+            color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
             "enemy",
-            { speed: Math.random() * 200 + 50 },
+            { speed: Math.random() * 350 + 50 },
         ])
 
         enemy.on("death", () => {
+            if(Math.random()*1 < 0.2){
+                addKaboom(enemy.pos)
+                if(player.pos.dist(enemy.pos) < 150){
+                    player.hurt(20)
+                    shake(8)
+                }
+            }
             destroy(enemy)
         })
 
