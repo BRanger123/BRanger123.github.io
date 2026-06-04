@@ -159,6 +159,9 @@ scene(1, () => {
 
 scene(2, () => {
     setGravity(0)
+    setBackground(rgb(247, 247, 247))
+    let score = 0
+    let enemiesDied = 0
     addLevel([
         "                                                      ",
         "                                                      ",
@@ -204,8 +207,6 @@ scene(2, () => {
             ]
         }
     })
-    setBackground(rgb(247, 247, 247))
-    let score = 0
     function bullet() {
         let direction = toWorld(mousePos()).sub(player.pos).unit()
         const bullet = add([
@@ -277,12 +278,17 @@ scene(2, () => {
         pos(width()-240, height()-100),
         color(0, 0, 0),
     ])
+    const enemiesDiedLabel = add([
+        text(`Kills: ${enemiesDied}`),
+        pos(width()-240, height()-50),
+        color(0, 0, 0),
+    ])
     const healthLabel = add([
         text(`Health: ${player.hp()}`),
         pos(24, height()-100),
         color(0, 0, 0),
     ])
-    const controls = add([
+    const controlsLabel = add([
         text("Click to shoot"),
         pos(center().x-145, 24),
         color(0, 0, 0),
@@ -332,13 +338,15 @@ scene(2, () => {
                 }
             }
             destroy(enemy)
-            controls.text = ``
-            // enemies.push(spawnEnemy())
+            controlsLabel.text = ``
+            enemies.push(spawnEnemy())
+            enemiesDied++
+            enemiesDiedLabel.text = `Kills: ${enemiesDied}`
+
         })
         return enemy
     }
-
-    obj.loop(1, () => {enemies.push(spawnEnemy())})
+    obj.loop(1.5, () => {enemies.push(spawnEnemy())})   // 1.5 value acts as diffuculty
 
     onUpdate(() => {
         score++
