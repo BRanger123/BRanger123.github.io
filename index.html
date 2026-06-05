@@ -26,87 +26,77 @@
             <div class="buttonContainer">
                 <button onclick="playLevel(1)">Level 1</button><br>
                 <button onclick="playLevel(2)">Level 2</button><br>
-                <button onclick="playLevel(3)">Level 3</button><br>
+                <button onclick="playLevel(3)">Level 3</button>
             </div>
+            <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
 
         <div id="settings" style="display: none">
             <h1>Information</h1>
             <h2>Version 1.6 Patch Notes:</h2>
             <h3>Level 2 becomes slowly more difficult.</h3><br><br>
-            <h2>Press M to go back to the menu</h2>
+            <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
 
-        <div id="upgrade">
+        <div id="upgrade" style="display: none;">
+            <h1>Upgrade Menu</h1>
+            <div class="buttonContainer">
+                <button onclick="player.health = 100">test 1</button><br>
+                <button onclick="">test 3</button><br>
+                <button onclick="">test 3</button><br>
+                <button onclick="websiteGoTo('gameWindow')">Continue</button><br>
+            </div>
 
         </div>
 
         <script type="module" src="website.js"></script>
         <script>
-            let levelGlobal = -1            //Global variables must load first
+            let levelGlobal = -1            // Global variables must load first
             let currentDivId = "menu"
-            let exiting = false
             let exitCounter = 0
-            //Now define functions for website navigation and level loading
+            // Now define functions for website navigation and level loading
 
             var input = document.getElementById("body")
             input.addEventListener("keypress", function(event) {
                 const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
-                if (event.key === "m" && exiting == false) {
+                if (event.key === "m") {
                     event.preventDefault()
                     playLevel(levelGlobal)
+                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
+                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))
+                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
+                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
                     document.getElementById('gameWindow').style.display = 'none'
                     websiteGoTo('menu')
                 }
-                else if (gameIsVisible) {
-                    // Ignore gameplay keys while the game is running.
-                    return
-                }
-                else {
-                    if (exitCounter >= 6) {
-                        document.getElementById('exitMessage1').style.display = 'none'
-                        document.getElementById('exitMessage2').style.display = 'none'
-                        document.getElementById('exitMessage3').style.display = 'none'
-                        document.getElementById('exitMessage4').style.display = 'none'
-                        document.getElementById('exitMessage5').style.display = 'none'
-                        document.getElementById('exitMessage6').style.display = 'none'
-                        document.getElementById('exitMessage7').style.display = 'inline-block'
-                        document.getElementById('gameWindow').style.display = 'none'
-                        websiteGoTo('menu')
-                    }
-                    else {
-                        exitCounter++
-                        document.getElementById(`exitMessage${exitCounter}`).style.display = "inline-block"
-                    }
+            })
+            input.addEventListener("keypress", function(event) {
+                const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
+                if (event.key === "r" && gameIsVisible) {
+                    event.preventDefault()
+                    go(levelGlobal)
                 }
             })
 
             function websiteGoTo(divId){
-                document.getElementById(currentDivId).style.display = "none"        //When called, must use div id in '' for function call
+                document.getElementById(currentDivId).style.display = "none"        // When called, must use div id in '' for function call
                 document.getElementById(divId).style.display = "inline-block"
                 currentDivId = divId
             }
             
             function playLevel(level) {
+                levelGlobal = level
                 document.getElementById(currentDivId).style.display = 'none'
                 document.getElementById('gameWindow').style.display = 'inline-block'
-                levelGlobal = level
                 currentDivId = "gameWindow"
                 go("startButton")
             }
 
-            document.getElementById('gameWindow').style.display = 'none'            //Must be called for some reason so page does not have scroll bar on load
+            document.getElementById('gameWindow').style.display = 'none'            // So page does not have scroll bar on load
             websiteGoTo('menu')
         </script>
         <div id="exitGame" style="display: none">
             <h1>Goodbye!</h1>
-            <h2 id="exitMessage7" style="display: none">Go away!</h2><br>
-            <h2 id="exitMessage1" style="display: none">You pressed exit,</h2><br>
-            <h2 id="exitMessage2" style="display: none">what did you think would happen?</h2><br>
-            <h2 id="exitMessage3" style="display: none"></h2><br>
-            <h2 id="exitMessage4" style="display: none"></h2><br>
-            <h2 id="exitMessage5" style="display: none">...</h2><br>
-            <h2 id="exitMessage6" style="display: none">Fine, go.</h2><br>
         </div>
     </body>
 </html>

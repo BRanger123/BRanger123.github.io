@@ -120,17 +120,9 @@ scene(1, () => {
             speed: 300,
         },
     ])
-    onKeyPress("space", () => {
-        if (player.isGrounded()) {
-            player.jump()
-        }
-    })
-    onKeyDown("a", () => {
-        player.move(-player.speed, 0)
-    })
-    onKeyDown("d",() => {
-        player.move(+player.speed, 0)
-    })
+    onKeyPress("space", () => {if (player.isGrounded()) {player.jump()}})
+    onKeyDown("a", () => {player.move(-player.speed, 0)})
+    onKeyDown("d",() => {player.move(+player.speed, 0)})
     player.onCollide("tile", (tile) => {
         tile.unuse("tile")  // VERY IMPORTANT!!! All tiles with "tile" tag are checked for collision, so now cracked tiles are no longer checked for collision
         tile.use(color(255, 0, 0))
@@ -288,19 +280,22 @@ scene(2, () => {
             enemies.push(spawnEnemy())
             enemiesDied++
             enemiesDiedLabel.text = `Kills: ${enemiesDied}`
-            //if (enemiesDied % 10 == 0){
-
-            //}
+            /*if (enemiesDied % 10 == 0){
+                canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
+                canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))
+                canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
+                canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
+                websiteGoTo('upgrade')
+            }*/
         })
         return enemy
     }
-    obj.loop(1.5, () => {enemies.push(spawnEnemy())})   // 1.5 value acts as diffuculty
+    obj.loop(1.9, () => {enemies.push(spawnEnemy())})   // Time value acts as diffuculty
 
     onUpdate(() => {
         score++
         scoreLabel.text = `Score: ${score}`
         healthLabel.text = `Health: ${player.hp()}`
-
         for (const enemy of enemies) {
             if (!enemy.exists()) {
                 continue
@@ -316,7 +311,6 @@ scene(2, () => {
     onKeyDown("s", () => player.move(0, player.speed))
     onKeyDown("d", () => player.move(player.speed, 0))
     onKeyDown("b", () => bullet())
-    onKeyPress("k", () => addKaboom(player.pos))
     onClick(() => gunTest.fireWeapon())
 
     // Collision with enemy
@@ -431,6 +425,7 @@ scene(3, () => {
     onKeyDown("a", () => {player.move(-player.speed, 0)})
     onKeyDown("d", () => {player.move(+player.speed, 0)})
     onKeyDown("s", () => {shake()})
+    onKeyPress("r", () => go(levelGlobal))    // Overide playLevel() so button level is not started
     let blocks = 5
     const blockLabel = add([
         text(`Blocks: ${blocks}`),
@@ -461,6 +456,12 @@ scene("deathScreen", (score) => {
     add([
         text("Press M to return to menu"),
         pos(center()),
+        anchor("center"),
+        color(255, 0, 0),
+    ])
+    add([
+        text("Press R to reset"),
+        pos(center().x, center().y-50),
         anchor("center"),
         color(255, 0, 0),
     ])

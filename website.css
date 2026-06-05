@@ -21,6 +21,10 @@ button{
     box-shadow: 2px 2px black;
     transition: transform .2s
 }
+#backButton{
+    background-color: rgb(0, 0, 0);
+    color: rgb(255, 255, 255);
+}
 button:hover{
     transform: scale(1.5)
 }
@@ -41,7 +45,7 @@ button:active{
     cursor: pointer;
     text-align: center;
 }
-#gameCanvas {
+#gameCanvas{
     display: inline-block;
     margin: 0 auto;
     border: 1px solid #ccc;
