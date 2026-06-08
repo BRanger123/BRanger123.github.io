@@ -262,10 +262,10 @@ scene(2, () => {
             pos(x, y),
             area(),
             body(),
-            health(Math.random() * 150 + 20),
+            health(Math.random() * 100 + 20),
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
             "enemy",
-            { speed: (Math.random() * 350) + 50 },
+            { speed: (Math.random() * 550) + 50 },
         ])
 
         enemy.on("death", () => {
@@ -281,7 +281,7 @@ scene(2, () => {
             enemies.push(spawnEnemy())
             enemiesDied++
             enemiesDiedLabel.text = `Kills: ${enemiesDied}`
-            if (enemiesDied % 1 == 0){
+            /*if (enemiesDied % 1 == 0){
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
@@ -299,7 +299,7 @@ scene(2, () => {
                     hintLabel.text = ``
                 })
             }
-            
+            */
         })
         return enemy
     }
@@ -329,13 +329,17 @@ scene(2, () => {
     })
 
     // Player controls
-    onKeyDown("w", () => player.move(0, -player.speed))
-    onKeyDown("a", () => player.move(-player.speed, 0))
-    onKeyDown("s", () => player.move(0, player.speed))
-    onKeyDown("d", () => player.move(player.speed, 0))
-    onKeyPress("b", () => {
-        player.hurt(50)
-        shake(50)
+    player.onUpdate(() => {
+        if (isPaused) {
+            return
+        }
+        const dir = vec2(0, 0)
+        if (isKeyDown("a")) {dir.x = -1}
+        if (isKeyDown("d")) {dir.x = 1}
+        if (isKeyDown("w")) {dir.y = -1}
+        if (isKeyDown("s")) {dir.y = 1}
+        const unitVec = dir.unit()
+        player.move(unitVec.scale(player.speed))
     })
     onClick(() => gunTest.fireWeapon())
 
