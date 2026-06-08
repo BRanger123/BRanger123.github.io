@@ -101,8 +101,8 @@ scene(1, () => {
         scoreLabel.text = score
     })
     add([
-        pos(-300, 850),
-        rect(2200, 40),
+        pos(-600, 850),
+        rect(4000, 40),
         area(),
         body({ isStatic: true }),
         color(0, 0, 0),
@@ -145,6 +145,7 @@ scene(2, () => {
     setBackground(rgb(247, 247, 247))
     let score = 0
     let enemiesDied = 0
+    let isPaused = false
     function bullet() {
         let direction = toWorld(mousePos()).sub(player.pos).unit()
         const bullet = add([
@@ -239,15 +240,15 @@ scene(2, () => {
     const enemies = []
     const minSpawnDist = 400
 
-    function spawnEnemy() {
+    function spawnEnemy(){
         let x, y
         let tries = 0
 
-        do {
+        do{
             x = Math.random() * width()
             y = Math.random() * height()
             tries++
-        } while (player && player.exists() && player.pos.dist(vec2(x, y)) < minSpawnDist && tries < 50)
+        }while (player && player.exists() && player.pos.dist(vec2(x, y)) < minSpawnDist && tries < 50)
         /*
         while (player && player.exists() && player.pos.dist(vec2(x, y)) < minSpawnDist && tries < 50){
             x = Math.random() * width()
@@ -268,11 +269,11 @@ scene(2, () => {
         ])
 
         enemy.on("death", () => {
-            if(Math.random()*1 < 0.3){
+            if(Math.random()*1 < 0.6){
                 addKaboom(enemy.pos)
-                if(player.pos.dist(enemy.pos) < 150){
+                shake(8)                                // Shake anyway rather than if player takes damage so game feels more responsive
+                if(player.pos.dist(enemy.pos) < 80){
                     player.hurt(20)
-                    shake(8)
                 }
             }
             destroy(enemy)
@@ -280,28 +281,50 @@ scene(2, () => {
             enemies.push(spawnEnemy())
             enemiesDied++
             enemiesDiedLabel.text = `Kills: ${enemiesDied}`
-            /*if (enemiesDied % 10 == 0){
+            if (enemiesDied % 1 == 0){
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
+                isPaused = true
+                destroyAll("bullet")
+                const hintLabel = add([
+                    text("Click to continue"),
+                    pos(center().x-175, 24),
+                    color(0, 0, 0),
+                ])
                 websiteGoTo('upgrade')
-            }*/
+                onClick(() => {
+                    isPaused = false
+                    hintLabel.text = ``
+                })
+            }
+            
         })
         return enemy
     }
-    obj.loop(1.9, () => {enemies.push(spawnEnemy())})   // Time value acts as diffuculty
+    obj.loop(1.9, () => {
+        if(!isPaused){
+            score++
+            scoreLabel.text = `Score: ${score}`
+            if(player.hp()<56){                                 // Player heals 5 every loop to max of 55+5
+                player.heal(5)
+                healthLabel.text = `Health: ${player.hp()}`
+            }
+            enemies.push(spawnEnemy())
+        }
+    })   // Time value acts as diffuculty
 
     onUpdate(() => {
-        score++
-        scoreLabel.text = `Score: ${score}`
         healthLabel.text = `Health: ${player.hp()}`
         for (const enemy of enemies) {
             if (!enemy.exists()) {
                 continue
             }
-            const direction = player.pos.sub(enemy.pos).unit()
-            enemy.move(direction.scale(enemy.speed))
+            if(!isPaused){
+                const direction = player.pos.sub(enemy.pos).unit()
+                enemy.move(direction.scale(enemy.speed))
+            }
         }
     })
 
@@ -310,7 +333,10 @@ scene(2, () => {
     onKeyDown("a", () => player.move(-player.speed, 0))
     onKeyDown("s", () => player.move(0, player.speed))
     onKeyDown("d", () => player.move(player.speed, 0))
-    onKeyDown("b", () => bullet())
+    onKeyPress("b", () => {
+        player.hurt(50)
+        shake(50)
+    })
     onClick(() => gunTest.fireWeapon())
 
     // Collision with enemy
@@ -333,23 +359,23 @@ scene(3, () => {
     setGravity(1600)
     setCursor("default")
     addLevel([
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                      =                               ",
-        "                      =                               ",
-        "                      =            =       =          ",
-        "                      =                               ",
-        "                      =                               ",
-        "               ==     =          ==   eee   ==        ",
-        "                      =            =========          ",
-        "                      =                               ",
-        "                                                      ",
+        "=                                                    =",
+        "=                                                    =",
+        "=                                                    =",
+        "=                                                    =",
+        "=                                                    =",
+        "=                                                    =",
+        "=                                                    =",
+        "=                                                    =",
+        "=                      =                             =",
+        "=                      =                             =",
+        "=                      =            =       =        =",
+        "=                      =                             =",
+        "=                      =                             =",
+        "=               ==     =          ==   eee   ==      =",
+        "=                      =            =========        =",
+        "=                      =                             =",
+        "=                                                    =",
         "======================================================",
     ],
     {
@@ -388,18 +414,16 @@ scene(3, () => {
             speed: 300,
         },
     ])
-    const controls = add([
+    const controlsLabel = add([
         text("Press e to place blocks"),
         pos(center().x-250, 24),
         color(0, 0, 0),
     ])
-    /*
-    const credits = add([
-        text("designed by Frank"),
+    const hintLabel = add([
+        text("Press r to restart"),
         pos(width()-450, height()-100),
         color(0, 0, 0),
     ])
-    */
     onKeyPress("space", () => {
         if (player.isGrounded()) {
             player.jump()
