@@ -143,7 +143,6 @@ scene(1, () => {
 scene(2, () => {
     setGravity(0)
     setBackground(rgb(247, 247, 247))
-    let score = 0
     let enemiesDied = 0
     let isPaused = false
     function bullet() {
@@ -168,17 +167,44 @@ scene(2, () => {
     
     // Experimental code for weapon class
     class gun{
-        constructor(fireRate, bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread) {  // ADD RECOIL
-            this.fireRate = fireRate
+        constructor(bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo) {
             this.bulletSpeed = bulletSpeed
             this.bulletColor = bulletColor
             this.bulletDamage = bulletDamage
             this.magSize = magSize
+            this.ammoInMag = magSize  // Current ammo in magazine
+            this.totalAmmo = totalAmmo  // Total ammunition available (including loaded)
             this.bulletsFired = bulletsFired
             this.spread = spread
+            this.recoilForce = recoilForce  // Force of recoil that pushes player back
         }
+        
+        canFire() {
+            return this.ammoInMag > 0
+        }
+        
+        reload() {
+            if (this.totalAmmo > 0) {
+                const ammoToLoad = Math.min(this.magSize, this.totalAmmo)
+                this.totalAmmo -= ammoToLoad
+                this.ammoInMag = ammoToLoad
+                return true
+            }
+            return false
+        }
+        
         fireWeapon(){
+            if (!this.canFire()) {
+                hintLabel.text = `Reload! (e)`
+                return  // Cannot fire if no ammo in magazine
+            }
+            
             const baseDir = toWorld(mousePos()).sub(player.pos).unit()  // toWorld() lets func work outside initial map boundaries
+            
+            // Apply recoil - push player backwards opposite to aim direction
+            const recoilDir = baseDir.scale(-this.recoilForce)
+            player.move(recoilDir)
+            
             for (let i = 0; i < this.bulletsFired; i++) {
                 const angle = baseDir.angle() + rand(-this.spread, this.spread)
                 const direction = Vec2.fromAngle(angle)
@@ -194,6 +220,9 @@ scene(2, () => {
                 bullet.onUpdate(() => {bullet.move(bullet.dir.scale(this.bulletSpeed))})
                 bullet.onCollide("enemy", (enemy) => {enemy.hurt(this.bulletDamage), bullet.destroy()})
             }
+            
+            // Decrease ammo count
+            this.ammoInMag--
         }
     }
 
@@ -210,11 +239,17 @@ scene(2, () => {
         { speed: 400 },
         offscreen({ destroy: true }),
     ])
-    let gunTest = new gun(10, 700, rgb(41, 41, 41), 20, 5, 7, 10)
+    // bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo
+    let gunTest = new gun(700, rgb(41, 41, 41), 20, 7, 7, 10, 1000, 100)
 
-    const scoreLabel = add([
-        text(`Score: ${score}`),
-        pos(width()-240, height()-100),
+    const hintLabel = add([
+        text(""),
+        pos(center().x-175, 24),
+        color(0, 0, 0),
+    ])
+    const ammoLabel = add([
+        text(`Ammo: ${gunTest.ammoInMag}/${gunTest.totalAmmo}`),
+        pos(24, height()-50),
         color(0, 0, 0),
     ])
     const enemiesDiedLabel = add([
@@ -265,7 +300,7 @@ scene(2, () => {
             health(Math.random() * 100 + 20),
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
             "enemy",
-            { speed: (Math.random() * 550) + 50 },
+            { speed: (Math.random() * 300) + 50 },
         ])
 
         enemy.on("death", () => {
@@ -277,36 +312,35 @@ scene(2, () => {
                 }
             }
             destroy(enemy)
-            controlsLabel.text = ``
             enemies.push(spawnEnemy())
             enemiesDied++
             enemiesDiedLabel.text = `Kills: ${enemiesDied}`
-            /*if (enemiesDied % 1 == 0){
+            /*if (enemiesDied % 10 == 0){
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
                 isPaused = true
                 destroyAll("bullet")
-                const hintLabel = add([
-                    text("Click to continue"),
-                    pos(center().x-175, 24),
-                    color(0, 0, 0),
-                ])
+                hintLabel.text = `Click to continue`
                 websiteGoTo('upgrade')
                 onClick(() => {
                     isPaused = false
                     hintLabel.text = ``
+                    if(upgradeValue==1){
+                        player.heal(100)
+                        healthLabel.text = `Health: ${player.hp()}`
+                    }
+                    if(upgradeValue==2){
+                        
+                    }
                 })
-            }
-            */
+            }*/
         })
         return enemy
     }
     obj.loop(1.9, () => {
         if(!isPaused){
-            score++
-            scoreLabel.text = `Score: ${score}`
             if(player.hp()<56){                                 // Player heals 5 every loop to max of 55+5
                 player.heal(5)
                 healthLabel.text = `Health: ${player.hp()}`
@@ -317,6 +351,7 @@ scene(2, () => {
 
     onUpdate(() => {
         healthLabel.text = `Health: ${player.hp()}`
+        ammoLabel.text = `Ammo: ${gunTest.ammoInMag}/${gunTest.totalAmmo}`
         for (const enemy of enemies) {
             if (!enemy.exists()) {
                 continue
@@ -341,7 +376,15 @@ scene(2, () => {
         const unitVec = dir.unit()
         player.move(unitVec.scale(player.speed))
     })
-    onClick(() => gunTest.fireWeapon())
+    onClick(() => {
+        gunTest.fireWeapon()
+        controlsLabel.text = ``
+    })
+    onKeyPress("e", () => {
+        if (gunTest.reload()) {
+            hintLabel.text = ``
+        }
+    })
 
     // Collision with enemy
     onCollideUpdate("player", "enemy", () => {
@@ -352,10 +395,10 @@ scene(2, () => {
     //    camPos(player.pos)
     //})
 
-    onDestroy("player", () => go("deathScreen", score))
+    onDestroy("player", () => go("deathScreen", enemiesDied))
     player.on("death", () => {
         destroy(player)
-        go("deathScreen", score)
+        go("deathScreen", enemiesDied)
     })
 })
 

@@ -41,15 +41,16 @@
         <div id="upgrade" style="display: none;">
             <h1>Upgrade Menu</h1>
             <div class="buttonContainer">
-                <button onclick="">test 1</button><br>
-                <button onclick="">test 2</button><br>
-                <button onclick="">test 3</button><br>
+                <button onclick="upgradeValue = 1">Gain 100 health</button><br>
+                <button onclick="upgradeValue = 2">Damage buff</button><br>
+                <button onclick="upgradeValue = 3">Test 3</button><br>
                 <button onclick="websiteGoTo('gameWindow')">Continue</button><br>
             </div>
         </div>
 
         <script type="module" src="website.js"></script>
         <script>
+            let upgradeValue = 0
             let levelGlobal = -1            // Global variables must load first
             let currentDivId = "menu"
             // Now define functions for website navigation and level loading
