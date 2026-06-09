@@ -141,6 +141,9 @@ scene(1, () => {
 })
 
 scene(2, () => {
+    loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
+    //loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")
+    loadBean()
     setGravity(0)
     setBackground(rgb(247, 247, 247))
     let enemiesDied = 0
@@ -227,7 +230,6 @@ scene(2, () => {
     }
 
     // Player code
-    loadBean()
     const player = add([
         sprite("bean"),
         pos(center()),
@@ -293,7 +295,7 @@ scene(2, () => {
         */
 
         const enemy = add([
-            sprite("bean"),
+            sprite("ghosty"),
             pos(x, y),
             area(),
             body(),
