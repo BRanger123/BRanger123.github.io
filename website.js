@@ -145,7 +145,7 @@ scene(2, () => {
     //loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")
     loadBean()
     setGravity(0)
-    setBackground(rgb(247, 247, 247))
+    setBackground(rgb(255, 255, 255))
     let enemiesDied = 0
     let isPaused = false
     function bullet() {
@@ -163,6 +163,7 @@ scene(2, () => {
             bullet.move(bullet.dir.scale(bullet.speed))
         })
         bullet.onCollide("enemy", (enemy) => {
+            spawnDamageNumber(enemy.pos, 20)
             enemy.hurt(20)
             bullet.destroy()
         })
@@ -221,12 +222,37 @@ scene(2, () => {
                     offscreen({ destroy: true }),
                 ])
                 bullet.onUpdate(() => {bullet.move(bullet.dir.scale(this.bulletSpeed))})
-                bullet.onCollide("enemy", (enemy) => {enemy.hurt(this.bulletDamage), bullet.destroy()})
+                bullet.onCollide("enemy", (enemy) => {
+                    spawnDamageNumber(enemy.pos, this.bulletDamage)
+                    enemy.hurt(this.bulletDamage)
+                    bullet.destroy()
+                })
             }
             
             // Decrease ammo count
             this.ammoInMag--
         }
+    }
+
+    // Function to spawn floating damage numbers
+    function spawnDamageNumber(position, damage) {
+        const damageText = add([
+            text(damage.toString()),
+            pos(position.x+Math.random()*20, position.y+Math.random()*20),
+            color(255, 0, 0),
+            "damageNumber",
+            { lifetime: 1 },
+        ])
+        
+        damageText.onUpdate(() => {
+            damageText.pos.y -= 100 * dt()  // Float upward
+            damageText.lifetime -= dt()
+            damageText.opacity = damageText.lifetime  // Fade out
+        })
+        
+        wait(1, () => {
+            destroy(damageText)
+        })
     }
 
     // Player code
@@ -340,6 +366,7 @@ scene(2, () => {
                         gunTest.magSize += 3
                         gunTest.totalAmmo += 3
                     }
+                    if(upgradeValue==4){gunTest.totalAmmo += 50}
                     upgradeValue=0
                 })
             }
