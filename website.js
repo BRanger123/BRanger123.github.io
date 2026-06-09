@@ -199,7 +199,7 @@ scene(2, () => {
                 return  // Cannot fire if no ammo in magazine
             }
             
-            const baseDir = toWorld(mousePos()).sub(player.pos).unit()  // toWorld() lets func work outside initial map boundaries
+            const baseDir = toWorld(mousePos()).sub(player.pos).unit()  // toWorld() lets func work outside initial map boundaries for camera code
             
             // Apply recoil - push player backwards opposite to aim direction
             const recoilDir = baseDir.scale(-this.recoilForce)
@@ -315,7 +315,7 @@ scene(2, () => {
             enemies.push(spawnEnemy())
             enemiesDied++
             enemiesDiedLabel.text = `Kills: ${enemiesDied}`
-            if (enemiesDied % 10 == 0){
+            /*if (enemiesDied % 10 == 0){
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
@@ -339,7 +339,7 @@ scene(2, () => {
                         gunTest.totalAmmo += 3
                     }
                 })
-            }
+            }*/
         })
         return enemy
     }
