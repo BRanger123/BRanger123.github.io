@@ -10,6 +10,7 @@ kaboom({
     width: window.innerWidth,
     height: window.innerHeight,
     background: [255, 255, 255],
+    font: "arial",
 })
 
 scene("startButton", () => {
@@ -373,7 +374,7 @@ scene(2, () => {
         })
         return enemy
     }
-    obj.loop(1.9, () => {
+    obj.loop(2.5, () => {
         if(!isPaused){
             if(player.hp()<56){                                 // Player heals 5 every loop to max of 55+5
                 player.heal(5)
