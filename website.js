@@ -315,7 +315,7 @@ scene(2, () => {
             enemies.push(spawnEnemy())
             enemiesDied++
             enemiesDiedLabel.text = `Kills: ${enemiesDied}`
-            /*if (enemiesDied % 10 == 0){
+            if (enemiesDied % 10 == 0){
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
@@ -332,10 +332,14 @@ scene(2, () => {
                         healthLabel.text = `Health: ${player.hp()}`
                     }
                     if(upgradeValue==2){
-                        
+                        gunTest.bulletDamage += 5
+                    }
+                    if(upgradeValue==3){
+                        gunTest.magSize += 3
+                        gunTest.totalAmmo += 3
                     }
                 })
-            }*/
+            }
         })
         return enemy
     }

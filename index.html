@@ -33,18 +33,17 @@
 
         <div id="settings" style="display: none">
             <h1>Information</h1>
-            <h2>Version 1.8 Patch Notes:</h2>
-            <h3>Gun update</h3><br><br>
+            <h2>Version 1.8.5 Patch Notes:</h2>
+            <h3>Gun update + upgrades</h3><br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
 
         <div id="upgrade" style="display: none;">
             <h1>Upgrade Menu</h1>
             <div class="buttonContainer">
-                <button onclick="upgradeValue = 1">Gain 100 health</button><br>
-                <button onclick="upgradeValue = 2">Damage buff</button><br>
-                <button onclick="upgradeValue = 3">Test 3</button><br>
-                <button onclick="websiteGoTo('gameWindow')">Continue</button><br>
+                <button onclick="upgradeValue = 1; websiteGoTo('gameWindow')">Gain 100 health</button><br>
+                <button onclick="upgradeValue = 2; websiteGoTo('gameWindow')">Damage increase</button><br>
+                <button onclick="upgradeValue = 3; websiteGoTo('gameWindow')">Round Capacity+</button>
             </div>
         </div>
 
