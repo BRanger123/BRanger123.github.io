@@ -143,32 +143,14 @@ scene(1, () => {
 
 scene(2, () => {
     loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
-    //loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")
+    loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")
     loadBean()
     setGravity(0)
     setBackground(rgb(255, 255, 255))
     let enemiesDied = 0
     let isPaused = false
-    function bullet() {
-        let direction = toWorld(mousePos()).sub(player.pos).unit()
-        const bullet = add([
-            pos(player.pos),
-            rect(8, 8),
-            area(),
-            color(0, 0, 0),
-            "bullet",
-            { speed: 500, dir: direction },
-            offscreen({ destroy: true }),
-        ])
-        bullet.onUpdate(() => {
-            bullet.move(bullet.dir.scale(bullet.speed))
-        })
-        bullet.onCollide("enemy", (enemy) => {
-            spawnDamageNumber(enemy.pos, 20)
-            enemy.hurt(20)
-            bullet.destroy()
-        })
-    }
+    let enemiesToKill = 10
+    let enemiesToKillCounter = 0
     
     // Experimental code for weapon class
     class gun{
@@ -296,7 +278,7 @@ scene(2, () => {
         pos(center().x-145, 24),
         color(0, 0, 0),
     ])
-    const obj = add([
+    const clock = add([
         timer()
     ])
     
@@ -341,32 +323,28 @@ scene(2, () => {
                 }
             }
             destroy(enemy)
+            burp()
             enemies.push(spawnEnemy())
             enemiesDied++
             enemiesDiedLabel.text = `Kills: ${enemiesDied}`
-            if (enemiesDied % 10 == 0){
+            enemiesToKillCounter++
+            if (enemiesToKillCounter == enemiesToKill){
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
                 isPaused = true
+                enemiesToKill = enemiesToKill + 5
+                enemiesToKillCounter = 0
                 destroyAll("bullet")
                 hintLabel.text = `Click to continue`
                 websiteGoTo('upgrade')
                 onClick(() => {
                     isPaused = false
                     hintLabel.text = ``
-                    if(upgradeValue==1){
-                        player.heal(100)
-                        healthLabel.text = `Health: ${player.hp()}`
-                    }
-                    if(upgradeValue==2){
-                        gunTest.bulletDamage += 5
-                    }
-                    if(upgradeValue==3){
-                        gunTest.magSize += 3
-                        gunTest.totalAmmo += 3
-                    }
+                    if(upgradeValue==1){player.heal(100), healthLabel.text = `Health: ${player.hp()}`}
+                    if(upgradeValue==2){gunTest.bulletDamage += 5}
+                    if(upgradeValue==3){gunTest.magSize += 3, gunTest.totalAmmo += 3}
                     if(upgradeValue==4){gunTest.totalAmmo += 50}
                     upgradeValue=0
                 })
@@ -374,18 +352,19 @@ scene(2, () => {
         })
         return enemy
     }
-    obj.loop(2.5, () => {
+
+    clock.loop(2.5, () => {
         if(!isPaused){
             if(player.hp()<56){                                 // Player heals 5 every loop to max of 55+5
                 player.heal(5)
                 healthLabel.text = `Health: ${player.hp()}`
             }
+            // if(Math.random()*1 < 0.05){enemies.push(spawnBoss())}
             enemies.push(spawnEnemy())
         }
     })   // Time value acts as diffuculty
 
     onUpdate(() => {
-        healthLabel.text = `Health: ${player.hp()}`
         ammoLabel.text = `Ammo: ${gunTest.ammoInMag}/${gunTest.totalAmmo}`
         for (const enemy of enemies) {
             if (!enemy.exists()) {
@@ -424,6 +403,7 @@ scene(2, () => {
     // Collision with enemy
     onCollideUpdate("player", "enemy", () => {
         player.hurt(1)
+        healthLabel.text = `Health: ${player.hp()}`
         shake(8)
     })
     //player.onUpdate(() => {
