@@ -1,0 +1,4 @@
+1+1=?,2,1,3,4
+2*2=?,4,1,2,3
+Which processor design does the following statement relate to: 'better power consumption makes this architecture better suited to portable devices'?,RISC,CISC,Both,Neither
+Which is a characteristic of RAM?,Read and write,Non-volatile,Read only,Small capacity

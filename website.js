@@ -440,9 +440,11 @@ scene(2, () => {
 
     // Collision with enemy
     onCollideUpdate("player", "enemy", () => {
-        player.hurt(1)
-        healthLabel.text = `Health: ${player.hp()}`
-        shake(8)
+        if(!isPaused){
+            player.hurt(1)
+            healthLabel.text = `Health: ${player.hp()}`
+            shake(8)           
+        }
     })
     //player.onUpdate(() => {
     //    camPos(player.pos)
