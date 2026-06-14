@@ -269,7 +269,7 @@ scene(2, () => {
         coinsLabel.text = `Coins: ${coins}`
     })
     // bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo
-    let gunTest = new gun(700, rgb(41, 41, 41), 20, 7, 7, 10, 2000, 100)
+    let gunTest = new gun(700, rgb(41, 41, 41), 10, 14, 7, 10, 3000, 100)
 
     const coinsLabel = add([
         text(`Coins: ${coins}`),

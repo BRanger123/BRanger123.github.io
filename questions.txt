@@ -1,4 +1,8 @@
-1+1=?,2,1,3,4
-2*2=?,4,1,2,3
-Which processor design does the following statement relate to: 'better power consumption makes this architecture better suited to portable devices'?,RISC,CISC,Both,Neither
+Which architecture is better suited to portable devices due to lower power consumption?,RISC,CISC,Both,Neither
 Which is a characteristic of RAM?,Read and write,Non-volatile,Read only,Small capacity
+More RAM required to store instructions relates to what?,RISC,CISC,Both,Neither
+Which is a benefit of concurrent processing?,Increased program throughput,Less process managment,Reduced memory usage,Cheaper
+What does GPU stand for?,Graphics Processing Unit,Graphics Production Unit,General Procedure Unit,General Processing Unit
+Using diagrams to represent data for analysis is a use of what?,Visualisation,Heuristics,Backtracking,Divide and conquer
+Which HTML tag should be used to enclose elements of JavaScript code?,<script>,<code>,<js>,<JavaScript>
+Which of these is a description of the CPU?,Central Processing Unit,Control Protocol Unit,Control Processing Unit,Central Protocol Unit
