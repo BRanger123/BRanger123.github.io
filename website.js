@@ -183,9 +183,9 @@ scene(2, () => {
         fireWeapon(){
             if (!this.canFire()){
                 hintLabel.text = `Reload! (e)`
-                return  // Cannot fire if no ammo in magazine
+                return  // Cannot fire if no ammo in magazine (or clip?)
             }
-            
+            shake(8)
             const baseDir = toWorld(mousePos()).sub(player.pos).unit()  // toWorld() lets func work outside initial map boundaries for camera code
             
             // Apply recoil - push player backwards opposite to aim direction
@@ -269,7 +269,7 @@ scene(2, () => {
         coinsLabel.text = `Coins: ${coins}`
     })
     // bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo
-    let gunTest = new gun(700, rgb(41, 41, 41), 10, 14, 7, 10, 3000, 100)
+    let gunTest = new gun(700, rgb(41, 41, 41), 10, 7, 14, 10, 3000, 100)
 
     const coinsLabel = add([
         text(`Coins: ${coins}`),
@@ -304,9 +304,7 @@ scene(2, () => {
         pos(center().x-145, 24),
         color(0, 0, 0),
     ])
-    const clock = add([
-        timer()
-    ])
+    const clock = add([timer()]) // Timer for spawning enemies
     
     // Make enemies
     const enemies = []

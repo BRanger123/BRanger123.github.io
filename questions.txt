@@ -1,7 +1,7 @@
 Which architecture is better suited to portable devices due to lower power consumption?,RISC,CISC,Both,Neither
 Which is a characteristic of RAM?,Read and write,Non-volatile,Read only,Small capacity
 More RAM required to store instructions relates to what?,RISC,CISC,Both,Neither
-Which is a benefit of concurrent processing?,Increased program throughput,Less process managment,Reduced memory usage,Cheaper
+Which is a benefit of concurrent processing?,Increased efficiency,Less process managment,Reduced memory usage,Cheaper
 What does GPU stand for?,Graphics Processing Unit,Graphics Production Unit,General Procedure Unit,General Processing Unit
 Using diagrams to represent data for analysis is a use of what?,Visualisation,Heuristics,Backtracking,Divide and conquer
 Which HTML tag should be used to enclose elements of JavaScript code?,<script>,<code>,<js>,<JavaScript>
