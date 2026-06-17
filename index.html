@@ -33,8 +33,9 @@
 
         <div id="settings" style="display: none">
             <h1>Information</h1>
-            <h2>Version 2.2 Patch Notes:</h2>
-            <h3>Question grid style</h3><br><br>
+            <h2>Version 2.3 Patch Notes:</h2>
+            <h3>Answer streaks</h3>
+            <br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
 
@@ -58,6 +59,7 @@
 
         <div id="questions" style="display: none;">
             <h1>Question Round</h1><br>
+            <h2 id="answerStreak">Answer Streak #</h2>
             <h2 id="question"></h2><br>
             <div class="answerButtonContainer">
                 <button id="answer1" onclick="checkAnswer(1)"></button><br>
@@ -156,7 +158,6 @@
 
             function startQuestion(){
                 websiteGoTo('questions')
-                // document.getElementById('answerStreak').textContent = `${answerStreak}`
                 document.getElementById('continueButton').style.display = 'none'
                 const sourceQuestion = questions[Math.floor(Math.random() * questions.length)]
                 const shuffledAnswers = shuffleArray(sourceQuestion.answers.map((text, idx) => ({
@@ -195,6 +196,7 @@
                     answerStreak = 0
                     // alert('Incorrect answer.')
                 }
+                document.getElementById('answerStreak').textContent = `${answerStreak}`
                 document.getElementById('continueButton').style.display = 'inline-block'
             }
 
