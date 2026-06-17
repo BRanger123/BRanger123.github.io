@@ -148,6 +148,7 @@ scene(2, () => {
     loadBean()
     setGravity(0)
     setBackground(rgb(255, 255, 255))
+
     let enemiesDied = 0
     let isPaused = false
     let enemiesToKill = 10
@@ -352,6 +353,7 @@ scene(2, () => {
             enemies.push(spawnEnemy())
             enemiesDied++
             enemiesDiedLabel.text = `Kills: ${enemiesDied}`
+            if(enemiesDied > highestEnemiesDied){highestEnemiesDied = enemiesDied}
             enemiesToKillCounter++
             if (enemiesToKillCounter == enemiesToKill){
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
@@ -372,6 +374,7 @@ scene(2, () => {
                         if(upgradeValue==2){gunTest.bulletDamage += 5}
                         if(upgradeValue==3){gunTest.magSize += 3, gunTest.totalAmmo += 3}
                         if(upgradeValue==4){gunTest.totalAmmo += 50}
+                        if(upgradeValue==5){gunTest.recoilForce += 20000}
                         upgradeValue=0
                     }
                 })
