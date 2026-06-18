@@ -143,7 +143,7 @@ scene(1, () => {
 
 scene(2, () => {
     loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
-    //loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")
+    //loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")        // Load assets
     loadSprite("coin", "https://kaboomjs.com/sprites/coin.png")
     loadBean()
     setGravity(0)
@@ -155,31 +155,31 @@ scene(2, () => {
     let enemiesToKillCounter = 0
     let coins = 0
     
-    // Experimental code for weapon class
+    // Code for weapon class
     class gun{
         constructor(bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo) {
-            this.bulletSpeed = bulletSpeed
+            this.bulletSpeed = bulletSpeed  // Technically used as distance per frame
             this.bulletColor = bulletColor
             this.bulletDamage = bulletDamage
             this.magSize = magSize
             this.ammoInMag = magSize  // Current ammo in magazine
-            this.totalAmmo = totalAmmo  // Total ammunition available (including loaded)
-            this.bulletsFired = bulletsFired
+            this.totalAmmo = totalAmmo  // Total ammunition magazine (or clip?)
+            this.bulletsFired = bulletsFired // So shotguns can use same code, just increase bullets fired (pellets?)
             this.spread = spread
             this.recoilForce = recoilForce  // Force of recoil that pushes player back
         }
         
         canFire(){
-            return this.ammoInMag > 0
+            return this.ammoInMag > 0   // Checks weapon is not empty
         }
         reload(){
             if (this.totalAmmo > 0) {
                 const ammoToLoad = Math.min(this.magSize, this.totalAmmo)
-                this.totalAmmo -= ammoToLoad
+                this.totalAmmo -= ammoToLoad    // Add bullets to magazine and remove from total
                 this.ammoInMag = ammoToLoad
-                return true
+                return true // Successful reload
             }
-            return false
+            return false    // Unsuccessful reload
         }
         fireWeapon(){
             if (!this.canFire()){
@@ -194,60 +194,57 @@ scene(2, () => {
             player.recoil = player.recoil.add(recoilDir)
             
             for (let i = 0; i < this.bulletsFired; i++){
-                const angle = baseDir.angle() + rand(-this.spread, this.spread)
+                const angle = baseDir.angle() + rand(-this.spread, this.spread) // Use spread as max possible random angle deviation
                 const direction = Vec2.fromAngle(angle)
                 const bullet = add([
                     pos(player.pos),
-                    rect(8, 8),
+                    rect(8, 8), // circle(5),
                     area(),
                     color(this.bulletColor),
-                    "bullet",
+                    "bullet",   // For collision detection
                     { speed: this.bulletSpeed, dir: direction },
-                    offscreen({ destroy: true }),
+                    offscreen({ destroy: true }),   // Saves processing power, may need to be changed if using camera code
                 ])
-                bullet.onUpdate(() => {bullet.move(bullet.dir.scale(this.bulletSpeed))})
+                bullet.onUpdate(() => {bullet.move(bullet.dir.scale(this.bulletSpeed))})    // Moves in dir by speed every frame, speed is actually dist per frame
                 bullet.onCollide("enemy", (enemy) => {
                     spawnDamageNumber(enemy.pos, this.bulletDamage)
-                    enemy.move(bullet.dir.scale(this.bulletSpeed))
-                    enemy.hurt(this.bulletDamage*2)
+                    enemy.move(bullet.dir.scale(this.bulletSpeed))  // Enemy pushed back by factor of bulletSpeed
+                    enemy.hurt(this.bulletDamage)   // enemy.hurt(this.bulletDamage*2)
                     bullet.destroy()
                 })
             }
-            
-            // Decrease ammo count
-            this.ammoInMag--
+            this.ammoInMag--    // Decrease ammo count in magazine
         }
     }
 
     // Function to spawn floating damage numbers
     function spawnDamageNumber(position, damage){
         const damageText = add([
-            text(damage.toString()),
-            pos(position.x+Math.random()*20, position.y+Math.random()*20),
+            text(`${damage}`),
+            pos(position.x+Math.random()*20, position.y+Math.random()*20),  // Rand so numbers do not overlap (shotguns)
             color(255, 0, 0),
-            "damageNumber",
-            { lifetime: 1 },
+            { visabilityStep: 1 },
         ])
         
         damageText.onUpdate(() => {
             damageText.pos.y -= 100 * dt()  // Float upward
-            damageText.lifetime -= dt()
-            damageText.opacity = damageText.lifetime  // Fade out
+            damageText.visabilityStep -= dt()   // Use deltatime() for smooth changes
+            damageText.opacity = damageText.visabilityStep
         })
         
         wait(1, () => {
-            destroy(damageText)
+            destroy(damageText) // Saves processing power
         })
     }
 
-    function spawnCoin(xy){
+    function spawnCoin(xy){ // Argument cannot be "pos"
         const coin = add([
             sprite("coin"),
             anchor("center"),
             pos(xy),
-            area({ collisionIgnore: ["enemy"]}),
+            area({ collisionIgnore: ["enemy"]}),    // Enemies dont get stuck on coins
             body(),
-            "coin",
+            "coin", // For collision detection with player
         ])
     }
 
@@ -259,9 +256,9 @@ scene(2, () => {
         anchor("center"),   // So bullets spawn at center
         body(),
         health(100),
-        "player",
-        { speed: 400, recoil: vec2(0, 0) },
-        offscreen({ destroy: true }),
+        "player",   // For collision detection
+        { speed: 400, recoil: vec2(0, 0) }, // Recoil 2d vector for fluid recoil
+        offscreen({ destroy: true }),   // Delete if use camera code 
     ])
     
     player.onCollide("coin", (coin) => {
@@ -269,9 +266,11 @@ scene(2, () => {
         coins=coins+1
         coinsLabel.text = `Coins: ${coins}`
     })
+    
     // bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo
-    let gunTest = new gun(700, rgb(41, 41, 41), 10, 7, 14, 10, 3000, 100)
+    let gunTest = new gun(700, rgb(0, 0, 0), 20, 7, 14, 10, 3000, 100)
 
+    // Initialize labels
     const coinsLabel = add([
         text(`Coins: ${coins}`),
         anchor("right"),
@@ -305,6 +304,7 @@ scene(2, () => {
         pos(center().x-145, 24),
         color(0, 0, 0),
     ])
+
     const clock = add([timer()]) // Timer for spawning enemies
     
     // Make enemies
@@ -313,7 +313,7 @@ scene(2, () => {
 
     function spawnEnemy(){
         let x, y
-        let tries = 0
+        let tries = 0   // Brute force spawning enemies untill dist is minSpawnDist
 
         do{
             x = Math.random() * width()
@@ -335,37 +335,37 @@ scene(2, () => {
             body(),
             health(Math.random() * 100 + 20),
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
-            "enemy",
+            "enemy",    // For collision detection
             { speed: (Math.random() * 300) + 50 },
         ])
 
         enemy.on("death", () => {
-            if(Math.random()*1 < 0.6){
+            if(Math.random()*1 < 0.7){  // 70% chance of explosion
                 addKaboom(enemy.pos)
-                shake(8)                                // Shake anyway rather than if player takes damage so game feels more responsive
-                if(player.pos.dist(enemy.pos) < 80){
+                shake(8)
+                if(player.pos.dist(enemy.pos) < 80){    // Player takes damage if too close
                     player.hurt(20)
                 }
             }
             spawnCoin(enemy.pos)
             destroy(enemy)
-            burp()
-            enemies.push(spawnEnemy())
+            burp()  // Sound effects built into Kaboom library
+            enemies.push(spawnEnemy())  // Spawn new enemy so threat is constant
             enemiesDied++
             enemiesDiedLabel.text = `Kills: ${enemiesDied}`
             if(enemiesDied > highestEnemiesDied){highestEnemiesDied = enemiesDied}
             enemiesToKillCounter++
-            if (enemiesToKillCounter == enemiesToKill){
+            if (enemiesToKillCounter == enemiesToKill){   // Check player gets upgrade 
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-                canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))
+                canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
                 isPaused = true
-                enemiesToKill = enemiesToKill + 5
-                enemiesToKillCounter = 0
+                enemiesToKill = enemiesToKill + 5   // Threshold increases by 5
+                enemiesToKillCounter = 0    // Reset progress
                 destroyAll("bullet")
                 hintLabel.text = `Click to continue`
-                websiteGoTo('upgrade')
+                websiteGoTo('upgrade')  // Upgrade selection
                 onClick(() => {
                     if(upgradeValue!=0){
                         isPaused = false
@@ -375,7 +375,7 @@ scene(2, () => {
                         if(upgradeValue==3){gunTest.magSize += 3, gunTest.totalAmmo += 3}
                         if(upgradeValue==4){gunTest.totalAmmo += 50}
                         if(upgradeValue==5){gunTest.recoilForce += 20000}
-                        upgradeValue=0
+                        upgradeValue=0  // Reset upgrade so does not reapply on click
                     }
                 })
             }
@@ -383,59 +383,60 @@ scene(2, () => {
         return enemy
     }
 
-    clock.loop(2.5, () => {
+    clock.loop(2.5, () => { // Time value acts as diffuculty
         if(!isPaused){
             if(player.hp()<56){                                 // Player heals 5 every loop to max of 55+5
                 player.heal(5)
                 healthLabel.text = `Health: ${player.hp()}`
             }
-            enemies.push(spawnEnemy())
+            enemies.push(spawnEnemy())  // Array used for movement handling
         }
-    })   // Time value acts as diffuculty
+    })
 
     onUpdate(() => {
-        ammoLabel.text = `Ammo: ${gunTest.ammoInMag}/${gunTest.totalAmmo}`
         for (const enemy of enemies) {
-            if (!enemy.exists()) {
+            if (!enemy.exists()) {  // Check if enemy destroyed
                 continue
             }
-            if(!isPaused){
-                const direction = player.pos.sub(enemy.pos).unit()
-                enemy.move(direction.scale(enemy.speed))
+            if(!isPaused){  // if not paused
+                const direction = player.pos.sub(enemy.pos).unit()  // Dir to player found
+                enemy.move(direction.scale(enemy.speed))    // Moves in dir by speed every frame
             }
         }
     })
 
     // Player controls
     player.onUpdate(() => {
-        if (isPaused) {
+        if (isPaused){ // Dont move if paused
             return
         }
-        const dir = vec2(0, 0)
-        if (isKeyDown("a")) {dir.x = -1}
-        if (isKeyDown("d")) {dir.x = 1}
-        if (isKeyDown("w")) {dir.y = -1}
-        if (isKeyDown("s")) {dir.y = 1}
-        const unitVec = dir.unit()
-        player.move(unitVec.scale(player.speed))
+        const dir = vec2(0, 0)  // Dir because normalised
+        if (isKeyDown("a")){dir.x = -1}
+        if (isKeyDown("d")){dir.x = 1} // Inputs
+        if (isKeyDown("w")){dir.y = -1}
+        if (isKeyDown("s")){dir.y = 1}
+        const unitVec = dir.unit()  // Vector normalisation (fixes diagonals)
+        player.move(unitVec.scale(player.speed))    // Moves in dir by speed every frame
 
-        if (player.recoil && player.recoil.len() > 0) {
+        if (player.recoil && player.recoil.len() > 0){ // If recoil vector exists and is not zero
             const recoilDamping = 15
-            const recoilStep = player.recoil.scale(1 - Math.exp(-recoilDamping * dt()))
+            const recoilStep = player.recoil.scale(1 - Math.exp(-recoilDamping * dt())) // Make recoil movement smooth
             player.move(recoilStep)
-            player.recoil = player.recoil.sub(recoilStep)
-            if (player.recoil.len() < 1) {
-                player.recoil = vec2(0, 0)
+            player.recoil = player.recoil.sub(recoilStep)   // Reduce recoil vector by the amount moved
+            if (player.recoil.len() < 1) {  // Round recoil to 0 if small
+                player.recoil = vec2(0, 0)  // Reset recoil vector to zero
             }
         }
     })
     onClick(() => {
-        gunTest.fireWeapon()
-        controlsLabel.text = ``
+        gunTest.fireWeapon()    // Shoot
+        ammoLabel.text = `Ammo: ${gunTest.ammoInMag}/${gunTest.totalAmmo}`
+        controlsLabel.text = `` // Click to shoot hint hidden
     })
     onKeyPress("e", () => {
-        if (gunTest.reload()) {
-            hintLabel.text = ``
+        if (gunTest.reload()) { // If successful
+            hintLabel.text = `` // Reload hint is hidden
+            ammoLabel.text = `Ammo: ${gunTest.ammoInMag}/${gunTest.totalAmmo}`
         }
     })
 
@@ -443,18 +444,19 @@ scene(2, () => {
     onCollideUpdate("player", "enemy", () => {
         if(!isPaused){
             player.hurt(1)
-            healthLabel.text = `Health: ${player.hp()}`
+            healthLabel.text = `Health: ${player.hp()}` // Update health label
             shake(8)           
         }
     })
-    //player.onUpdate(() => {
-    //    camPos(player.pos)
-    //})
+    // Camera code
+    // player.onUpdate(() => {
+    //     camPos(player.pos)
+    // })
 
-    onDestroy("player", () => go("deathScreen", enemiesDied*coins))
+    onDestroy("player", () => go("deathScreen", enemiesDied*coins)) // If off screen
     player.on("death", () => {
         destroy(player)
-        go("deathScreen", enemiesDied*coins)
+        go("deathScreen", enemiesDied*coins)    // Score = enemiesDied
     })
 })
 
