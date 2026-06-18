@@ -105,17 +105,17 @@ button:active{
 }
 @media (max-width: 768px){
     #question{
-        max-width: 250px;
+        max-width: 300px;
     }
     .answerButtonContainer button{
         flex: 1;
         padding: 10px;
-        font-size: 10px;
+        font-size: 15px;
         cursor: pointer;
         text-align: center;
-        margin-left: 10px;
-        margin-right: 10px;
-        width: 110px;
-        height: 40px;
+        margin-left: 15px;
+        margin-right: 15px;
+        width: 165px;
+        height: 60px;
     }
 }
