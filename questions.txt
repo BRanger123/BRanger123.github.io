@@ -1,8 +1,96 @@
-Which architecture is better suited to portable devices due to lower power consumption?,RISC,CISC,Both,Neither
-Which is a characteristic of RAM?,Read and write,Non-volatile,Read only,Small capacity
-More RAM required to store instructions relates to what?,RISC,CISC,Both,Neither
-Which is a benefit of concurrent processing?,Increased efficiency,Less process managment,Reduced memory usage,Cheaper
-What does GPU stand for?,Graphics Processing Unit,Graphics Production Unit,General Procedure Unit,General Processing Unit
-Using diagrams to represent data for analysis is a use of what?,Visualisation,Heuristics,Backtracking,Divide and conquer
-Which HTML tag should be used to close elements of JavaScript code?,</script>,<code>,<js>,</JavaScript>
-Which of these is a description of the CPU?,Central Processing Unit,Control Protocol Unit,Control Processing Unit,Central Protocol Unit
+What does CPU stand for?,Central Processing Unit,Control Process Unit,Central Program Unit,Computer Power Unit
+Which memory is volatile?,RAM,ROM,SSD,HDD
+What does ROM store?,Firmware,User files,Cache data,Videos
+What is binary made of?,0 and 1,1 and 2,A and B,0 to 9
+How many bits in a byte?,8,4,16,32
+What does LAN stand for?,Local Area Network,Long Area Network,Local Access Node,Linked Area Network
+What is an IP address used for?,Device identification,File storage,Image editing,Audio playback
+Which is an output device?,Monitor,Keyboard,Scanner,Microphone
+Which is an input device?,Mouse,Printer,Speaker,Projector
+What does HDD stand for?,Hard Disk Drive,High Data Drive,Hard Data Disk,Host Disk Drive
+Which storage is optical?,DVD,RAM,SSD,Cache
+What does GUI stand for?,Graphical User Interface,General User Input,Graphic Utility Interface,Global User Interface
+What is malware?,Malicious software,Useful software,Free software,System software
+What is phishing?,Fraudulent data theft,Data backup,File compression,Software update
+Which is system software?,Operating System,Spreadsheet,Database,Presentation
+What is an algorithm?,Step-by-step solution,Programming language,Hardware device,Data file
+What is pseudocode?,Algorithm notation,Machine code,Hardware design,Database query
+Which logic gate outputs 1 if both inputs are 1?,AND,OR,NOT,XOR
+Which gate reverses input?,NOT,AND,OR,NOR
+What does CPU do?,Processes instructions,Stores files,Prints documents,Connects cables
+Which memory is non-volatile?,ROM,RAM,Cache,Register
+What is a WAN?,Wide Area Network,Wireless Access Node,Web Area Network,Wired Access Network
+Which is secondary storage?,SSD,RAM,Cache,Register
+What is cloud storage?,Remote online storage,RAM storage,Optical storage,Cache storage
+Which unit measures CPU speed?,GHz,MB,Pixels,Bytes
+What is hexadecimal base?,16,10,8,2
+How many values in a nibble?,16,8,4,32
+Which number system uses 0 and 1?,Binary,Decimal,Hexadecimal,Denary
+What does ASCII represent?,Characters,Images,Videos,Programs
+How many bits in ASCII?,7,4,16,32
+What is Unicode used for?,Character encoding,Image storage,CPU control,File deletion
+What is encryption?,Data scrambling,Data deletion,Data printing,Data copying
+What is decryption?,Unscrambling data,Deleting data,Compressing data,Backing up data
+What is a firewall?,Network security barrier,Storage device,Input device,Programming tool
+Which is a network topology?,Star,Folder,Window,Kernel
+Which topology uses a central switch?,Star,Ring,Bus,Mesh
+What is a protocol?,Communication rule,Storage medium,CPU component,Programming bug
+Which protocol transfers web pages?,HTTP,FTP,SMTP,TCP
+Which protocol sends emails?,SMTP,HTTP,FTP,POP3
+What does URL stand for?,Uniform Resource Locator,Universal Resource Link,User Resource Locator,Uniform Route Link
+What is packet switching?,Data sent in packets,Data encryption,Data deletion,Data storage
+Which is a benefit of SSDs?,Faster access,Cheaper always,Higher noise,More moving parts
+What is cache memory?,Fast temporary storage,Optical storage,Permanent storage,Cloud storage
+What is a register?,Small CPU storage,Optical disk,Input device,Network cable
+What is machine code?,Binary instructions,Flowchart symbols,High-level code,Database entries
+Which language is high-level?,Python,Binary,Machine code,Assembly
+What translates source code?,Compiler,Monitor,Router,Scanner
+What does a compiler do?,Converts whole program,Runs hardware,Stores files,Draws graphics
+What does an interpreter do?,Translates line by line,Stores code,Deletes code,Builds hardware
+What is debugging?,Finding errors,Encrypting files,Compressing data,Backing up data
+What is syntax error?,Grammar mistake in code,Hardware fault,Network issue,Logic gate error
+What is a logic error?,Wrong program outcome,Typing mistake,Broken CPU,Lost file
+What is validation?,Checking input data,Deleting input,Encrypting data,Backing up data
+Which validation checks a range?,Range check,Length check,Type check,Presence check
+Which validation checks data exists?,Presence check,Range check,Format check,Length check
+What is verification?,Checking copied data,Deleting data,Compressing data,Encrypting data
+What is a database?,Structured data collection,Programming language,CPU component,Network protocol
+What is a field?,Single data item,Database table,Whole record,File type
+What is a record?,Related fields,Single field,Entire database,Program code
+What is a primary key?,Unique identifier,Password field,Backup file,Network address
+What is data redundancy?,Duplicate data,Encrypted data,Missing data,Compressed data
+What is cyber security?,Protecting systems online,Building networks,Creating games,Editing videos
+What is brute force attack?,Trying many passwords,Data backup,System update,File compression
+What is two-factor authentication?,Two login checks,Two passwords only,Double storage,Two monitors
+What is biometric data?,Physical characteristics,Text files,Program code,Network packets
+What is a sensor?,Input measuring device,Output display,Storage medium,Network cable
+What does embedded system mean?,Dedicated computer system,Large network,Programming language,Database server
+Which is an embedded system?,Washing machine,Desktop PC,Laptop,Tablet
+What is analogue data?,Continuous values,Binary values,Text values,Encrypted values
+What is digital data?,Discrete values,Continuous values,Paper records,Audio waves
+What is sampling?,Measuring signal values,Deleting signals,Encrypting signals,Compressing signals
+What affects image size?,Resolution,Font size,CPU speed,Speaker volume
+What is resolution?,Pixel count,File type,CPU speed,Bit rate
+What is bit depth?,Bits per pixel,Pixels per inch,Bytes per file,CPU register size
+What affects sound quality?,Sample rate,Screen size,CPU fan speed,Monitor type
+What is compression?,Reducing file size,Deleting files,Encrypting files,Printing files
+Which compression loses data?,Lossy,Lossless,Run-length,Huffman
+Which compression keeps all data?,Lossless,Lossy,JPEG,MPEG
+What is open source software?,Source code available,Always free,No licence,Hardware included
+What is proprietary software?,Owned licensed software,Free software,Open source software,Public domain software
+What is utility software?,Maintenance software,Game software,Database software,Presentation software
+What is defragmentation?,Reorganising HDD data,Encrypting HDD,Deleting HDD,Formatting SSD
+What is RAM mainly used for?,Running programs,Firmware storage,Long-term storage,Network access
+Which component performs calculations?,ALU,Cache,RAM,HDD
+What does ALU stand for?,Arithmetic Logic Unit,Advanced Logic Unit,Arithmetic Link Unit,Array Logic Unit
+What controls CPU operations?,Control Unit,RAM,SSD,Monitor
+What is fetch-decode-execute?,CPU cycle,Network protocol,Validation check,Compression method
+Which topology has one cable?,Bus,Star,Mesh,Tree
+What is a MAC address?,Hardware address,IP address,Web address,Email address
+What does DNS do?,Translates domain names,Encrypts data,Stores files,Compresses images
+What is a packet?,Chunk of data,Storage device,Input device,CPU register
+What is ethical hacking?,Authorised security testing,Illegal access,Data theft,Password sharing
+What is a cookie?,Website data file,Virus,Protocol,Database
+What is an iteration?,Repeated loop,Single decision,Variable type,Input device
+What is selection?,Decision in code,Loop in code,Storage device,Network type
+What is sequence?,Ordered instructions,Random code,Data packet,Logic gate
