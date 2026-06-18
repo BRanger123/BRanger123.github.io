@@ -103,9 +103,9 @@ button:active{
 ::-webkit-scrollbar-thumb:active{
     display: none;
 }
-@media (max-width: 768px){
+@media (max-width: 768px){  /*For smaller devices*/
     #question{
-        max-width: 300px;
+        max-width: 375px;
     }
     .answerButtonContainer button{
         flex: 1;
@@ -115,7 +115,7 @@ button:active{
         text-align: center;
         margin-left: 15px;
         margin-right: 15px;
-        width: 165px;
+        width: 160px;
         height: 60px;
     }
 }
