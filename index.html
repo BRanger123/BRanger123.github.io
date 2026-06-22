@@ -56,19 +56,19 @@
             <h1>Shop</h1>
             <h2>Choose an upgrade:</h2>
             <div class="buttonContainer">
-                <button onclick="upgradeValue = 1; websiteGoTo('gameWindow')">Gain 100 health</button><br>
-                <button onclick="upgradeValue = 2; websiteGoTo('gameWindow')">Damage increase</button><br>
-                <button onclick="upgradeValue = 3; websiteGoTo('gameWindow')">Round Capacity +3</button><br>
+                <button onclick="upgradeValue = 1; websiteGoTo('gameWindow')">100 Health</button><br>
+                <button onclick="upgradeValue = 2; websiteGoTo('gameWindow')">Damage +5</button><br>
+                <button onclick="upgradeValue = 3; websiteGoTo('gameWindow')">Capacity +3</button><br>
                 <button onclick="upgradeValue = 4; websiteGoTo('gameWindow')">50 Ammo</button><br>
-                <button onclick="upgradeValue = 5; websiteGoTo('gameWindow')">Extra recoil</button><br>
+                <button onclick="upgradeValue = 5; websiteGoTo('gameWindow')">Full auto?</button><br>
             </div>
-            <!---<h2>Buy a gun:</h2>
+            <!--<h2>Buy a gun:</h2>
             <div class="buttonContainer">
                 <h2>Under construction</h2>
                 <button onclick="">Sniper</button><br>
                 <button onclick="">Machine gun</button><br>
-                <button onclick="">Test 3</button><br>-->
-            </div>
+                <button onclick="">Test 3</button><br>
+            </div>-->
         </div>
 
         <div id="questions" style="display: none;">
@@ -89,12 +89,14 @@
 
         <script type="module" src="website.js"></script>
         <script>
+            let gunGlobal
             let upgradeValue = 0
             let levelGlobal = -1        // Global variables must load first
             let currentDivId = "menu"
             let answerStreak = 0
             let highestAnswerStreak = 0
             let highestEnemiesDied = 0
+
 
             function getQuestions() {
                 const xhr = new XMLHttpRequest()
@@ -116,13 +118,13 @@
 
             // Now define functions for website navigation and level loading
             var input = document.getElementById("body")
-            input.addEventListener("keypress", function(event) {
+            input.addEventListener("keypress", function(event){
                 const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
-                if (event.key === "m") {
+                if (event.key === "m"){
                     event.preventDefault()
                     playLevel(levelGlobal)
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))
+                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
                     document.getElementById('gameWindow').style.display = 'none'
@@ -131,7 +133,7 @@
             })
             input.addEventListener("keypress", function(event) {
                 const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
-                if (event.key === "r" && gameIsVisible) {
+                if (event.key === "r" && gameIsVisible){
                     event.preventDefault()
                     go(levelGlobal)
                 }

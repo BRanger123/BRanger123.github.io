@@ -157,7 +157,7 @@ scene(2, () => {
     
     // Code for weapon class
     class gun{
-        constructor(bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo) {
+        constructor(bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo, isFullAuto = false, fireRate = 100, penetration = 0) {
             this.bulletSpeed = bulletSpeed  // Technically used as distance per frame
             this.bulletColor = bulletColor
             this.bulletDamage = bulletDamage
@@ -167,6 +167,10 @@ scene(2, () => {
             this.bulletsFired = bulletsFired // So shotguns can use same code, just increase bullets fired (pellets?)
             this.spread = spread
             this.recoilForce = recoilForce  // Force of recoil that pushes player back
+            this.isFullAuto = isFullAuto  // true for machine guns and automatic weapons
+            this.fireRate = fireRate      // milliseconds between shots when full auto is enabled
+            this.lastFireTime = 0         // track time between automatic shots
+            this.penetration = penetration // number of enemies a bullet can pass through before destruction
         }
         
         canFire(){
@@ -186,6 +190,13 @@ scene(2, () => {
                 hintLabel.text = `Reload! (e)`
                 return  // Cannot fire if no ammo in magazine (or clip?)
             }
+            if (this.isFullAuto) {
+                const now = Date.now()
+                if (now - this.lastFireTime < this.fireRate) {
+                    return
+                }
+                this.lastFireTime = now
+            }
             shake(8)
             const baseDir = toWorld(mousePos()).sub(player.pos).unit()  // toWorld() lets func work outside initial map boundaries for camera code
             
@@ -198,11 +209,11 @@ scene(2, () => {
                 const direction = Vec2.fromAngle(angle)
                 const bullet = add([
                     pos(player.pos),
-                    rect(8, 8), // circle(5),
+                    rect(8,8),
                     area(),
                     color(this.bulletColor),
                     "bullet",   // For collision detection
-                    { speed: this.bulletSpeed, dir: direction },
+                    { speed: this.bulletSpeed, dir: direction, penetration: this.penetration },
                     offscreen({ destroy: true }),   // Saves processing power, may need to be changed if using camera code
                 ])
                 bullet.onUpdate(() => {bullet.move(bullet.dir.scale(this.bulletSpeed))})    // Moves in dir by speed every frame, speed is actually dist per frame
@@ -210,7 +221,11 @@ scene(2, () => {
                     spawnDamageNumber(enemy.pos, this.bulletDamage)
                     enemy.move(bullet.dir.scale(this.bulletSpeed))  // Enemy pushed back by factor of bulletSpeed
                     enemy.hurt(this.bulletDamage)   // enemy.hurt(this.bulletDamage*2)
-                    bullet.destroy()
+                    if (bullet.penetration > 0) {
+                        bullet.penetration--
+                    } else {
+                        bullet.destroy()
+                    }
                 })
             }
             this.ammoInMag--    // Decrease ammo count in magazine
@@ -267,8 +282,13 @@ scene(2, () => {
         coinsLabel.text = `Coins: ${coins}`
     })
     
-    // bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo
-    let gunTest = new gun(700, rgb(0, 0, 0), 20, 7, 14, 10, 3000, 100)
+    // amazing gun class can be used for all weapon archetypes
+    // bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo, isFullAuto, fireRate, penetration
+    let shotGun = new gun(700, rgb(0, 0, 0), 20, 7, 14, 10, 3000, 100, false, 100, 0)
+    let pistol = new gun(1000, rgb(0, 0, 0), 10, 12, 1, 5, 500, 100, false, 100, 0)
+    let machineGun = new gun(800, rgb(50, 50, 50), 12, 30, 1, 6, 2000, 180, true, 80, 10)
+    gunGlobal = shotGun
+    
 
     // Initialize labels
     const coinsLabel = add([
@@ -290,7 +310,7 @@ scene(2, () => {
         color(0, 0, 0),
     ])
     const ammoLabel = add([
-        text(`Ammo: ${gunTest.ammoInMag}/${gunTest.totalAmmo}`),
+        text(`Ammo: ${gunGlobal.ammoInMag}/${gunGlobal.totalAmmo}`),
         pos(24, height()-50),
         color(0, 0, 0),
     ])
@@ -301,7 +321,8 @@ scene(2, () => {
     ])
     const controlsLabel = add([
         text("Click to shoot"),
-        pos(center().x-145, 24),
+        anchor("center"),
+        pos(center().x, 24),
         color(0, 0, 0),
     ])
 
@@ -366,24 +387,26 @@ scene(2, () => {
                 destroyAll("bullet")
                 hintLabel.text = `Click to continue`
                 websiteGoTo('upgrade')  // Upgrade selection
-                onClick(() => {
-                    if(upgradeValue!=0){
-                        isPaused = false
-                        hintLabel.text = ``
-                        if(upgradeValue==1){player.heal(100), healthLabel.text = `Health: ${player.hp()}`}
-                        if(upgradeValue==2){gunTest.bulletDamage += 5}
-                        if(upgradeValue==3){gunTest.magSize += 3, gunTest.totalAmmo += 3}
-                        if(upgradeValue==4){gunTest.totalAmmo += 50}
-                        if(upgradeValue==5){gunTest.recoilForce += 20000}
-                        upgradeValue=0  // Reset upgrade so does not reapply on click
-                    }
-                })
+                onClick(() => upgrade())
             }
         })
         return enemy
+        
+    }
+    function upgrade(){
+        if(upgradeValue!=0){
+            isPaused = false
+            hintLabel.text = ``
+            if(upgradeValue==1){player.heal(100), healthLabel.text = `Health: ${player.hp()}`}
+            if(upgradeValue==2){gunGlobal.bulletDamage += 5}
+            if(upgradeValue==3){gunGlobal.magSize += 3, gunGlobal.totalAmmo += 3}
+            if(upgradeValue==4){gunGlobal.totalAmmo += 50}
+            if(upgradeValue==5){gunGlobal.isFullAuto = true}
+            upgradeValue=0  // Reset upgrade so does not reapply on click
+        }
     }
 
-    clock.loop(2.5, () => { // Time value acts as diffuculty
+    clock.loop(4, () => { // Time value acts as diffuculty
         if(!isPaused){
             if(player.hp()<56){                                 // Player heals 5 every loop to max of 55+5
                 player.heal(5)
@@ -428,15 +451,39 @@ scene(2, () => {
             }
         }
     })
+    let mouseDown = false
+
     onClick(() => {
-        gunTest.fireWeapon()    // Shoot
-        ammoLabel.text = `Ammo: ${gunTest.ammoInMag}/${gunTest.totalAmmo}`
+        if (isPaused || gunGlobal.isFullAuto) {
+            return
+        }
+        gunGlobal.fireWeapon()    // Shoot once per click for semi-auto weapons
+        ammoLabel.text = `Ammo: ${gunGlobal.ammoInMag}/${gunGlobal.totalAmmo}`
         controlsLabel.text = `` // Click to shoot hint hidden
     })
+
+    onMouseDown(() => {
+        if (isPaused || !gunGlobal.isFullAuto) {
+            return
+        }
+        mouseDown = true
+    })
+
+    onMouseRelease(() => {
+        mouseDown = false
+    })
+
+    onUpdate(() => {
+        if (mouseDown && gunGlobal.isFullAuto && !isPaused) {
+            gunGlobal.fireWeapon()    // Automatic firing while held down
+            ammoLabel.text = `Ammo: ${gunGlobal.ammoInMag}/${gunGlobal.totalAmmo}`
+            controlsLabel.text = ``
+        }
+    })
     onKeyPress("e", () => {
-        if (gunTest.reload()) { // If successful
+        if (gunGlobal.reload()) { // If successful
             hintLabel.text = `` // Reload hint is hidden
-            ammoLabel.text = `Ammo: ${gunTest.ammoInMag}/${gunTest.totalAmmo}`
+            ammoLabel.text = `Ammo: ${gunGlobal.ammoInMag}/${gunGlobal.totalAmmo}`
         }
     })
 
