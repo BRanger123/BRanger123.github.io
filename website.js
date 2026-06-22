@@ -496,6 +496,7 @@ scene(2, () => {
         }
     })
 
+    // test shop
     onKeyPress("p", () => {
         canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
         canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
