@@ -46,29 +46,36 @@
 
         <div id="information" style="display: none">
             <h1>Information</h1>
-            <h2>Version 2.6 Patch Notes:</h2>
-            <h3>Full auto</h3>
+            <h2>Version 2.7 Patch Notes:</h2>
+            <h3>Shop added back</h3>
             <br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
 
         <div id="upgrade" style="display: none;">
-            <h1>Shop</h1>
-            <h2>Choose an upgrade:</h2>
+            <h1>Upgrade</h1>
+            <h2 id="chosenUpgrade">Choosen Upgrade</h2>
             <div class="buttonContainer">
-                <button onclick="upgradeValue = 1; websiteGoTo('gameWindow')">100 Health</button><br>
-                <button onclick="upgradeValue = 2; websiteGoTo('gameWindow')">Damage +5</button><br>
-                <button onclick="upgradeValue = 3; websiteGoTo('gameWindow')">Capacity +3</button><br>
-                <button onclick="upgradeValue = 4; websiteGoTo('gameWindow')">50 Ammo</button><br>
-                <button onclick="upgradeValue = 5; websiteGoTo('gameWindow')">Full auto?</button><br>
+                <button onclick="upgradeValue = 1; selectUpgrade('100 Health')">100 Health</button><br>
+                <button onclick="upgradeValue = 2; selectUpgrade('Damage +5')">Damage +5</button><br>
+                <button onclick="upgradeValue = 3; selectUpgrade('Capacity +3')">Capacity +3</button><br>
+                <button onclick="upgradeValue = 4; selectUpgrade('50 Ammo')">50 Ammo</button><br>
+                <button onclick="upgradeValue = 5; selectUpgrade('Full auto')">Full auto?</button><br>
             </div>
-            <!--<h2>Buy a gun:</h2>
+            <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); this.style.display = 'none'" style="display: none;">Continue</button>
+        </div>
+
+        <div id="shop" style="display: none;">
+            <h1>Shop</h1>
+            <h2 id="coinsCount">coins not found</h2>
+            <h2 id="currentGun">Gun: Pistol</h2>
+            <h3>Purchase:</h3>
             <div class="buttonContainer">
-                <h2>Under construction</h2>
-                <button onclick="">Sniper</button><br>
-                <button onclick="">Machine gun</button><br>
-                <button onclick="">Test 3</button><br>
-            </div>-->
+                <button onclick="purchaseGun(shotgunGlobal, 5, 'shotgun')">Shotgun -20</button><br>
+                <button onclick="purchaseGun(machineGunGlobal, 5, 'machine gun')">Machine gun</button><br>
+                <button onclick="purchaseGun(sniperGlobal, 5, 'sniper')">Sniper</button><br>
+            </div>
+            <button onclick="websiteGoTo('gameWindow')">Continue</button>
         </div>
 
         <div id="questions" style="display: none;">
@@ -91,11 +98,16 @@
         <script>
             let gunGlobal
             let upgradeValue = 0
-            let levelGlobal = -1        // Global variables must load first
+            let levelGlobal = -1        // Globals so Kaboom objects can be seen in entire src
             let currentDivId = "menu"
             let answerStreak = 0
             let highestAnswerStreak = 0
             let highestEnemiesDied = 0
+            let coins
+            let pistolGlobal
+            let shotgunGlobal
+            let machineGunGlobal
+            let sniperGlobal
 
 
             function getQuestions() {
@@ -151,6 +163,21 @@
                 document.getElementById('gameWindow').style.display = 'inline-block'
                 currentDivId = "gameWindow"
                 go("startButton")
+            }
+
+            function selectUpgrade(upgradeString){
+                document.getElementById('chosenUpgrade').textContent = upgradeString || ''
+                document.getElementById('upgradeContinue').style.display = "inline-block"
+            }
+
+            function purchaseGun(gun, price, gunName){
+                if(price>coins){alert(`You cannot afford the ${gunName}.`)}
+                else{
+                    coins = coins-price
+                    gunGlobal=gun
+                    document.getElementById('coinsCount').textContent = coins || ''
+                    document.getElementById('currentGun').textContent = gunName || ''
+                }
             }
 
             function shuffleArray(array){

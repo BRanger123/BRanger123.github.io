@@ -153,7 +153,8 @@ scene(2, () => {
     let isPaused = false
     let enemiesToKill = 10
     let enemiesToKillCounter = 0
-    let coins = 0
+    coins = 0
+    document.getElementById("coinsCount").textContent = `Coins: ${coins}`
     
     // Code for weapon class
     class gun{
@@ -168,9 +169,9 @@ scene(2, () => {
             this.spread = spread
             this.recoilForce = recoilForce  // Force of recoil that pushes player back
             this.isFullAuto = isFullAuto  // true for machine guns and automatic weapons
-            this.fireRate = fireRate      // milliseconds between shots when full auto is enabled
-            this.lastFireTime = 0         // track time between automatic shots
-            this.penetration = penetration // number of enemies a bullet can pass through before destruction
+            this.fireRate = fireRate      // Milliseconds between shots when full auto is enabled
+            this.lastFireTime = 0         // Track time between automatic shots
+            this.penetration = penetration // Number of enemies a bullet can pass through before destruction
         }
         
         canFire(){
@@ -232,6 +233,20 @@ scene(2, () => {
         }
     }
 
+    // amazing gun class can be used for all weapon archetypes
+    // bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo, isFullAuto, fireRate, penetration
+    let shotgun = new gun(700, rgb(0, 0, 0), 20, 7, 14, 10, 3000, 100, false, 100, 0)
+    shotgunGlobal = shotgun
+    let pistol = new gun(1000, rgb(0, 0, 0), 10, 12, 1, 5, 500, 100, false, 100, 0)
+    pistolGlobal = pistol
+    let machineGun = new gun(800, rgb(50, 50, 50), 12, 30, 1, 6, 2000, 180, true, 80, 10)
+    machineGunGlobal = machineGun
+    let sniper = new gun(2000, rgb(0, 0, 0), 999, 5, 1, 0, 7000, 100, false, 200, 99)
+    sniperGlobal = sniper
+
+    gunGlobal = pistolGlobal   // Assign global gun initial object
+    
+
     // Function to spawn floating damage numbers
     function spawnDamageNumber(position, damage){
         const damageText = add([
@@ -280,15 +295,8 @@ scene(2, () => {
         destroy(coin)
         coins=coins+1
         coinsLabel.text = `Coins: ${coins}`
+        document.getElementById("coinsCount").textContent = coins
     })
-    
-    // amazing gun class can be used for all weapon archetypes
-    // bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo, isFullAuto, fireRate, penetration
-    let shotGun = new gun(700, rgb(0, 0, 0), 20, 7, 14, 10, 3000, 100, false, 100, 0)
-    let pistol = new gun(1000, rgb(0, 0, 0), 10, 12, 1, 5, 500, 100, false, 100, 0)
-    let machineGun = new gun(800, rgb(50, 50, 50), 12, 30, 1, 6, 2000, 180, true, 80, 10)
-    gunGlobal = shotGun
-    
 
     // Initialize labels
     const coinsLabel = add([
@@ -311,11 +319,13 @@ scene(2, () => {
     ])
     const ammoLabel = add([
         text(`Ammo: ${gunGlobal.ammoInMag}/${gunGlobal.totalAmmo}`),
+        // anchor("center"),
         pos(24, height()-50),
         color(0, 0, 0),
     ])
     const healthLabel = add([
         text(`Health: ${player.hp()}`),
+        // anchor("center"),
         pos(24, height()-100),
         color(0, 0, 0),
     ])
@@ -325,8 +335,6 @@ scene(2, () => {
         pos(center().x, 24),
         color(0, 0, 0),
     ])
-
-    const clock = add([timer()]) // Timer for spawning enemies
     
     // Make enemies
     const enemies = []
@@ -354,7 +362,7 @@ scene(2, () => {
             pos(x, y),
             area(),
             body(),
-            health(Math.random() * 100 + 20),
+            health(Math.random() * 50 + 20),
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
             "enemy",    // For collision detection
             { speed: (Math.random() * 300) + 50 },
@@ -394,9 +402,9 @@ scene(2, () => {
         
     }
     function upgrade(){
+        isPaused = false
+        hintLabel.text = ``
         if(upgradeValue!=0){
-            isPaused = false
-            hintLabel.text = ``
             if(upgradeValue==1){player.heal(100), healthLabel.text = `Health: ${player.hp()}`}
             if(upgradeValue==2){gunGlobal.bulletDamage += 5}
             if(upgradeValue==3){gunGlobal.magSize += 3, gunGlobal.totalAmmo += 3}
@@ -406,6 +414,7 @@ scene(2, () => {
         }
     }
 
+    const clock = add([timer()]) // Timer for spawning enemies
     clock.loop(4, () => { // Time value acts as diffuculty
         if(!isPaused){
             if(player.hp()<56){                                 // Player heals 5 every loop to max of 55+5
@@ -485,6 +494,21 @@ scene(2, () => {
             hintLabel.text = `` // Reload hint is hidden
             ammoLabel.text = `Ammo: ${gunGlobal.ammoInMag}/${gunGlobal.totalAmmo}`
         }
+    })
+
+    onKeyPress("p", () => {
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
+        isPaused = true
+        destroyAll("bullet")
+        hintLabel.text = `Click to continue`
+        websiteGoTo('shop')
+        onClick(() => {
+            isPaused = false
+            hintLabel.text = ``
+        })
     })
 
     // Collision with enemy

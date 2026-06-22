@@ -103,7 +103,7 @@ button:active{
 ::-webkit-scrollbar-thumb:active{
     display: none;
 }
-@media (max-width: 768px){  /*For smaller devices*/
+@media (max-width: 768px){  /*For smaller devices Seth*/
     #question{
         max-width: 375px;
     }
