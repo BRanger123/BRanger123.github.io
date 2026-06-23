@@ -353,6 +353,7 @@ scene(2, () => {
         coinsLabel.text = `Coins: ${coins}`
         document.getElementById("coinsCount").textContent = coins
     })
+    
 
     // Initialize labels
     const coinsLabel = add([
@@ -463,21 +464,6 @@ scene(2, () => {
             }
             enemies.push(spawnEnemy())  // Array used for movement handling
         }
-        // small chance to open shop
-        if(Math.random() < 0.3){
-            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
-            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
-            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
-            isPaused = true
-            destroyAll("bullet")
-            hintLabel.text = `Click to continue`
-            websiteGoTo('shop')
-            onClick(() => {
-                isPaused = false
-                hintLabel.text = ``
-            })
-        }
     })
 
     onUpdate(() => {
@@ -548,6 +534,21 @@ scene(2, () => {
             hintLabel.text = `` // Reload hint is hidden
             ammoLabel.text = `Ammo: ${gunGlobal.ammoInMag}/${gunGlobal.totalAmmo}`
         }
+    })
+
+    onKeyPress("p", () => {
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
+        isPaused = true
+        destroyAll("bullet")
+        hintLabel.text = `Click to continue`
+        websiteGoTo('shop')
+        onClick(() => {
+            isPaused = false
+            hintLabel.text = ``
+        })
     })
 
     // Collision with enemy
