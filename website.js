@@ -145,6 +145,15 @@ scene(2, () => {
     loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
     //loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")        // Load assets
     loadSprite("coin", "https://kaboomjs.com/sprites/coin.png")
+    /*
+    loadSprite("blaster", "https://kaboomjs.com/sprites/gun.png")
+        const blasterSprite = add([
+        sprite("blaster"),
+        pos(player.pos),
+        anchor("center"),   // So beams spawn at center
+        body(),
+    ])
+    */
     loadBean()
     setGravity(0)
     setBackground(rgb(255, 255, 255))
@@ -157,7 +166,7 @@ scene(2, () => {
         "=                                             =                          =                        =",
         "=                                             =                          =                        =",
         "=                                             =                          =                        =",
-        "=                                             =                          =                        =",
+        "=                                             =                          =                        =                                                             e",
         "=                                             =                                                   =",
         "=                                             =                                                   =",
         "=                ==========                   =                                                   =",
@@ -352,6 +361,11 @@ scene(2, () => {
         coins=coins+1
         coinsLabel.text = `Coins: ${coins}`
         document.getElementById("coinsCount").textContent = coins
+    })
+
+        
+    onCollide("player", "goal", () => {
+        go("winScreen")
     })
     
 
