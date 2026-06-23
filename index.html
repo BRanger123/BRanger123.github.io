@@ -71,9 +71,9 @@
             <h2 id="currentGear">Gear: Spark Beam</h2>
             <h3>Purchase:</h3>
             <div class="buttonContainer">
-                <button onclick="purchaseGadget(bubbleBlasterGlobal, 5, 'Bubble Beam')">Bubble Beam -5</button><br>
-                <button onclick="purchaseGadget(rapidBlasterGlobal, 5, 'Rapid Beam')">Rapid Beam -5</button><br>
-                <button onclick="purchaseGadget(stickBlasterGlobal, 5, 'Stick Beam')">Stick Beam -5</button><br>
+                <button onclick="purchaseGadget(bubbleBlasterGlobal, 5, 'bubble blaster')">Bubble Blaster -5</button><br>
+                <button onclick="purchaseGadget(rapidBlasterGlobal, 5, 'rapid blaster')">Rapid Blaster -5</button><br>
+                <button onclick="purchaseGadget(beamBlasterGlobal, 5, 'beam blaster')">Beam Blaster -5</button><br>
             </div>
             <button onclick="websiteGoTo('gameWindow')">Continue</button>
         </div>
@@ -104,9 +104,10 @@
             let highestAnswerStreak = 0
             let highestEnemiesDied = 0
             let coins
-            let bubbleGlobal
-            let machineGlobal
-            let stickGlobal
+            let bubbleBlasterGlobal
+            let sparkBlasterGlobal
+            let rapidBlasterGlobal
+            let beamBlasterGlobal
 
 
             function getQuestions() {

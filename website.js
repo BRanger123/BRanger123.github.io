@@ -3,10 +3,6 @@ import kaboom from "https://unpkg.com/kaboom@3000.0.1/dist/kaboom.mjs"
 
 //Get the canvas element
 const canvas = document.getElementById('gameCanvas')
-let gadgetGlobal = null
-window.bubbleBlasterGlobal = null
-window.rapidBlasterGlobal = null
-window.stickBlasterGlobal = null
 
 //Initialize kaboom with canvas element
 kaboom({
@@ -297,15 +293,15 @@ scene(2, () => {
     // amazing beam gadget class can be used for all gadget archetypes
     // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, totalAmmo, isFullAuto, fireRate, penetration
     let bubbleBlaster = new BeamGadget(700, rgb(0, 0, 0), 20, 7, 14, 15, 3000, 100, false, 100, 0)
-    window.bubbleBlasterGlobal = bubbleBlaster
+    bubbleBlasterGlobal = bubbleBlaster
     let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 20, 12, 1, 5, 500, 100, false, 100, 0)
+    sparkBlasterGlobal = sparkBlaster
     let rapidBlaster = new BeamGadget(800, rgb(50, 50, 50), 12, 30, 1, 6, 2000, 180, true, 80, 10)
-    window.rapidBlasterGlobal = rapidBlaster
-    let stickBlaster = new BeamGadget(2000, rgb(0, 0, 0), 999, 5, 1, 0, 7000, 100, false, 200, 99)
-    window.stickBlasterGlobal = stickBlaster
+    rapidBlasterGlobal = rapidBlaster
+    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 999, 5, 1, 0, 7000, 100, false, 200, 99)
+    beamBlasterGlobal = beamBlaster
 
-    gadgetGlobal = bubbleBlaster   // Assign global gadget initial object
-    window.gadgetGlobal = gadgetGlobal
+    gadgetGlobal = sparkBlaster   // Assign global gadget initial object
     
 
     // Function to spawn floating damage numbers
