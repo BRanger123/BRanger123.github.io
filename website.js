@@ -503,6 +503,7 @@ scene(2, () => {
     })
 
     onClick(() => {
+        coinsLabel.text = `Coins: ${coins}`
         if (isPaused || gadgetGlobal.isFullAuto) {
             return
         }
