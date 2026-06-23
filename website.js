@@ -148,9 +148,63 @@ scene(2, () => {
     loadBean()
     setGravity(0)
     setBackground(rgb(255, 255, 255))
+    addLevel([
+        "===================================================================================================",
+        "=                                                                                                 =",
+        "=                                                                                                 =",
+        "=                                                                        =                        =",
+        "=                                                                        =                        =",
+        "=                                             =                          =                        =",
+        "=                                             =                          =                        =",
+        "=                                             =                          =                        =",
+        "=                                             =                          =                        =",
+        "=                                             =                                                   =",
+        "=                                             =                                                   =",
+        "=                ==========                   =                                                   =",
+        "=                                                                                                 =",
+        "=                                                                                                 =",
+        "=                                                       ==================                        =",
+        "=                                                                                                 =",
+        "=                                                                                                 =",
+        "=                                              =                                                  =",
+        "=                                              =                                                  =",
+        "=           ===========                        =                               ==                 =",
+        "=           =                                  =                              ==                  =",
+        "=           =                             ======                             ==                   =",
+        "=           =                                                               ==                    =",
+        "=           =                                                              ==                     =",
+        "=           =                                                             ==                      =",
+        "=                                                                        ==                       =",
+        "=                                                                       ==                        =",
+        "=                                                                                                 =",
+        "===================================================================================================",
+    ],
+    {
+        // define the size of tile block
+        tileWidth: 32,
+        tileHeight: 32,
+        // define what each symbol means, by a function returning a component list (what will be passed to add())
+        tiles: {
+            "=": () => [
+                rect(32, 32),
+                area(),
+                body({ isStatic: true }),
+                color(30, 30, 30),
+                "tile",
+            ],
+            "e": () => [
+                rect(32, 32),
+                area(),
+                body({ isStatic: true }),
+                color(10, 200, 10),
+                "goal",
+            ]
+        }
+    })
 
     let enemiesDied = 0
     let isPaused = false
+    let mouseDown = false
     let enemiesToKill = 10
     let enemiesToKillCounter = 0
     coins = 0
@@ -228,6 +282,9 @@ scene(2, () => {
                         bullet.destroy()
                     }
                 })
+                bullet.onCollide("tile", () => {
+                    bullet.destroy()   // Bullets destroyed on collision with tiles, can be changed for different weapon types
+                })
             }
             this.ammoInMag--    // Decrease ammo count in magazine
         }
@@ -235,16 +292,16 @@ scene(2, () => {
 
     // amazing gun class can be used for all weapon archetypes
     // bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo, isFullAuto, fireRate, penetration
-    let shotgun = new gun(700, rgb(0, 0, 0), 20, 7, 14, 10, 3000, 100, false, 100, 0)
+    let shotgun = new gun(700, rgb(0, 0, 0), 20, 7, 14, 15, 3000, 100, false, 100, 0)
     shotgunGlobal = shotgun
-    let pistol = new gun(1000, rgb(0, 0, 0), 10, 12, 1, 5, 500, 100, false, 100, 0)
+    let pistol = new gun(1000, rgb(0, 0, 0), 20, 12, 1, 5, 500, 100, false, 100, 0)
     pistolGlobal = pistol
     let machineGun = new gun(800, rgb(50, 50, 50), 12, 30, 1, 6, 2000, 180, true, 80, 10)
     machineGunGlobal = machineGun
     let sniper = new gun(2000, rgb(0, 0, 0), 999, 5, 1, 0, 7000, 100, false, 200, 99)
     sniperGlobal = sniper
 
-    gunGlobal = pistolGlobal   // Assign global gun initial object
+    gunGlobal = shotgunGlobal   // Assign global gun initial object
     
 
     // Function to spawn floating damage numbers
@@ -288,7 +345,6 @@ scene(2, () => {
         health(100),
         "player",   // For collision detection
         { speed: 400, recoil: vec2(0, 0) }, // Recoil 2d vector for fluid recoil
-        offscreen({ destroy: true }),   // Delete if use camera code 
     ])
     
     player.onCollide("coin", (coin) => {
@@ -301,38 +357,32 @@ scene(2, () => {
     // Initialize labels
     const coinsLabel = add([
         text(`Coins: ${coins}`),
-        anchor("right"),
-        pos(width()-24, height()-100),
-        color(0, 0, 0),
-    ])
-    const enemiesDiedLabel = add([
-        text(`Kills: ${enemiesDied}`),
-        anchor("right"),
-        pos(width()-24, height()-50),
+        anchor("center"),
+        pos(0, 0),
         color(0, 0, 0),
     ])
     const hintLabel = add([
         text(""),
         anchor("center"),
-        pos(center().x, 24),
+        pos(0, 0),
         color(0, 0, 0),
     ])
     const ammoLabel = add([
         text(`Ammo: ${gunGlobal.ammoInMag}/${gunGlobal.totalAmmo}`),
-        // anchor("center"),
-        pos(24, height()-50),
+        anchor("center"),
+        pos(0, 0),
         color(0, 0, 0),
     ])
     const healthLabel = add([
         text(`Health: ${player.hp()}`),
-        // anchor("center"),
-        pos(24, height()-100),
+        anchor("center"),
+        pos(0, 0),
         color(0, 0, 0),
     ])
     const controlsLabel = add([
         text("Click to shoot"),
         anchor("center"),
-        pos(center().x, 24),
+        pos(0, 0),
         color(0, 0, 0),
     ])
     
@@ -341,26 +391,17 @@ scene(2, () => {
     const minSpawnDist = 400
 
     function spawnEnemy(){
-        let x, y
-        let tries = 0   // Brute force spawning enemies untill dist is minSpawnDist
-
-        do{
-            x = Math.random() * width()
-            y = Math.random() * height()
-            tries++
-        }while (player && player.exists() && player.pos.dist(vec2(x, y)) < minSpawnDist && tries < 50)
-        /*
-        while (player && player.exists() && player.pos.dist(vec2(x, y)) < minSpawnDist && tries < 50){
-            x = Math.random() * width()
-            y = Math.random() * height()
-            tries++
-        }
-        */
+        let x
+        let y
+        // Pick random angle and spawn at minSpawnDist from player
+        const angle = Math.random() * 360
+        x = player.pos.x + Math.cos(angle) * minSpawnDist
+        y = player.pos.y + Math.sin(angle) * minSpawnDist
 
         const enemy = add([
             sprite("ghosty"),
             pos(x, y),
-            area(),
+            area({ collisionIgnore: ["tile"]}), 
             body(),
             health(Math.random() * 50 + 20),
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
@@ -381,7 +422,6 @@ scene(2, () => {
             burp()  // Sound effects built into Kaboom library
             enemies.push(spawnEnemy())  // Spawn new enemy so threat is constant
             enemiesDied++
-            enemiesDiedLabel.text = `Kills: ${enemiesDied}`
             if(enemiesDied > highestEnemiesDied){highestEnemiesDied = enemiesDied}
             enemiesToKillCounter++
             if (enemiesToKillCounter == enemiesToKill){   // Check player gets upgrade 
@@ -423,6 +463,21 @@ scene(2, () => {
             }
             enemies.push(spawnEnemy())  // Array used for movement handling
         }
+        // small chance to open shop
+        if(Math.random() < 0.3){
+            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
+            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
+            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
+            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
+            isPaused = true
+            destroyAll("bullet")
+            hintLabel.text = `Click to continue`
+            websiteGoTo('shop')
+            onClick(() => {
+                isPaused = false
+                hintLabel.text = ``
+            })
+        }
     })
 
     onUpdate(() => {
@@ -460,7 +515,6 @@ scene(2, () => {
             }
         }
     })
-    let mouseDown = false
 
     onClick(() => {
         if (isPaused || gunGlobal.isFullAuto) {
@@ -496,22 +550,6 @@ scene(2, () => {
         }
     })
 
-    // test shop
-    onKeyPress("p", () => {
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
-        isPaused = true
-        destroyAll("bullet")
-        hintLabel.text = `Click to continue`
-        websiteGoTo('shop')
-        onClick(() => {
-            isPaused = false
-            hintLabel.text = ``
-        })
-    })
-
     // Collision with enemy
     onCollideUpdate("player", "enemy", () => {
         if(!isPaused){
@@ -520,15 +558,27 @@ scene(2, () => {
             shake(8)           
         }
     })
-    // Camera code
-    // player.onUpdate(() => {
-    //     camPos(player.pos)
-    // })
 
-    onDestroy("player", () => go("deathScreen", enemiesDied*coins)) // If off screen
+    player.onUpdate(() => {
+        // Camera follows point between player and mouse cursor
+        const mouseWorldPos = toWorld(mousePos())
+        const targetPos = player.pos.add(mouseWorldPos).scale(0.5)
+        camPos(targetPos)
+
+        // Make labels stay relative to camera
+        toWorld(camPos())   // Set world origin to camPos()
+        coinsLabel.pos = camPos().add(vec2(width()/2 - 100, -height()/2 + 24))
+        ammoLabel.pos = camPos().add(vec2(-width()/2 + 120, height()/2 - 24))
+        healthLabel.pos = camPos().add(vec2(width()/2 - 110, height()/2 - 24))
+        hintLabel.pos = camPos().add(vec2(0, -height()/2 + 24))
+        controlsLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
+
+    })
+
+    onDestroy("player", () => go("deathScreen", enemiesDied+coins)) // If off screen
     player.on("death", () => {
         destroy(player)
-        go("deathScreen", enemiesDied*coins)    // Score = enemiesDied
+        go("deathScreen", enemiesDied+coins)
     })
 })
 

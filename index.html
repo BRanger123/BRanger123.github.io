@@ -25,10 +25,10 @@
 
         <div id="levelsMenu" style="display: none">
             <h1>Level Select</h1>
-            <h2>Level 2 is my favourite</h2>
+            <h2>My favourite is Ghost Hunters</h2>
             <div class="buttonContainer">
-                <button onclick="playLevel(1)">Level 1</button><br>
-                <button onclick="upgradeValue=0; playLevel(2)">Level 2</button><br>
+                <button onclick="playLevel(1)">Block Fall</button><br>
+                <button onclick="upgradeValue=0; playLevel(2)">Ghost Hunters</button><br>
                 <button onclick="playLevel(3)">Level 3</button>
             </div>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
@@ -46,8 +46,8 @@
 
         <div id="information" style="display: none">
             <h1>Information</h1>
-            <h2>Version 2.7 Patch Notes:</h2>
-            <h3>Shop added back</h3>
+            <h2>Version 3 Patch Notes:</h2>
+            <h3>Start of open world</h3>
             <br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
@@ -71,9 +71,9 @@
             <h2 id="currentGun">Gun: Pistol</h2>
             <h3>Purchase:</h3>
             <div class="buttonContainer">
-                <button onclick="purchaseGun(shotgunGlobal, 5, 'shotgun')">Shotgun -20</button><br>
-                <button onclick="purchaseGun(machineGunGlobal, 5, 'machine gun')">Machine gun</button><br>
-                <button onclick="purchaseGun(sniperGlobal, 5, 'sniper')">Sniper</button><br>
+                <button onclick="purchaseGun(shotgunGlobal, 5, 'shotgun')">Shotgun -5</button><br>
+                <button onclick="purchaseGun(machineGunGlobal, 5, 'machine gun')">Machine gun -5</button><br>
+                <button onclick="purchaseGun(sniperGlobal, 5, 'sniper')">Sniper -5</button><br>
             </div>
             <button onclick="websiteGoTo('gameWindow')">Continue</button>
         </div>
@@ -245,8 +245,8 @@
             }
 
             function updateStats(){
-                document.getElementById('answerStreakStat').textContent = `${highestAnswerStreak}`
-                document.getElementById('enemiesDiedStat').textContent = `${highestEnemiesDied}`
+                document.getElementById('answerStreakStat').textContent = `${highestAnswerStreak}` || ''
+                document.getElementById('enemiesDiedStat').textContent = `${highestEnemiesDied}` || ''
 
             }
 
