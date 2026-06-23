@@ -3,6 +3,10 @@ import kaboom from "https://unpkg.com/kaboom@3000.0.1/dist/kaboom.mjs"
 
 //Get the canvas element
 const canvas = document.getElementById('gameCanvas')
+let gadgetGlobal = null
+window.bubbleBlasterGlobal = null
+window.rapidBlasterGlobal = null
+window.stickBlasterGlobal = null
 
 //Initialize kaboom with canvas element
 kaboom({
@@ -210,31 +214,31 @@ scene(2, () => {
     coins = 0
     document.getElementById("coinsCount").textContent = `Coins: ${coins}`
     
-    // Code for weapon class
-    class gun{
-        constructor(bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo, isFullAuto = false, fireRate = 100, penetration = 0) {
-            this.bulletSpeed = bulletSpeed  // Technically used as distance per frame
-            this.bulletColor = bulletColor
-            this.bulletDamage = bulletDamage
+    // Code for beam gadget class
+    class BeamGadget{
+        constructor(beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, totalAmmo, isFullAuto = false, fireRate = 100, penetration = 0) {
+            this.beamSpeed = beamSpeed  // Technically used as distance per frame
+            this.beamColor = beamColor
+            this.beamDamage = beamDamage
             this.magSize = magSize
-            this.ammoInMag = magSize  // Current ammo in magazine
-            this.totalAmmo = totalAmmo  // Total ammunition magazine (or clip?)
-            this.bulletsFired = bulletsFired // So shotguns can use same code, just increase bullets fired (pellets?)
+            this.ammoInMag = magSize  // Current charge in magazine
+            this.totalAmmo = totalAmmo  // Total charge reserve
+            this.beamsFired = beamsFired // So burst beam gadgets can use same code, just increase beams fired (pellets?)
             this.spread = spread
             this.recoilForce = recoilForce  // Force of recoil that pushes player back
-            this.isFullAuto = isFullAuto  // true for machine guns and automatic weapons
+            this.isFullAuto = isFullAuto  // true for rapid beam gadgets
             this.fireRate = fireRate      // Milliseconds between shots when full auto is enabled
             this.lastFireTime = 0         // Track time between automatic shots
-            this.penetration = penetration // Number of enemies a bullet can pass through before destruction
+            this.penetration = penetration // Number of enemies a beam can pass through before disappearing
         }
         
         canFire(){
-            return this.ammoInMag > 0   // Checks weapon is not empty
+            return this.ammoInMag > 0   // Checks gadget has charge
         }
         reload(){
             if (this.totalAmmo > 0) {
                 const ammoToLoad = Math.min(this.magSize, this.totalAmmo)
-                this.totalAmmo -= ammoToLoad    // Add bullets to magazine and remove from total
+                this.totalAmmo -= ammoToLoad    // Add charge to magazine and remove from reserve
                 this.ammoInMag = ammoToLoad
                 return true // Successful reload
             }
@@ -243,7 +247,7 @@ scene(2, () => {
         fireWeapon(){
             if (!this.canFire()){
                 hintLabel.text = `Reload! (e)`
-                return  // Cannot fire if no ammo in magazine (or clip?)
+                return  // Cannot fire if no charge in gadget
             }
             if (this.isFullAuto) {
                 const now = Date.now()
@@ -252,56 +256,56 @@ scene(2, () => {
                 }
                 this.lastFireTime = now
             }
-            shake(8)
+            shake(0.002*(this.recoilForce*2))
             const baseDir = toWorld(mousePos()).sub(player.pos).unit()  // toWorld() lets func work outside initial map boundaries for camera code
             
             // Apply recoil - push player backwards opposite to aim direction
             const recoilDir = baseDir.scale(-this.recoilForce)
             player.recoil = player.recoil.add(recoilDir)
             
-            for (let i = 0; i < this.bulletsFired; i++){
+            for (let i = 0; i < this.beamsFired; i++){
                 const angle = baseDir.angle() + rand(-this.spread, this.spread) // Use spread as max possible random angle deviation
                 const direction = Vec2.fromAngle(angle)
-                const bullet = add([
+                const beam = add([
                     pos(player.pos),
                     rect(8,8),
                     area(),
-                    color(this.bulletColor),
-                    "bullet",   // For collision detection
-                    { speed: this.bulletSpeed, dir: direction, penetration: this.penetration },
+                    color(this.beamColor),
+                    "beam",   // For collision detection
+                    { speed: this.beamSpeed, dir: direction, penetration: this.penetration },
                     offscreen({ destroy: true }),   // Saves processing power, may need to be changed if using camera code
                 ])
-                bullet.onUpdate(() => {bullet.move(bullet.dir.scale(this.bulletSpeed))})    // Moves in dir by speed every frame, speed is actually dist per frame
-                bullet.onCollide("enemy", (enemy) => {
-                    spawnDamageNumber(enemy.pos, this.bulletDamage)
-                    enemy.move(bullet.dir.scale(this.bulletSpeed))  // Enemy pushed back by factor of bulletSpeed
-                    enemy.hurt(this.bulletDamage)   // enemy.hurt(this.bulletDamage*2)
-                    if (bullet.penetration > 0) {
-                        bullet.penetration--
+                beam.onUpdate(() => {beam.move(beam.dir.scale(this.beamSpeed))})    // Moves in dir by speed every frame, speed is actually dist per frame
+                beam.onCollide("enemy", (enemy) => {
+                    spawnDamageNumber(enemy.pos, this.beamDamage)
+                    enemy.move(beam.dir.scale(this.beamSpeed))  // Enemy pushed back by factor of beam speed
+                    enemy.hurt(this.beamDamage)   // enemy.hurt(this.beamDamage*2)
+                    if (beam.penetration > 0) {
+                        beam.penetration--
                     } else {
-                        bullet.destroy()
+                        beam.destroy()
                     }
                 })
-                bullet.onCollide("tile", () => {
-                    bullet.destroy()   // Bullets destroyed on collision with tiles, can be changed for different weapon types
+                beam.onCollide("tile", () => {
+                    beam.destroy()   // Beams destroyed on collision with tiles, can be changed for different gadget types
                 })
             }
-            this.ammoInMag--    // Decrease ammo count in magazine
+            this.ammoInMag--    // Decrease charge count in magazine
         }
     }
 
-    // amazing gun class can be used for all weapon archetypes
-    // bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread, recoilForce, totalAmmo, isFullAuto, fireRate, penetration
-    let shotgun = new gun(700, rgb(0, 0, 0), 20, 7, 14, 15, 3000, 100, false, 100, 0)
-    shotgunGlobal = shotgun
-    let pistol = new gun(1000, rgb(0, 0, 0), 20, 12, 1, 5, 500, 100, false, 100, 0)
-    pistolGlobal = pistol
-    let machineGun = new gun(800, rgb(50, 50, 50), 12, 30, 1, 6, 2000, 180, true, 80, 10)
-    machineGunGlobal = machineGun
-    let sniper = new gun(2000, rgb(0, 0, 0), 999, 5, 1, 0, 7000, 100, false, 200, 99)
-    sniperGlobal = sniper
+    // amazing beam gadget class can be used for all gadget archetypes
+    // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, totalAmmo, isFullAuto, fireRate, penetration
+    let bubbleBlaster = new BeamGadget(700, rgb(0, 0, 0), 20, 7, 14, 15, 3000, 100, false, 100, 0)
+    window.bubbleBlasterGlobal = bubbleBlaster
+    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 20, 12, 1, 5, 500, 100, false, 100, 0)
+    let rapidBlaster = new BeamGadget(800, rgb(50, 50, 50), 12, 30, 1, 6, 2000, 180, true, 80, 10)
+    window.rapidBlasterGlobal = rapidBlaster
+    let stickBlaster = new BeamGadget(2000, rgb(0, 0, 0), 999, 5, 1, 0, 7000, 100, false, 200, 99)
+    window.stickBlasterGlobal = stickBlaster
 
-    gunGlobal = shotgunGlobal   // Assign global gun initial object
+    gadgetGlobal = bubbleBlaster   // Assign global gadget initial object
+    window.gadgetGlobal = gadgetGlobal
     
 
     // Function to spawn floating damage numbers
@@ -340,7 +344,7 @@ scene(2, () => {
         sprite("bean"),
         pos(center()),
         area(),
-        anchor("center"),   // So bullets spawn at center
+        anchor("center"),   // So beams spawn at center
         body(),
         health(100),
         "player",   // For collision detection
@@ -369,7 +373,7 @@ scene(2, () => {
         color(0, 0, 0),
     ])
     const ammoLabel = add([
-        text(`Ammo: ${gunGlobal.ammoInMag}/${gunGlobal.totalAmmo}`),
+        text(`Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`),
         anchor("center"),
         pos(0, 0),
         color(0, 0, 0),
@@ -381,7 +385,7 @@ scene(2, () => {
         color(0, 0, 0),
     ])
     const controlsLabel = add([
-        text("Click to shoot"),
+        text("Click to zap"),
         anchor("center"),
         pos(0, 0),
         color(0, 0, 0),
@@ -433,7 +437,7 @@ scene(2, () => {
                 isPaused = true
                 enemiesToKill = enemiesToKill + 5   // Threshold increases by 5
                 enemiesToKillCounter = 0    // Reset progress
-                destroyAll("bullet")
+                destroyAll("beam")
                 hintLabel.text = `Click to continue`
                 websiteGoTo('upgrade')  // Upgrade selection
                 onClick(() => upgrade())
@@ -447,10 +451,10 @@ scene(2, () => {
         hintLabel.text = ``
         if(upgradeValue!=0){
             if(upgradeValue==1){player.heal(100), healthLabel.text = `Health: ${player.hp()}`}
-            if(upgradeValue==2){gunGlobal.bulletDamage += 5}
-            if(upgradeValue==3){gunGlobal.magSize += 3, gunGlobal.totalAmmo += 3}
-            if(upgradeValue==4){gunGlobal.totalAmmo += 50}
-            if(upgradeValue==5){gunGlobal.isFullAuto = true}
+            if(upgradeValue==2){gadgetGlobal.beamDamage += 5}
+            if(upgradeValue==3){gadgetGlobal.magSize += 3, gadgetGlobal.totalAmmo += 3}
+            if(upgradeValue==4){gadgetGlobal.totalAmmo += 50}
+            if(upgradeValue==5){gadgetGlobal.isFullAuto = true}
             upgradeValue=0  // Reset upgrade so does not reapply on click
         }
     }
@@ -503,16 +507,16 @@ scene(2, () => {
     })
 
     onClick(() => {
-        if (isPaused || gunGlobal.isFullAuto) {
+        if (isPaused || gadgetGlobal.isFullAuto) {
             return
         }
-        gunGlobal.fireWeapon()    // Shoot once per click for semi-auto weapons
-        ammoLabel.text = `Ammo: ${gunGlobal.ammoInMag}/${gunGlobal.totalAmmo}`
-        controlsLabel.text = `` // Click to shoot hint hidden
+        gadgetGlobal.fireWeapon()    // Zap once per click for semi-auto gadgets
+        ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
+        controlsLabel.text = `` // Click to zap hint hidden
     })
 
     onMouseDown(() => {
-        if (isPaused || !gunGlobal.isFullAuto) {
+        if (isPaused || !gadgetGlobal.isFullAuto) {
             return
         }
         mouseDown = true
@@ -523,16 +527,16 @@ scene(2, () => {
     })
 
     onUpdate(() => {
-        if (mouseDown && gunGlobal.isFullAuto && !isPaused) {
-            gunGlobal.fireWeapon()    // Automatic firing while held down
-            ammoLabel.text = `Ammo: ${gunGlobal.ammoInMag}/${gunGlobal.totalAmmo}`
+        if (mouseDown && gadgetGlobal.isFullAuto && !isPaused) {
+            gadgetGlobal.fireWeapon()    // Automatic zapping while held down
+            ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
             controlsLabel.text = ``
         }
     })
     onKeyPress("e", () => {
-        if (gunGlobal.reload()) { // If successful
+        if (gadgetGlobal.reload()) { // If successful
             hintLabel.text = `` // Reload hint is hidden
-            ammoLabel.text = `Ammo: ${gunGlobal.ammoInMag}/${gunGlobal.totalAmmo}`
+            ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
         }
     })
 
@@ -542,7 +546,7 @@ scene(2, () => {
         canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
         canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
         isPaused = true
-        destroyAll("bullet")
+        destroyAll("beam")
         hintLabel.text = `Click to continue`
         websiteGoTo('shop')
         onClick(() => {

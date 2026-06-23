@@ -46,8 +46,8 @@
 
         <div id="information" style="display: none">
             <h1>Information</h1>
-            <h2>Version 3 Patch Notes:</h2>
-            <h3>Start of open world</h3>
+            <h2>Version 3.1 Patch Notes:</h2>
+            <h3>Family friendly version to avoid block, thanks Marling</h3>
             <br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
@@ -59,8 +59,8 @@
                 <button onclick="upgradeValue = 1; selectUpgrade('100 Health')">100 Health</button><br>
                 <button onclick="upgradeValue = 2; selectUpgrade('Damage +5')">Damage +5</button><br>
                 <button onclick="upgradeValue = 3; selectUpgrade('Capacity +3')">Capacity +3</button><br>
-                <button onclick="upgradeValue = 4; selectUpgrade('50 Ammo')">50 Ammo</button><br>
-                <button onclick="upgradeValue = 5; selectUpgrade('Full auto')">Full auto?</button><br>
+                <button onclick="upgradeValue = 4; selectUpgrade('50 Charge')">50 Charge</button><br>
+                <button onclick="upgradeValue = 5; selectUpgrade('Auto Zap')">Auto Zap</button><br>
             </div>
             <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); this.style.display = 'none'" style="display: none;">Continue</button>
         </div>
@@ -68,12 +68,12 @@
         <div id="shop" style="display: none;">
             <h1>Shop</h1>
             <h2 id="coinsCount">coins not found</h2>
-            <h2 id="currentGun">Gun: Pistol</h2>
+            <h2 id="currentGear">Gear: Spark Beam</h2>
             <h3>Purchase:</h3>
             <div class="buttonContainer">
-                <button onclick="purchaseGun(shotgunGlobal, 5, 'shotgun')">Shotgun -5</button><br>
-                <button onclick="purchaseGun(machineGunGlobal, 5, 'machine gun')">Machine gun -5</button><br>
-                <button onclick="purchaseGun(sniperGlobal, 5, 'sniper')">Sniper -5</button><br>
+                <button onclick="purchaseGadget(bubbleBlasterGlobal, 5, 'Bubble Beam')">Bubble Beam -5</button><br>
+                <button onclick="purchaseGadget(rapidBlasterGlobal, 5, 'Rapid Beam')">Rapid Beam -5</button><br>
+                <button onclick="purchaseGadget(stickBlasterGlobal, 5, 'Stick Beam')">Stick Beam -5</button><br>
             </div>
             <button onclick="websiteGoTo('gameWindow')">Continue</button>
         </div>
@@ -96,7 +96,7 @@
 
         <script type="module" src="website.js"></script>
         <script>
-            let gunGlobal
+            let gadgetGlobal
             let upgradeValue = 0
             let levelGlobal = -1        // Globals so Kaboom objects can be seen in entire src
             let currentDivId = "menu"
@@ -104,10 +104,9 @@
             let highestAnswerStreak = 0
             let highestEnemiesDied = 0
             let coins
-            let pistolGlobal
-            let shotgunGlobal
-            let machineGunGlobal
-            let sniperGlobal
+            let bubbleGlobal
+            let machineGlobal
+            let stickGlobal
 
 
             function getQuestions() {
@@ -170,13 +169,13 @@
                 document.getElementById('upgradeContinue').style.display = "inline-block"
             }
 
-            function purchaseGun(gun, price, gunName){
-                if(price>coins){alert(`You cannot afford the ${gunName}.`)}
+            function purchaseGadget(gadget, price, gearName){
+                if(price>coins){alert(`You cannot afford the ${gearName}.`)}
                 else{
                     coins = coins-price
-                    gunGlobal=gun
+                    gadgetGlobal=gadget
                     document.getElementById('coinsCount').textContent = coins || ''
-                    document.getElementById('currentGun').textContent = gunName || ''
+                    document.getElementById('currentGear').textContent = gearName || ''
                 }
             }
 
