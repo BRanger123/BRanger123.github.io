@@ -484,7 +484,7 @@ scene(2, () => {
                 healthLabel.text = `Health: ${player.hp()}`
             }
             enemies.push(spawnEnemy())  // Array used for movement handling
-            if(Math.random()>0){
+            if(Math.random()<0.1){
                 let x
                 let y
                 // Pick random angle and spawn at minSpawnDist from player
