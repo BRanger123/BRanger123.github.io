@@ -145,6 +145,7 @@ scene(2, () => {
     loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
     //loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")        // Load assets
     loadSprite("coin", "https://kaboomjs.com/sprites/coin.png")
+    loadSprite("ammo", "https://kaboomjs.com/sprites/jumpy.png")
     /*
     loadSprite("blaster", "https://kaboomjs.com/sprites/gun.png")
         const blasterSprite = add([
@@ -190,12 +191,12 @@ scene(2, () => {
     ],
     {
         // define the size of tile block
-        tileWidth: 50,
-        tileHeight: 50,
+        tileWidth: 32,
+        tileHeight: 32,
         // define what each symbol means, by a function returning a component list (what will be passed to add())
         tiles: {
             "=": () => [
-                rect(50, 50),
+                rect(32, 32),
                 area(),
                 body({ isStatic: true }),
                 color(30, 30, 30),
@@ -211,7 +212,9 @@ scene(2, () => {
         }
     })
 
-    let clockLoopCount = -1
+    const enemies = []
+    const minSpawnDist = 400
+    let clockLoopCycle = -1
     let enemiesDied = 0
     let isPaused = false
     let mouseDown = false
@@ -363,6 +366,12 @@ scene(2, () => {
         coinsLabel.text = `Coins: ${coins}`
         document.getElementById("coinsCount").textContent = coins
     })
+    
+    player.onCollide("ammo", (ammoBag) => {
+        destroy(ammoBag)
+        gadgetGlobal.totalAmmo += 50
+        ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
+    })
 
         
     onCollide("player", "goal", () => {
@@ -401,10 +410,6 @@ scene(2, () => {
         pos(0, 0),
         color(0, 0, 0),
     ])
-    
-    // Make enemies
-    const enemies = []
-    const minSpawnDist = 400
 
     function spawnEnemy(){
         let x
@@ -414,12 +419,13 @@ scene(2, () => {
         x = player.pos.x + Math.cos(angle) * minSpawnDist
         y = player.pos.y + Math.sin(angle) * minSpawnDist
 
+
         const enemy = add([
             sprite("ghosty"),
             pos(x, y),
             area({ collisionIgnore: ["tile"]}), 
             body(),
-            health(Math.random() * 30 + 5),
+            health(Math.random() * 30 + 10),
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
             "enemy",    // For collision detection
             { speed: (Math.random() * 200) + 50 },
@@ -464,7 +470,7 @@ scene(2, () => {
             if(upgradeValue==1){player.heal(100), healthLabel.text = `Health: ${player.hp()}`}
             if(upgradeValue==2){gadgetGlobal.beamDamage += 5}
             if(upgradeValue==3){gadgetGlobal.magSize += 3, gadgetGlobal.totalAmmo += 3}
-            if(upgradeValue==4){gadgetGlobal.totalAmmo += 50}
+            if(upgradeValue==4){gadgetGlobal.totalAmmo += 50, `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`}
             if(upgradeValue==5){gadgetGlobal.isFullAuto = true}
             upgradeValue=0  // Reset upgrade so does not reapply on click
         }
@@ -478,7 +484,23 @@ scene(2, () => {
                 healthLabel.text = `Health: ${player.hp()}`
             }
             enemies.push(spawnEnemy())  // Array used for movement handling
-            clockLoopCount +=1
+            if(Math.random()>0){
+                let x
+                let y
+                // Pick random angle and spawn at minSpawnDist from player
+                const angle = Math.random() * 360
+                x = player.pos.x + Math.cos(angle) * minSpawnDist
+                y = player.pos.y + Math.sin(angle) * minSpawnDist
+                const ammoBag = add([
+                    sprite("ammo"),
+                    anchor("center"),
+                    pos(x, y),
+                    area({ collisionIgnore: ["enemy"]}),    // Enemies dont get stuck on ammo
+                    body(),
+                    "ammo", // For collision detection with player
+                ])
+            }
+            clockLoopCycle += 1
         }
     })
 
