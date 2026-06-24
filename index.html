@@ -56,11 +56,10 @@
             <h1>Upgrade</h1>
             <h2 id="chosenUpgrade">Choosen Upgrade</h2>
             <div class="buttonContainer">
-                <button onclick="upgradeValue = 1; selectUpgrade('100 Health')">100 Health</button><br>
-                <button onclick="upgradeValue = 2; selectUpgrade('Damage +5')">Damage +5</button><br>
-                <button onclick="upgradeValue = 3; selectUpgrade('Capacity +3')">Capacity +3</button><br>
-                <button onclick="upgradeValue = 4; selectUpgrade('50 Charge')">50 Charge</button><br>
-                <button onclick="upgradeValue = 5; selectUpgrade('Auto Zap')">Auto Zap</button><br>
+                <button onclick="upgradeValue = 1; selectUpgrade(`${this.textContent}`)">100 Health</button><br>
+                <button onclick="upgradeValue = 2; selectUpgrade(`${this.textContent}`)">Damage +5</button><br>
+                <button onclick="upgradeValue = 3; selectUpgrade(`${this.textContent}`)">Capacity +3</button><br>
+                <button onclick="upgradeValue = 4; selectUpgrade(`${this.textContent}`)">50 Charge</button><br>
             </div>
             <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); this.style.display = 'none'" style="display: none;">Continue</button>
         </div>

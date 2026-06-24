@@ -190,12 +190,12 @@ scene(2, () => {
     ],
     {
         // define the size of tile block
-        tileWidth: 32,
-        tileHeight: 32,
+        tileWidth: 50,
+        tileHeight: 50,
         // define what each symbol means, by a function returning a component list (what will be passed to add())
         tiles: {
             "=": () => [
-                rect(32, 32),
+                rect(50, 50),
                 area(),
                 body({ isStatic: true }),
                 color(30, 30, 30),
@@ -211,10 +211,11 @@ scene(2, () => {
         }
     })
 
+    let clockLoopCount = -1
     let enemiesDied = 0
     let isPaused = false
     let mouseDown = false
-    let enemiesToKill = 10
+    let enemiesToKill = 8
     let enemiesToKillCounter = 0
     coins = 0
     document.getElementById("coinsCount").textContent = `Coins: ${coins}`
@@ -301,10 +302,10 @@ scene(2, () => {
 
     // amazing beam gadget class can be used for all gadget archetypes
     // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, totalAmmo, isFullAuto, fireRate, penetration
-    let bubbleBlaster = new BeamGadget(700, rgb(0, 0, 0), 20, 7, 14, 15, 3000, 100, false, 100, 0)
-    bubbleBlasterGlobal = bubbleBlaster
     let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 20, 12, 1, 5, 500, 100, false, 100, 0)
     sparkBlasterGlobal = sparkBlaster
+    let bubbleBlaster = new BeamGadget(700, rgb(0, 0, 0), 7, 7, 14, 15, 3000, 100, false, 100, 0)
+    bubbleBlasterGlobal = bubbleBlaster
     let rapidBlaster = new BeamGadget(800, rgb(50, 50, 50), 12, 30, 1, 6, 2000, 180, true, 80, 10)
     rapidBlasterGlobal = rapidBlaster
     let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 999, 5, 1, 0, 7000, 100, false, 200, 99)
@@ -418,10 +419,10 @@ scene(2, () => {
             pos(x, y),
             area({ collisionIgnore: ["tile"]}), 
             body(),
-            health(Math.random() * 50 + 20),
+            health(Math.random() * 30 + 5),
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
             "enemy",    // For collision detection
-            { speed: (Math.random() * 300) + 50 },
+            { speed: (Math.random() * 200) + 50 },
         ])
 
         enemy.on("death", () => {
@@ -477,6 +478,7 @@ scene(2, () => {
                 healthLabel.text = `Health: ${player.hp()}`
             }
             enemies.push(spawnEnemy())  // Array used for movement handling
+            clockLoopCount +=1
         }
     })
 
