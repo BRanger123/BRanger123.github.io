@@ -146,15 +146,8 @@ scene(2, () => {
     //loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")        // Load assets
     loadSprite("coin", "https://kaboomjs.com/sprites/coin.png")
     loadSprite("ammo", "https://kaboomjs.com/sprites/jumpy.png")
-    /*
     loadSprite("blaster", "https://kaboomjs.com/sprites/gun.png")
-        const blasterSprite = add([
-        sprite("blaster"),
-        pos(player.pos),
-        anchor("center"),   // So beams spawn at center
-        body(),
-    ])
-    */
+    
     loadBean()
     setGravity(0)
     setBackground(rgb(255, 255, 255))
@@ -281,6 +274,7 @@ scene(2, () => {
                     area(),
                     color(this.beamColor),
                     "beam",   // For collision detection
+                    "object",
                     { speed: this.beamSpeed, dir: direction, penetration: this.penetration },
                     offscreen({ destroy: true }),   // Saves processing power, may need to be changed if using camera code
                 ])
@@ -345,6 +339,7 @@ scene(2, () => {
             area({ collisionIgnore: ["enemy"]}),    // Enemies dont get stuck on coins
             body(),
             "coin", // For collision detection with player
+            "object",
         ])
     }
 
@@ -357,6 +352,7 @@ scene(2, () => {
         body(),
         health(100),
         "player",   // For collision detection
+        "object",
         { speed: 400, recoil: vec2(0, 0) }, // Recoil 2d vector for fluid recoil
     ])
     
@@ -373,6 +369,14 @@ scene(2, () => {
         ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
     })
 
+    const blasterSprite = add([
+        sprite("blaster"),
+        pos(player.pos),
+        anchor("center"),   // So beams spawn at center
+        body(),
+        rotate(0),
+        area({ collisionIgnore: ["object"],}),
+    ])
         
     onCollide("player", "goal", () => {
         go("winScreen")
@@ -428,6 +432,7 @@ scene(2, () => {
             health(Math.random() * 30 + 10),
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
             "enemy",    // For collision detection
+            "object",
             { speed: (Math.random() * 200) + 50 },
         ])
 
@@ -440,6 +445,17 @@ scene(2, () => {
                 }
             }
             spawnCoin(enemy.pos)
+            if(Math.random()<0.05){
+                const ammoBag = add([
+                    sprite("ammo"),
+                    anchor("center"),
+                    pos(enemy.pos),
+                    area({ collisionIgnore: ["enemy"]}),    // Enemies dont get stuck on ammo
+                    body(),
+                    "ammo", // For collision detection with player
+                    "object",
+                ])
+            }
             destroy(enemy)
             burp()  // Sound effects built into Kaboom library
             enemies.push(spawnEnemy())  // Spawn new enemy so threat is constant
@@ -484,22 +500,6 @@ scene(2, () => {
                 healthLabel.text = `Health: ${player.hp()}`
             }
             enemies.push(spawnEnemy())  // Array used for movement handling
-            if(Math.random()<0.1){
-                let x
-                let y
-                // Pick random angle and spawn at minSpawnDist from player
-                const angle = Math.random() * 360
-                x = player.pos.x + Math.cos(angle) * minSpawnDist
-                y = player.pos.y + Math.sin(angle) * minSpawnDist
-                const ammoBag = add([
-                    sprite("ammo"),
-                    anchor("center"),
-                    pos(x, y),
-                    area({ collisionIgnore: ["enemy"]}),    // Enemies dont get stuck on ammo
-                    body(),
-                    "ammo", // For collision detection with player
-                ])
-            }
             clockLoopCycle += 1
         }
     })
@@ -612,7 +612,8 @@ scene(2, () => {
         healthLabel.pos = camPos().add(vec2(width()/2 - 110, height()/2 - 24))
         hintLabel.pos = camPos().add(vec2(0, -height()/2 + 24))
         controlsLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
-
+        blasterSprite.pos = player.pos.add(vec2(40,20))
+        blasterSprite.angle = toWorld(mousePos()).sub(blasterSprite.pos).unit()
     })
 
     onDestroy("player", () => go("deathScreen", enemiesDied+coins)) // If off screen
