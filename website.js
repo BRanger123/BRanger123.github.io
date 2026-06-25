@@ -617,7 +617,7 @@ scene(2, () => {
         const diff = mouseWorldPos.sub(player.pos)
         let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)
         blasterSprite.angle = angle
-        blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(50))
+        blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
     })
 
     onDestroy("player", () => go("deathScreen", enemiesDied+coins)) // If off screen
