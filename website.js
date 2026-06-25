@@ -194,6 +194,7 @@ scene(2, () => {
                 body({ isStatic: true }),
                 color(30, 30, 30),
                 "tile",
+                "object",
             ],
             "e": () => [
                 rect(32, 32),
@@ -201,6 +202,7 @@ scene(2, () => {
                 body({ isStatic: true }),
                 color(10, 200, 10),
                 "goal",
+                "object"
             ]
         }
     })
@@ -365,17 +367,17 @@ scene(2, () => {
     
     player.onCollide("ammo", (ammoBag) => {
         destroy(ammoBag)
-        gadgetGlobal.totalAmmo += 50
+        gadgetGlobal.totalAmmo = 100
         ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
     })
 
     const blasterSprite = add([
         sprite("blaster"),
         pos(player.pos),
-        anchor("center"),   // So beams spawn at center
+        anchor("left"),   // So beams spawn at center
         body(),
         rotate(0),
-        area({ collisionIgnore: ["object"],}),
+        area({ collisionIgnore: ["object"],}, {scale: 5}),
     ])
         
     onCollide("player", "goal", () => {
@@ -480,9 +482,9 @@ scene(2, () => {
         
     }
     function upgrade(){
-        isPaused = false
-        hintLabel.text = ``
         if(upgradeValue!=0){
+            isPaused = false
+            hintLabel.text = ``
             if(upgradeValue==1){player.heal(100), healthLabel.text = `Health: ${player.hp()}`}
             if(upgradeValue==2){gadgetGlobal.beamDamage += 5}
             if(upgradeValue==3){gadgetGlobal.magSize += 3, gadgetGlobal.totalAmmo += 3}
@@ -610,10 +612,12 @@ scene(2, () => {
         coinsLabel.pos = camPos().add(vec2(width()/2 - 100, -height()/2 + 24))
         ammoLabel.pos = camPos().add(vec2(-width()/2 + 120, height()/2 - 24))
         healthLabel.pos = camPos().add(vec2(width()/2 - 110, height()/2 - 24))
-        hintLabel.pos = camPos().add(vec2(0, -height()/2 + 24))
+        hintLabel.pos = camPos().add(vec2(0, -height()/2 + 90))
         controlsLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
-        blasterSprite.pos = player.pos.add(vec2(40,20))
-        blasterSprite.angle = toWorld(mousePos()).sub(blasterSprite.pos).unit()
+        const diff = mouseWorldPos.sub(player.pos)
+        let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)
+        blasterSprite.angle = angle
+        blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(50))
     })
 
     onDestroy("player", () => go("deathScreen", enemiesDied+coins)) // If off screen
@@ -688,7 +692,7 @@ scene(3, () => {
         color(0, 0, 0),
     ])
     const hintLabel = add([
-        text("Press r to restart"),
+        text("Press k to restart"),
         pos(width()-450, height()-100),
         color(0, 0, 0),
     ])
@@ -717,7 +721,7 @@ scene(3, () => {
     onKeyDown("a", () => {player.move(-player.speed, 0)})
     onKeyDown("d", () => {player.move(+player.speed, 0)})
     onKeyDown("s", () => {shake()})
-    onKeyPress("r", () => go(levelGlobal))    // Overide playLevel() so button level is not started
+    onKeyPress("k", () => go(levelGlobal))    // Overide playLevel() so button level is not started
     let blocks = 5
     const blockLabel = add([
         text(`Blocks: ${blocks}`),
@@ -752,7 +756,7 @@ scene("deathScreen", (score) => {
         color(255, 0, 0),
     ])
     add([
-        text("Press R to reset"),
+        text("Press k to reset"),
         pos(center().x, center().y-50),
         anchor("center"),
         color(255, 0, 0),

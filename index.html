@@ -47,7 +47,7 @@
         <div id="information" style="display: none">
             <h1>Information</h1>
             <h2>Version 3.2 Patch Notes:</h2>
-            <h3>Family friendly version + ammo bags</h3>
+            <h3>ammo bags + blaster + bug fix</h3>
             <br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
@@ -143,7 +143,7 @@
             })
             input.addEventListener("keypress", function(event) {
                 const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
-                if (event.key === "r" && gameIsVisible){
+                if (event.key === "k" && gameIsVisible){
                     event.preventDefault()
                     go(levelGlobal)
                 }
