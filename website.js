@@ -149,6 +149,7 @@ scene(2, () => {
     loadSprite("blaster", "https://kaboomjs.com/sprites/gun.png")
     loadSprite("mark", "https://kaboomjs.com/sprites/mark.png")
     loadSprite("dino", "https://kaboomjs.com/sprites/dino.png")
+    loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
     loadBean()
 
     setGravity(0)
@@ -512,6 +513,7 @@ scene(2, () => {
             if(upgradeValue==-1){player.use(sprite("mark"))}
             if(upgradeValue==-2){player.use(sprite("ghosty"))}
             if(upgradeValue==-3){player.use(sprite("dino"))}
+            if(upgradeValue==-4){player.use(sprite("dc"))}
             upgradeValue=0  // Reset upgrade so does not reapply on click
         }
     }
