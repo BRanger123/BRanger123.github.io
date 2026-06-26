@@ -216,6 +216,7 @@ scene(2, () => {
     let enemiesToKill = 8
     let enemiesToKillCounter = 0
     coins = 0
+    let coinMagForce = 35000
     document.getElementById("coinsCount").textContent = `Coins: ${coins}`
     
     // Code for beam gadget class
@@ -317,7 +318,7 @@ scene(2, () => {
     function spawnDamageNumber(position, damage){
         const damageText = add([
             text(`${damage}`),
-            pos(position.x+Math.random()*20, position.y+Math.random()*20),  // Rand so numbers do not overlap (shotguns)
+            pos(position.x+Math.random()*20, position.y+Math.random()*20),  // Rand so numbers do not overlap (shotgun)
             color(255, 0, 0),
             { visabilityStep: 1 },
         ])
@@ -338,11 +339,17 @@ scene(2, () => {
             sprite("coin"),
             anchor("center"),
             pos(xy),
-            area({ collisionIgnore: ["enemy"]}),    // Enemies dont get stuck on coins
+            area({ collisionIgnore: ["enemy","tile"]}),    // Enemies dont get stuck on coins
             body(),
             "coin", // For collision detection with player
             "object",
         ])
+        onUpdate(() => {
+            if(!isPaused){
+                const direction = player.pos.sub(coin.pos).unit()  // Dir to player found
+                coin.move(direction.scale(coinMagForce/player.pos.sub(coin.pos).len()))    // Moves in dir by speed every frame
+            }
+        })
     }
 
     // Player code
@@ -367,7 +374,7 @@ scene(2, () => {
     
     player.onCollide("ammo", (ammoBag) => {
         destroy(ammoBag)
-        gadgetGlobal.totalAmmo = 100
+        gadgetGlobal.totalAmmo += 50
         ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
     })
 
@@ -420,11 +427,11 @@ scene(2, () => {
     function spawnEnemy(){
         let x
         let y
-        // Pick random angle and spawn at minSpawnDist from player
         const angle = Math.random() * 360
         x = player.pos.x + Math.cos(angle) * minSpawnDist
         y = player.pos.y + Math.sin(angle) * minSpawnDist
         
+        let boss = false
         let enemySprite = "ghosty"
         let enemyHealth = Math.random() * 30 + 10
         let enemySpeed = (Math.random() * 200) + 50
@@ -433,6 +440,7 @@ scene(2, () => {
             enemySprite = "boss"
             enemyHealth = 1000
             enemySpeed = 500
+            boss = true
         }
 
         const enemy = add([
@@ -497,7 +505,7 @@ scene(2, () => {
             if(upgradeValue==1){player.heal(100), healthLabel.text = `Health: ${player.hp()}`}
             if(upgradeValue==2){gadgetGlobal.beamDamage += 5}
             if(upgradeValue==3){gadgetGlobal.magSize += 3, gadgetGlobal.totalAmmo += 3}
-            if(upgradeValue==4){gadgetGlobal.totalAmmo += 50, `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`}
+            if(upgradeValue==4){coinMagForce += 30000}
             if(upgradeValue==5){gadgetGlobal.isFullAuto = true}
             upgradeValue=0  // Reset upgrade so does not reapply on click
         }

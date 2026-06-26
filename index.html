@@ -47,7 +47,7 @@
         <div id="information" style="display: none">
             <h1>Information</h1>
             <h2>Version 3.2 Patch Notes:</h2>
-            <h3>ammo bags + blaster + bug fix</h3>
+            <h3>ammo bags + blaster + coin magnet</h3>
             <br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
@@ -59,6 +59,7 @@
                 <button onclick="upgradeValue = 1; selectUpgrade(`${this.textContent}`)">100 Health</button><br>
                 <button onclick="upgradeValue = 2; selectUpgrade(`${this.textContent}`)">Damage +5</button><br>
                 <button onclick="upgradeValue = 3; selectUpgrade(`${this.textContent}`)">Capacity +3</button><br>
+                <button onclick="upgradeValue = 4; selectUpgrade(`${this.textContent}`)">Coin Magnet +</button><br>
             </div>
             <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); this.style.display = 'none'" style="display: none;">Continue</button>
         </div>
@@ -69,9 +70,9 @@
             <h2 id="currentGear">Gear: Spark Beam</h2>
             <h3>Purchase:</h3>
             <div class="buttonContainer">
-                <button onclick="purchaseGadget(bubbleBlasterGlobal, 5, 'bubble blaster')">Bubble Blaster -5</button><br>
-                <button onclick="purchaseGadget(rapidBlasterGlobal, 5, 'rapid blaster')">Rapid Blaster -5</button><br>
-                <button onclick="purchaseGadget(beamBlasterGlobal, 5, 'beam blaster')">Beam Blaster -5</button><br>
+                <button onclick="purchaseGadget(bubbleBlasterGlobal, 10, `${this.textContent}`)">Bubble Blaster -10</button><br>
+                <button onclick="purchaseGadget(rapidBlasterGlobal, 10, `${this.textContent}`)">Rapid Blaster -10</button><br>
+                <button onclick="purchaseGadget(beamBlasterGlobal, 10, `${this.textContent}`)">Beam Blaster -10</button><br>
             </div>
             <button onclick="websiteGoTo('gameWindow')">Continue</button>
         </div>
@@ -169,7 +170,7 @@
             }
 
             function purchaseGadget(gadget, price, gearName){
-                if(price>coins){alert(`You cannot afford the ${gearName}.`)}
+                if(price>coins){alert(`You cannot afford the ${gearName}`)}
                 else{
                     coins = coins-price
                     gadgetGlobal=gadget
