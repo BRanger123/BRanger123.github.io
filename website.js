@@ -147,6 +147,8 @@ scene(2, () => {
     loadSprite("coin", "https://kaboomjs.com/sprites/coin.png")
     loadSprite("ammo", "https://kaboomjs.com/sprites/jumpy.png")
     loadSprite("blaster", "https://kaboomjs.com/sprites/gun.png")
+    loadSprite("mark", "https://kaboomjs.com/sprites/mark.png")
+    loadSprite("dino", "https://kaboomjs.com/sprites/dino.png")
     loadBean()
 
     setGravity(0)
@@ -507,6 +509,9 @@ scene(2, () => {
             if(upgradeValue==3){gadgetGlobal.magSize += 3, gadgetGlobal.totalAmmo += 3}
             if(upgradeValue==4){coinMagForce += 120000}
             if(upgradeValue==5){gadgetGlobal.isFullAuto = true}
+            if(upgradeValue==-1){player.use(sprite("mark"))}
+            if(upgradeValue==-2){player.use(sprite("ghosty"))}
+            if(upgradeValue==-3){player.use(sprite("dino"))}
             upgradeValue=0  // Reset upgrade so does not reapply on click
         }
     }
@@ -567,6 +572,7 @@ scene(2, () => {
         gadgetGlobal.fireWeapon()    // Zap once per click for semi-auto gadgets
         ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
         controlsLabel.text = `` // Click to zap hint hidden
+        upgrade()
     })
 
     onMouseDown(() => {

@@ -29,7 +29,7 @@
             <div class="buttonContainer">
                 <button onclick="playLevel(1)">Block Fall</button><br>
                 <button onclick="upgradeValue=0; playLevel(2)">Ghost Hunters</button><br>
-                <button onclick="playLevel(3)">Level 3</button>
+                <button onclick="playLevel(3)">Drop Oclock</button>
             </div>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
@@ -47,7 +47,7 @@
         <div id="information" style="display: none">
             <h1>Information</h1>
             <h2>Version 3.2 Patch Notes:</h2>
-            <h3>ammo bags + blaster + coin magnet</h3>
+            <h3>ammo bags + coin magnet + skins</h3>
             <br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
@@ -68,11 +68,18 @@
             <h1>Shop</h1>
             <h2 id="coinsCount">coins not found</h2>
             <h2 id="currentGear">Gear: Spark Beam</h2>
-            <h3>Purchase:</h3>
+            <h3>Purchase Gadget:</h3>
             <div class="buttonContainer">
-                <button onclick="purchaseGadget(bubbleBlasterGlobal, 10, `${this.textContent}`)">Bubble Blaster -10</button><br>
-                <button onclick="purchaseGadget(rapidBlasterGlobal, 10, `${this.textContent}`)">Rapid Blaster -10</button><br>
-                <button onclick="purchaseGadget(beamBlasterGlobal, 10, `${this.textContent}`)">Beam Blaster -10</button><br>
+                <button onclick="purchaseGadget(bubbleBlasterGlobal, 35, `${this.textContent}`)">Bubble Blaster (35)</button><br>
+                <button onclick="purchaseGadget(rapidBlasterGlobal, 35, `${this.textContent}`)">Rapid Blaster (35)</button><br>
+                <button onclick="purchaseGadget(beamBlasterGlobal, 35, `${this.textContent}`)">Beam Blaster (35)</button><br>
+            </div>
+            <h2 id="currentSkin">Skin: Bean</h2>
+            <h3>Purchase Skin:</h3>
+            <div class="buttonContainer">
+                <button onclick="purchaseSkin(-1, 200, `${this.textContent}`)">Mark (200)</button><br>
+                <button onclick="purchaseSkin(-2, 300, `${this.textContent}`)">Ghosty (300)</button><br>
+                <button onclick="purchaseSkin(-3, 150, `${this.textContent}`)">Dino (150)</button><br>
             </div>
             <button onclick="websiteGoTo('gameWindow')">Continue</button>
         </div>
@@ -96,6 +103,7 @@
         <script type="module" src="website.js"></script>
         <script>
             let gadgetGlobal
+            let playerSkin = "bean"
             let upgradeValue = 0
             let levelGlobal = -1        // Globals so Kaboom objects can be seen in entire src
             let currentDivId = "menu"
@@ -169,13 +177,23 @@
                 document.getElementById('upgradeContinue').style.display = "inline-block"
             }
 
+            function purchaseSkin(skinIndex, price, skinName){
+                if(price>coins){alert(`You cannot afford the ${skinName} skin.`)}
+                else{
+                    coins = coins-price
+                    upgradeValue = skinIndex
+                    document.getElementById('coinsCount').textContent = coins || ''
+                    document.getElementById('currentSkin').textContent = `Skin: ${skinName}` || ''
+                }
+            }
+
             function purchaseGadget(gadget, price, gearName){
                 if(price>coins){alert(`You cannot afford the ${gearName}`)}
                 else{
                     coins = coins-price
                     gadgetGlobal=gadget
                     document.getElementById('coinsCount').textContent = coins || ''
-                    document.getElementById('currentGear').textContent = gearName || ''
+                    document.getElementById('currentGear').textContent = `Gear: ${gearName}` || ''
                 }
             }
 
