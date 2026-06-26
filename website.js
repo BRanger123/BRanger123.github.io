@@ -143,12 +143,12 @@ scene(1, () => {
 
 scene(2, () => {
     loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
-    //loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")        // Load assets
+    loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")        // Load assets
     loadSprite("coin", "https://kaboomjs.com/sprites/coin.png")
     loadSprite("ammo", "https://kaboomjs.com/sprites/jumpy.png")
     loadSprite("blaster", "https://kaboomjs.com/sprites/gun.png")
     loadBean()
-    
+
     setGravity(0)
     setBackground(rgb(255, 255, 255))
     addLevel([
@@ -424,18 +424,27 @@ scene(2, () => {
         const angle = Math.random() * 360
         x = player.pos.x + Math.cos(angle) * minSpawnDist
         y = player.pos.y + Math.sin(angle) * minSpawnDist
+        
+        let enemySprite = "ghosty"
+        let enemyHealth = Math.random() * 30 + 10
+        let enemySpeed = (Math.random() * 200) + 50
 
+        if(Math.random()<0.01){
+            enemySprite = "boss"
+            enemyHealth = 1000
+            enemySpeed = 500
+        }
 
         const enemy = add([
-            sprite("ghosty"),
+            sprite(`${enemySprite}`),
             pos(x, y),
             area({ collisionIgnore: ["tile"]}), 
             body(),
-            health(Math.random() * 30 + 10),
+            health(enemyHealth),
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
             "enemy",    // For collision detection
             "object",
-            { speed: (Math.random() * 200) + 50 },
+            { speed: enemySpeed },
         ])
 
         enemy.on("death", () => {
