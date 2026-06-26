@@ -505,7 +505,7 @@ scene(2, () => {
             if(upgradeValue==1){player.heal(100), healthLabel.text = `Health: ${player.hp()}`}
             if(upgradeValue==2){gadgetGlobal.beamDamage += 5}
             if(upgradeValue==3){gadgetGlobal.magSize += 3, gadgetGlobal.totalAmmo += 3}
-            if(upgradeValue==4){coinMagForce += 30000}
+            if(upgradeValue==4){coinMagForce += 120000}
             if(upgradeValue==5){gadgetGlobal.isFullAuto = true}
             upgradeValue=0  // Reset upgrade so does not reapply on click
         }
