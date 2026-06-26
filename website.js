@@ -147,8 +147,8 @@ scene(2, () => {
     loadSprite("coin", "https://kaboomjs.com/sprites/coin.png")
     loadSprite("ammo", "https://kaboomjs.com/sprites/jumpy.png")
     loadSprite("blaster", "https://kaboomjs.com/sprites/gun.png")
-    
     loadBean()
+    
     setGravity(0)
     setBackground(rgb(255, 255, 255))
     addLevel([
@@ -184,12 +184,12 @@ scene(2, () => {
     ],
     {
         // define the size of tile block
-        tileWidth: 32,
-        tileHeight: 32,
+        tileWidth: 50,
+        tileHeight: 50,
         // define what each symbol means, by a function returning a component list (what will be passed to add())
         tiles: {
             "=": () => [
-                rect(32, 32),
+                rect(50, 50),
                 area(),
                 body({ isStatic: true }),
                 color(30, 30, 30),
@@ -197,7 +197,7 @@ scene(2, () => {
                 "object",
             ],
             "e": () => [
-                rect(32, 32),
+                rect(50, 50),
                 area(),
                 body({ isStatic: true }),
                 color(10, 200, 10),
