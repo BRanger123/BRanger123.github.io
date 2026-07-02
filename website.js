@@ -60,9 +60,9 @@ function selectUpgrade(upgradeString, newUpgradeValue) {
 }
 
 function purchaseSkin(skinIndex, price, skinName) {
-    if (price > coins) {
-        alert(`You cannot afford the ${skinName} skin.`)
-    } else {
+    if (price > coins){
+    }
+    else{
         coins = coins - price
         upgradeValue = skinIndex
         document.getElementById('coinsCount').textContent = coins || ''
@@ -71,8 +71,8 @@ function purchaseSkin(skinIndex, price, skinName) {
 }
 
 function purchaseGadget(price, gearName) {
-    if (price > coins) {
-        alert(`You cannot afford the ${gearName}`)
+    if (price > coins){
+
     }
     else{
         coins = coins - price
