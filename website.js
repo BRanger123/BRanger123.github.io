@@ -4,6 +4,208 @@ import kaboom from "https://unpkg.com/kaboom@3000.0.1/dist/kaboom.mjs"
 //Get the canvas element
 const canvas = document.getElementById('gameCanvas')
 
+let gadgetGlobal
+let playerSkin = "bean"
+let levelGlobal = -1
+let currentDivId = "menu"
+let answerStreak = 0
+let upgradeValue = 0
+let highestAnswerStreak = 0
+let highestEnemiesDied = 0
+let coins = 0
+let sparkBlasterGlobal
+let bubbleBlasterGlobal
+let rapidBlasterGlobal
+let beamBlasterGlobal
+let currentQuestion = null
+let questions = []
+
+function getQuestions() {
+    const xhr = new XMLHttpRequest()
+    xhr.open('GET', 'questions.txt', false)
+    xhr.send()
+    if (xhr.status === 200) {
+        return xhr.responseText.trim().split('\n').map(line => {
+            const parts = line.split(',')
+            return {
+                question: parts[0].trim(),
+                answers: parts.slice(1).map(a => a.trim()),
+            }
+        })
+    }
+    console.error('Failed to load questions.txt')
+    return []
+}
+
+questions = getQuestions()
+
+function websiteGoTo(divId) {
+    document.getElementById(currentDivId).style.display = "none"
+    document.getElementById(divId).style.display = "inline-block"
+    currentDivId = divId
+}
+
+function playLevel(level) {
+    levelGlobal = level
+    document.getElementById(currentDivId).style.display = 'none'
+    document.getElementById('gameWindow').style.display = 'inline-block'
+    currentDivId = "gameWindow"
+    go("startButton")
+}
+
+function selectUpgrade(upgradeString, newUpgradeValue) {
+    document.getElementById('chosenUpgrade').textContent = upgradeString || ''
+    upgradeValue = newUpgradeValue
+    document.getElementById('upgradeContinue').style.display = "inline-block"
+}
+
+function purchaseSkin(skinIndex, price, skinName) {
+    if (price > coins) {
+        alert(`You cannot afford the ${skinName} skin.`)
+    } else {
+        coins = coins - price
+        upgradeValue = skinIndex
+        document.getElementById('coinsCount').textContent = coins || ''
+        document.getElementById('currentSkin').textContent = `Skin: ${skinName}` || ''
+    }
+}
+
+function purchaseGadget(price, gearName) {
+    if (price > coins) {
+        alert(`You cannot afford the ${gearName}`)
+    }
+    else{
+        coins = coins - price
+        if(gearName=="Bubble Blaster (20)"){gadgetGlobal = bubbleBlasterGlobal}
+        if(gearName=="Rapid Blaster (20)"){gadgetGlobal = rapidBlasterGlobal}
+        if(gearName=="Beam Blaster (20)"){gadgetGlobal = beamBlasterGlobal}
+        document.getElementById('coinsCount').textContent = coins || ''
+        document.getElementById('currentGear').textContent = `Gear: ${gearName}` || ''
+    }
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+        const temp = array[i]
+        array[i] = array[j]
+        array[j] = temp
+    }
+    return array
+}
+
+function resetAnswerButtons() {
+    for (let i = 1; i <= 4; i++) {
+        const button = document.getElementById(`answer${i}`)
+        button.disabled = false
+        button.style.backgroundColor = ''
+        button.style.color = ''
+    }
+}
+
+function startQuestion() {
+    websiteGoTo('questions')
+    document.getElementById('continueButton').style.display = 'none'
+    const sourceQuestion = questions[Math.floor(Math.random() * questions.length)]
+    const shuffledAnswers = shuffleArray(sourceQuestion.answers.map((text, idx) => ({
+        text,
+        isCorrect: idx === 0,
+    })))
+    currentQuestion = {
+        question: sourceQuestion.question,
+        answers: shuffledAnswers,
+    }
+    document.getElementById('question').textContent = currentQuestion.question || ''
+    resetAnswerButtons()
+    currentQuestion.answers.forEach((answer, answerNum) => {
+        const button = document.getElementById(`answer${answerNum + 1}`)
+        button.textContent = answer.text || ''
+        button.onclick = () => checkAnswer(answerNum)
+    })
+}
+
+function checkAnswer(answerNum) {
+    if (!currentQuestion) return
+    const selectedAnswer = currentQuestion.answers[answerNum]
+    if (!selectedAnswer) return
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById(`answer${i}`).disabled = true
+    }
+    if (selectedAnswer.isCorrect) {
+        document.getElementById(`answer${answerNum + 1}`).style.backgroundColor = 'lightgreen'
+        answerStreak = answerStreak + 1
+        if (answerStreak > highestAnswerStreak) {
+            highestAnswerStreak = answerStreak
+        }
+    } else {
+        document.getElementById(`answer${answerNum + 1}`).style.backgroundColor = 'salmon'
+        const correctAnswerNum = currentQuestion.answers.findIndex(ans => ans.isCorrect)
+        document.getElementById(`answer${correctAnswerNum + 1}`).style.backgroundColor = 'lightgreen'
+        answerStreak = 0
+    }
+    document.getElementById('answerStreak').textContent = `${answerStreak}`
+    document.getElementById('continueButton').style.display = 'inline-block'
+}
+
+function updateStats() {
+    document.getElementById('answerStreakStat').textContent = `${highestAnswerStreak}` || ''
+    document.getElementById('enemiesDiedStat').textContent = `${highestEnemiesDied}` || ''
+}
+
+function handleUpgradeContinueClick() {
+    const continueButton = document.getElementById('upgradeContinue')
+    if (continueButton) {
+        continueButton.style.display = 'none'
+    }
+    websiteGoTo('shop')
+}
+
+function handleQuestionContinueClick() {
+    const continueButton = document.getElementById('continueButton')
+    if (continueButton) {
+        continueButton.style.display = 'none'
+    }
+    startQuestion()
+}
+
+const bodyElement = document.getElementById('body')
+bodyElement.addEventListener('keypress', (event) => {
+    const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
+    if (event.key === 'm') {
+        event.preventDefault()
+        playLevel(levelGlobal)
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
+        document.getElementById('gameWindow').style.display = 'none'
+        websiteGoTo('menu')
+    }
+})
+
+bodyElement.addEventListener('keypress', (event) => {
+    const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
+    if (event.key === 'k' && gameIsVisible) {
+        event.preventDefault()
+        go(levelGlobal)
+    }
+})
+
+window.websiteGoTo = websiteGoTo
+window.playLevel = playLevel
+window.selectUpgrade = selectUpgrade
+window.purchaseSkin = purchaseSkin
+window.purchaseGadget = purchaseGadget
+window.startQuestion = startQuestion
+window.checkAnswer = checkAnswer
+window.updateStats = updateStats
+window.handleUpgradeContinueClick = handleUpgradeContinueClick
+window.handleQuestionContinueClick = handleQuestionContinueClick
+
+window.addEventListener('DOMContentLoaded', () => {
+    websiteGoTo('menu')
+})
+
 //Initialize kaboom with canvas element
 kaboom({
     canvas: canvas,
@@ -24,17 +226,17 @@ scene("startButton", () => {
         color(220, 220, 220),
     ])
     btn.add([
-        text(`Level ${levelGlobal}`),
+        text(`Start`),
         anchor("center"),
         color(0, 0, 0),
     ])
     btn.onHoverUpdate(() => {
         btn.color = rgb(200, 200, 200)
-        btn.scale = vec2(1.1)
+        btn.use(scale(1.1))
         setCursor("pointer")
     })
     btn.onHoverEnd(() => {
-        btn.scale = vec2(1)
+        btn.use(scale(1))
         btn.color = rgb(220, 220, 220)
         setCursor("default")
     })
@@ -158,38 +360,38 @@ scene(2, () => {
         "===================================================================================================",
         "=                                                                                                 =",
         "=                                                                                                 =",
-        "=                                                                        =                        =",
-        "=                                                                        =                        =",
+        "=                         =                                              =                        =",
+        "=                         =                                              =                        =",
+        "=                         =                   =                          =                        =",
+        "=    ========             =                   =                          =                        =",
+        "=                         =                   =                          =                        =",
         "=                                             =                          =                        =",
-        "=                                             =                          =                        =",
-        "=                                             =                          =                        =",
-        "=                                             =                          =                        =                                                             e",
-        "=                                             =                                                   =",
-        "=                                             =                                                   =",
-        "=                ==========                   =                                                   =",
-        "=                                                                                                 =",
-        "=                                                                                                 =",
-        "=                                                       ==================                        =",
-        "=                                                                                                 =",
-        "=                                                                                                 =",
-        "=                                              =                                                  =",
-        "=                                              =                                                  =",
-        "=           ===========                        =                               ==                 =",
+        "=                                             =                                    ==             =",
+        "=                                             =                                     ==            =",
+        "=                ==========                   =                                      ==           =",
+        "=                                  ==                                                 ==          =",
+        "=                                 ==                                                              =",
+        "=                                ==                     ==================                        =",
+        "=                               ==                                                                =",
+        "=                              ==                                                                 =",
+        "=                             ==               =              =                                   =",
+        "=                                              =              =                                   =",
+        "=           ===========                        =              =                ==                 =",
         "=           =                                  =                              ==                  =",
         "=           =                             ======                             ==                   =",
         "=           =                                                               ==                    =",
-        "=           =                                                              ==                     =",
-        "=           =                                                             ==                      =",
-        "=                                                                        ==                       =",
+        "=           =                     =                                        ==                     =",
+        "=           =                     =                                       ==                      =",
+        "=                                 =                                      ==                       =",
         "=                                                                       ==                        =",
         "=                                                                                                 =",
         "===================================================================================================",
     ],
     {
-        // define the size of tile block
+        // Define the size of tile block
         tileWidth: 50,
         tileHeight: 50,
-        // define what each symbol means, by a function returning a component list (what will be passed to add())
+        // Define what each symbol means
         tiles: {
             "=": () => [
                 rect(50, 50),
@@ -198,26 +400,31 @@ scene(2, () => {
                 color(30, 30, 30),
                 "tile",
                 "object",
-            ],
-            "e": () => [
-                rect(50, 50),
-                area(),
-                body({ isStatic: true }),
-                color(10, 200, 10),
-                "goal",
-                "object"
             ]
         }
     })
 
+    //spawnWave(1, 3, 5, 2) // spawns 5 enemies 2x as strong for 3 waves every 1 second
+    let rounds = [[6, 4, 5, 1, false],[5, 2, 3, 2, false],[6, 5, 13, 0.5, false],[1, 1, 1, 1, true]]      // loop through preset round types. (like BTD6).
+    let round = 0
+
+    function getRoundConfig(roundIndex) {
+        const roundConfig = rounds[roundIndex] || rounds[rounds.length - 1]
+        return {
+            time: roundConfig[0],
+            waves: roundConfig[1],
+            enemyNum: roundConfig[2],
+            difficulty: roundConfig[3],
+            makeBoss: roundConfig[4],
+        }
+    }
     const enemies = []
-    const minSpawnDist = 400
-    let clockLoopCycle = -1
+    const minSpawnDist = 500
+    let enemiesLeft = -1
     let enemiesDied = 0
     let isPaused = false
     let mouseDown = false
-    let enemiesToKill = 8
-    let enemiesToKillCounter = 0
+    let waiting = false
     coins = 0
     let coinMagForce = 35000
     document.getElementById("coinsCount").textContent = `Coins: ${coins}`
@@ -225,18 +432,18 @@ scene(2, () => {
     // Code for beam gadget class
     class BeamGadget{
         constructor(beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, totalAmmo, isFullAuto = false, fireRate = 100, penetration = 0) {
-            this.beamSpeed = beamSpeed  // Technically used as distance per frame
+            this.beamSpeed = beamSpeed
             this.beamColor = beamColor
             this.beamDamage = beamDamage
             this.magSize = magSize
             this.ammoInMag = magSize  // Current charge in magazine
             this.totalAmmo = totalAmmo  // Total charge reserve
-            this.beamsFired = beamsFired // So burst beam gadgets can use same code, just increase beams fired (pellets?)
+            this.beamsFired = beamsFired // So shotguns can use same code, just increase beams fired (pellets?)
             this.spread = spread
             this.recoilForce = recoilForce  // Force of recoil that pushes player back
-            this.isFullAuto = isFullAuto  // true for rapid beam gadgets
+            this.isFullAuto = isFullAuto
             this.fireRate = fireRate      // Milliseconds between shots when full auto is enabled
-            this.lastFireTime = 0         // Track time between automatic shots
+            this.lastFireTime = 0         // Track time between automatic shots rather than dt()
             this.penetration = penetration // Number of enemies a beam can pass through before disappearing
         }
         
@@ -253,13 +460,13 @@ scene(2, () => {
             return false    // Unsuccessful reload
         }
         fireWeapon(){
-            if (!this.canFire()){
-                hintLabel.text = `Reload! (e)`
+            if(!this.canFire()){
+                reloadLabel.text = `Reload! (e)`
                 return  // Cannot fire if no charge in gadget
             }
-            if (this.isFullAuto) {
+            if(this.isFullAuto){
                 const now = Date.now()
-                if (now - this.lastFireTime < this.fireRate) {
+                if(now - this.lastFireTime < this.fireRate){    // If enough time has passed: fire
                     return
                 }
                 this.lastFireTime = now
@@ -267,49 +474,48 @@ scene(2, () => {
             shake(0.002*(this.recoilForce*2))
             const baseDir = toWorld(mousePos()).sub(player.pos).unit()  // toWorld() lets func work outside initial map boundaries for camera code
             
-            // Apply recoil - push player backwards opposite to aim direction
-            const recoilDir = baseDir.scale(-this.recoilForce)
+            // Apply recoil
+            const recoilDir = baseDir.scale(-this.recoilForce)  // Opposite to beam fire direction
             player.recoil = player.recoil.add(recoilDir)
             
-            for (let i = 0; i < this.beamsFired; i++){
+            for(let i = 0; i < this.beamsFired; i++){
                 const angle = baseDir.angle() + rand(-this.spread, this.spread) // Use spread as max possible random angle deviation
                 const direction = Vec2.fromAngle(angle)
                 const beam = add([
-                    pos(player.pos),
+                    pos(player.pos),    // Use blasterSprite.pos ?///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     rect(8,8),
                     area(),
                     color(this.beamColor),
                     "beam",   // For collision detection
                     "object",
                     { speed: this.beamSpeed, dir: direction, penetration: this.penetration },
-                    offscreen({ destroy: true }),   // Saves processing power, may need to be changed if using camera code
+                    offscreen({ destroy: true }),   // Saves processing power, may need to be changed if using camera code///////////////////////////////////////////////////////////////////////////
                 ])
-                beam.onUpdate(() => {beam.move(beam.dir.scale(this.beamSpeed))})    // Moves in dir by speed every frame, speed is actually dist per frame
+                beam.onUpdate(() => {beam.move(beam.dir.scale(this.beamSpeed))})    // Moves in dir by speed every frame
                 beam.onCollide("enemy", (enemy) => {
                     spawnDamageNumber(enemy.pos, this.beamDamage)
-                    enemy.move(beam.dir.scale(this.beamSpeed))  // Enemy pushed back by factor of beam speed
-                    enemy.hurt(this.beamDamage)   // enemy.hurt(this.beamDamage*2)
-                    if (beam.penetration > 0) {
+                    //enemy.move(beam.dir.scale(this.beamSpeed))  // Enemy pushed back by factor of beam speed//////////////////////////////////////////////////////////////////////////////////////
+                    enemy.hurt(this.beamDamage)
+                    if(beam.penetration > 0){
                         beam.penetration--
-                    } else {
+                    }
+                    else{
                         beam.destroy()
                     }
                 })
-                beam.onCollide("tile", () => {
-                    beam.destroy()   // Beams destroyed on collision with tiles, can be changed for different gadget types
-                })
+                beam.onCollide("tile", () => {beam.destroy()})
             }
             this.ammoInMag--    // Decrease charge count in magazine
         }
     }
 
-    // amazing beam gadget class can be used for all gadget archetypes
+    // amazing gadget class can be used for all gadget archetypes
     // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, totalAmmo, isFullAuto, fireRate, penetration
     let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 20, 12, 1, 5, 500, 100, false, 100, 0)
     sparkBlasterGlobal = sparkBlaster
     let bubbleBlaster = new BeamGadget(700, rgb(0, 0, 0), 7, 7, 14, 15, 3000, 100, false, 100, 0)
     bubbleBlasterGlobal = bubbleBlaster
-    let rapidBlaster = new BeamGadget(800, rgb(50, 50, 50), 12, 30, 1, 6, 2000, 180, true, 80, 10)
+    let rapidBlaster = new BeamGadget(800, rgb(50, 50, 50), 12, 30, 1, 6, 2000, 180, true, 80, 10)  // Globalise all gadgets
     rapidBlasterGlobal = rapidBlaster
     let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 999, 5, 1, 0, 7000, 100, false, 200, 99)
     beamBlasterGlobal = beamBlaster
@@ -317,7 +523,6 @@ scene(2, () => {
     gadgetGlobal = sparkBlaster   // Assign global gadget initial object
     
 
-    // Function to spawn floating damage numbers
     function spawnDamageNumber(position, damage){
         const damageText = add([
             text(`${damage}`),
@@ -327,13 +532,13 @@ scene(2, () => {
         ])
         
         damageText.onUpdate(() => {
-            damageText.pos.y -= 100 * dt()  // Float upward
+            damageText.pos.y -= 100 * dt()  // Float upward (backwards coordinates)
             damageText.visabilityStep -= dt()   // Use deltatime() for smooth changes
             damageText.opacity = damageText.visabilityStep
         })
         
         wait(1, () => {
-            destroy(damageText) // Saves processing power
+            destroy(damageText)
         })
     }
 
@@ -342,7 +547,7 @@ scene(2, () => {
             sprite("coin"),
             anchor("center"),
             pos(xy),
-            area({ collisionIgnore: ["enemy","tile"]}),    // Enemies dont get stuck on coins
+            area({ collisionIgnore: ["enemy","ammo"]}),    // Enemies dont get stuck on coins
             body(),
             "coin", // For collision detection with player
             "object",
@@ -350,7 +555,7 @@ scene(2, () => {
         onUpdate(() => {
             if(!isPaused){
                 const direction = player.pos.sub(coin.pos).unit()  // Dir to player found
-                coin.move(direction.scale(coinMagForce/player.pos.sub(coin.pos).len()))    // Moves in dir by speed every frame
+                coin.move(direction.scale(coinMagForce/player.pos.sub(coin.pos).len()))    // Moves to player
             }
         })
     }
@@ -372,7 +577,7 @@ scene(2, () => {
         destroy(coin)
         coins=coins+1
         coinsLabel.text = `Coins: ${coins}`
-        document.getElementById("coinsCount").textContent = coins
+        document.getElementById("coinsCount").textContent = coins   // Update coins in HTML
     })
     
     player.onCollide("ammo", (ammoBag) => {
@@ -384,16 +589,12 @@ scene(2, () => {
     const blasterSprite = add([
         sprite("blaster"),
         pos(player.pos),
-        anchor("left"),   // So beams spawn at center
+        anchor("left"),   // Close to player
         body(),
         rotate(0),
-        area({ collisionIgnore: ["object"],}, {scale: 5}),
+        area({ collisionIgnore: ["object"],}),
+        //scale(0.2) // only for large sprites or could use .use(scale(0.2))
     ])
-        
-    onCollide("player", "goal", () => {
-        go("winScreen")
-    })
-    
 
     // Initialize labels
     const coinsLabel = add([
@@ -426,8 +627,20 @@ scene(2, () => {
         pos(0, 0),
         color(0, 0, 0),
     ])
+    const reloadLabel = add([
+        text(""),
+        anchor("center"),
+        pos(0, 0),
+        color(0, 0, 0),
+    ])
+    const nextWaveTimeLabel = add([
+        text(""),
+        anchor("center"),
+        pos(0, 0),
+        color(0, 0, 0),
+    ])
 
-    function spawnEnemy(){
+    function spawnEnemy(difficulty, makeBoss){
         let x
         let y
         const angle = Math.random() * 360
@@ -436,10 +649,10 @@ scene(2, () => {
         
         let boss = false
         let enemySprite = "ghosty"
-        let enemyHealth = Math.random() * 30 + 10
-        let enemySpeed = (Math.random() * 200) + 50
+        let enemyHealth = (Math.random() * 30 + 10) * difficulty
+        let enemySpeed = ((Math.random() * 200) + 50) * difficulty
 
-        if(Math.random()<0.01){
+        if(makeBoss){
             enemySprite = "boss"
             enemyHealth = 1000
             enemySpeed = 500
@@ -480,27 +693,24 @@ scene(2, () => {
             }
             destroy(enemy)
             burp()  // Sound effects built into Kaboom library
-            enemies.push(spawnEnemy())  // Spawn new enemy so threat is constant
             enemiesDied++
             if(enemiesDied > highestEnemiesDied){highestEnemiesDied = enemiesDied}
-            enemiesToKillCounter++
-            if (enemiesToKillCounter == enemiesToKill){   // Check player gets upgrade 
+            enemiesLeft = enemiesLeft - 1
+            if(enemiesLeft <= 0){
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
                 canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
                 isPaused = true
-                enemiesToKill = enemiesToKill + 5   // Threshold increases by 5
-                enemiesToKillCounter = 0    // Reset progress
                 destroyAll("beam")
-                hintLabel.text = `Click to continue`
+                hintLabel.text = `Click to continue with upgrade`
                 websiteGoTo('upgrade')  // Upgrade selection
                 onClick(() => upgrade())
             }
         })
         return enemy
-        
     }
+
     function upgrade(){
         if(upgradeValue!=0){
             isPaused = false
@@ -515,20 +725,41 @@ scene(2, () => {
             if(upgradeValue==-3){player.use(sprite("dino"))}
             if(upgradeValue==-4){player.use(sprite("dc"))}
             upgradeValue=0  // Reset upgrade so does not reapply on click
+
+            let nextWaveTime = 10
+            const clock = add([timer()])
+            clock.loop(1, () => {
+                nextWaveTimeLabel.text = `Time untill next wave: ${nextWaveTime}`
+                waiting = true
+                nextWaveTime = nextWaveTime - 1
+                if(nextWaveTime <= -1){
+                    nextWaveTimeLabel.text = ``
+                    waiting = false
+                    const nextRound = getRoundConfig(round)
+                    spawnWave(nextRound.time, nextRound.waves, nextRound.enemyNum, nextRound.difficulty, nextRound.makeBoss)
+                    round += 1
+                    if(rounds >= 3){go("winScreen")}
+                    destroy(clock)
+                }
+            })
         }
     }
 
-    const clock = add([timer()]) // Timer for spawning enemies
-    clock.loop(4, () => { // Time value acts as diffuculty
-        if(!isPaused){
-            if(player.hp()<56){                                 // Player heals 5 every loop to max of 55+5
-                player.heal(5)
-                healthLabel.text = `Health: ${player.hp()}`
+    function spawnWave(time, waves, enemyNum, difficulty, makeBoss){
+        let clockLoopCycle = 1
+        enemiesLeft = enemyNum*waves
+        const clock = add([timer()])
+        clock.loop(time, () => {
+            if(!isPaused && clockLoopCycle < waves+1){
+                for(let i=0; i<enemyNum; i++){
+                    enemies.push(spawnEnemy(difficulty, makeBoss))
+                }
+                clockLoopCycle += 1
             }
-            enemies.push(spawnEnemy())  // Array used for movement handling
-            clockLoopCycle += 1
-        }
-    })
+        })
+    }
+    //spawnWave(1, 3, 5, 2, false) // spawns 5 non boss enemies 2x as strong for 3 waves every 1 second
+    spawnWave(1, 1, 3, 0.5, false) // Tutorial
 
     onUpdate(() => {
         for (const enemy of enemies) {
@@ -574,6 +805,7 @@ scene(2, () => {
         gadgetGlobal.fireWeapon()    // Zap once per click for semi-auto gadgets
         ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
         controlsLabel.text = `` // Click to zap hint hidden
+        hintLabel.text = ``
         upgrade()
     })
 
@@ -597,7 +829,7 @@ scene(2, () => {
     })
     onKeyPress("e", () => {
         if (gadgetGlobal.reload()) { // If successful
-            hintLabel.text = `` // Reload hint is hidden
+            reloadLabel.text = `` // Reload hint is hidden
             ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
         }
     })
@@ -639,6 +871,8 @@ scene(2, () => {
         healthLabel.pos = camPos().add(vec2(width()/2 - 110, height()/2 - 24))
         hintLabel.pos = camPos().add(vec2(0, -height()/2 + 90))
         controlsLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
+        reloadLabel.pos = camPos().add(vec2(0, -height()/2 + 150))
+        nextWaveTimeLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
         const diff = mouseWorldPos.sub(player.pos)
         let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)
         blasterSprite.angle = angle

@@ -56,12 +56,12 @@
             <h1>Upgrade</h1>
             <h2 id="chosenUpgrade">Choosen Upgrade</h2>
             <div class="buttonContainer">
-                <button onclick="upgradeValue = 1; selectUpgrade(`${this.textContent}`)">100 Health</button><br>
-                <button onclick="upgradeValue = 2; selectUpgrade(`${this.textContent}`)">Damage +5</button><br>
-                <button onclick="upgradeValue = 3; selectUpgrade(`${this.textContent}`)">Capacity +3</button><br>
-                <button onclick="upgradeValue = 4; selectUpgrade(`${this.textContent}`)">Magnet Boost</button><br>
+                <button onclick="selectUpgrade(`${this.textContent}`, 1)">100 Health</button><br>
+                <button onclick="selectUpgrade(`${this.textContent}`, 2)">Damage +5</button><br>
+                <button onclick="selectUpgrade(`${this.textContent}`, 3)">Capacity +3</button><br>
+                <button onclick="selectUpgrade(`${this.textContent}`, 4)">Magnet Boost</button><br>
             </div>
-            <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); this.style.display = 'none'" style="display: none;">Continue</button>
+                <button id="upgradeContinue" onclick="handleUpgradeContinueClick()" style="display: none;">Continue</button>
         </div>
 
         <div id="shop" style="display: none;">
@@ -70,9 +70,9 @@
             <h2 id="currentGear">Gear: Spark Beam</h2>
             <h3>Purchase Gadget:</h3>
             <div class="buttonContainer">
-                <button onclick="purchaseGadget(bubbleBlasterGlobal, 20, `${this.textContent}`)">Bubble Blaster (20)</button><br>
-                <button onclick="purchaseGadget(rapidBlasterGlobal, 20, `${this.textContent}`)">Rapid Blaster (20)</button><br>
-                <button onclick="purchaseGadget(beamBlasterGlobal, 20, `${this.textContent}`)">Beam Blaster (20)</button><br>
+                <button onclick="purchaseGadget(20, `${this.textContent}`)">Bubble Blaster (20)</button><br>
+                <button onclick="purchaseGadget(20, `${this.textContent}`)">Rapid Blaster (20)</button><br>
+                <button onclick="purchaseGadget(20, `${this.textContent}`)">Beam Blaster (20)</button><br>
             </div>
             <h2 id="currentSkin">Skin: Bean</h2>
             <h3>Purchase Skin:</h3>
@@ -80,7 +80,7 @@
                 <button onclick="purchaseSkin(-1, 200, `${this.textContent}`)">Mark (200)</button><br>
                 <button onclick="purchaseSkin(-2, 300, `${this.textContent}`)">Ghosty (300)</button><br>
                 <button onclick="purchaseSkin(-3, 150, `${this.textContent}`)">Dino (150)</button><br>
-                <button onclick="purchaseSkin(-4, 1, `${this.textContent}`)">Don Cheadle (1)</button><br>
+                <button onclick="purchaseSkin(-4, 100, `${this.textContent}`)">Don Cheadle (1)</button><br>
             </div>
             <button onclick="websiteGoTo('gameWindow')">Continue</button>
         </div>
@@ -97,178 +97,10 @@
                 <button id="answer3" onclick="checkAnswer(3)"></button><br>
                 <button id="answer4" onclick="checkAnswer(4)"></button>
             </div><br><br>
-            <button id="continueButton" onclick="startQuestion()" style="display: none;">Continue</button><br><br>
+            <button id="continueButton" onclick="handleQuestionContinueClick()" style="display: none;">Continue</button><br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button><br>
         </div>
 
         <script type="module" src="website.js"></script>
-        <script>
-            let gadgetGlobal
-            let playerSkin = "bean"
-            let upgradeValue = 0
-            let levelGlobal = -1        // Globals so Kaboom objects can be seen in entire src
-            let currentDivId = "menu"
-            let answerStreak = 0
-            let highestAnswerStreak = 0
-            let highestEnemiesDied = 0
-            let coins
-            let bubbleBlasterGlobal
-            let sparkBlasterGlobal
-            let rapidBlasterGlobal
-            let beamBlasterGlobal
-
-
-            function getQuestions() {
-                const xhr = new XMLHttpRequest()
-                xhr.open('GET', 'questions.txt', false)
-                xhr.send()
-                if (xhr.status === 200) {
-                    return xhr.responseText.trim().split('\n').map(line => {
-                        const parts = line.split(',')
-                        return {
-                            question: parts[0].trim(),
-                            answers: parts.slice(1).map(a => a.trim()),
-                        }
-                    })
-                }
-                console.error('Failed to load questions.txt')
-                return []
-            }
-            const questions = getQuestions()
-
-            // Now define functions for website navigation and level loading
-            var input = document.getElementById("body")
-            input.addEventListener("keypress", function(event){
-                const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
-                if (event.key === "m"){
-                    event.preventDefault()
-                    playLevel(levelGlobal)
-                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
-                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
-                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
-                    document.getElementById('gameWindow').style.display = 'none'
-                    websiteGoTo('menu')
-                }
-            })
-            input.addEventListener("keypress", function(event) {
-                const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
-                if (event.key === "k" && gameIsVisible){
-                    event.preventDefault()
-                    go(levelGlobal)
-                }
-            })
-
-            function websiteGoTo(divId){
-                document.getElementById(currentDivId).style.display = "none"        // When called, must use div id in '' for function call
-                document.getElementById(divId).style.display = "inline-block"
-                currentDivId = divId
-            }
-            
-            function playLevel(level){
-                levelGlobal = level
-                document.getElementById(currentDivId).style.display = 'none'
-                document.getElementById('gameWindow').style.display = 'inline-block'
-                currentDivId = "gameWindow"
-                go("startButton")
-            }
-
-            function selectUpgrade(upgradeString){
-                document.getElementById('chosenUpgrade').textContent = upgradeString || ''
-                document.getElementById('upgradeContinue').style.display = "inline-block"
-            }
-
-            function purchaseSkin(skinIndex, price, skinName){
-                if(price>coins){alert(`You cannot afford the ${skinName} skin.`)}
-                else{
-                    coins = coins-price
-                    upgradeValue = skinIndex
-                    document.getElementById('coinsCount').textContent = coins || ''
-                    document.getElementById('currentSkin').textContent = `Skin: ${skinName}` || ''
-                }
-            }
-
-            function purchaseGadget(gadget, price, gearName){
-                if(price>coins){alert(`You cannot afford the ${gearName}`)}
-                else{
-                    coins = coins-price
-                    gadgetGlobal=gadget
-                    document.getElementById('coinsCount').textContent = coins || ''
-                    document.getElementById('currentGear').textContent = `Gear: ${gearName}` || ''
-                }
-            }
-
-            function shuffleArray(array){
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1))
-                    const temp = array[i]
-                    array[i] = array[j]
-                    array[j] = temp
-                }
-                return array
-            }
-
-            function resetAnswerButtons(){
-                for (let i = 1; i <= 4; i++) {
-                    const button = document.getElementById(`answer${i}`)
-                    button.disabled = false
-                    button.style.backgroundColor = ''
-                    button.style.color = ''
-                }
-            }
-
-            function startQuestion(){
-                websiteGoTo('questions')
-                document.getElementById('continueButton').style.display = 'none'
-                const sourceQuestion = questions[Math.floor(Math.random() * questions.length)]
-                const shuffledAnswers = shuffleArray(sourceQuestion.answers.map((text, idx) => ({
-                    text,
-                    isCorrect: idx === 0,
-                })))
-                currentQuestion = {
-                    question: sourceQuestion.question,
-                    answers: shuffledAnswers,
-                }
-                document.getElementById('question').textContent = currentQuestion.question || ''
-                resetAnswerButtons()
-                currentQuestion.answers.forEach((answer, answerNum) => {
-                    const button = document.getElementById(`answer${answerNum + 1}`)
-                    button.textContent = answer.text || ''
-                    button.onclick = () => checkAnswer(answerNum)
-                })
-            }
-
-            function checkAnswer(answerNum){
-                if (!currentQuestion) return
-                const selectedAnswer = currentQuestion.answers[answerNum]
-                if (!selectedAnswer) return
-                for (let i = 1; i <= 4; i++) {
-                    document.getElementById(`answer${i}`).disabled = true
-                }
-                if (selectedAnswer.isCorrect) {
-                    document.getElementById(`answer${answerNum + 1}`).style.backgroundColor = 'lightgreen'
-                    answerStreak = answerStreak + 1
-                    if(answerStreak > highestAnswerStreak){highestAnswerStreak = answerStreak}
-                    // alert('Correct answer!')
-                }
-                else {
-                    document.getElementById(`answer${answerNum + 1}`).style.backgroundColor = 'salmon'
-                    const correctAnswerNum = currentQuestion.answers.findIndex(ans => ans.isCorrect)
-                    document.getElementById(`answer${correctAnswerNum + 1}`).style.backgroundColor = 'lightgreen'   // Sets correct answer to green
-                    answerStreak = 0
-                    // alert('Incorrect answer.')
-                }
-                document.getElementById('answerStreak').textContent = `${answerStreak}`
-                document.getElementById('continueButton').style.display = 'inline-block'
-            }
-
-            function updateStats(){
-                document.getElementById('answerStreakStat').textContent = `${highestAnswerStreak}` || ''
-                document.getElementById('enemiesDiedStat').textContent = `${highestEnemiesDied}` || ''
-
-            }
-
-            websiteGoTo('menu')
-        </script>
     </body>
 </html>

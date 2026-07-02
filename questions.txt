@@ -24,7 +24,7 @@ Which is secondary storage?,SSD,RAM,Cache,Register
 What is cloud storage?,Remote online storage,RAM storage,Optical storage,Cache storage
 Which unit measures CPU speed?,GHz,MB,Pixels,Bytes
 What is hexadecimal base?,16,10,8,2
-How many values in a nibble?,16,8,4,32
+How many bits in a nibble?,4,8,16,32
 Which number system uses only 0 and 1?,Binary,Decimal,Hexadecimal,Denary
 What does ASCII represent?,Characters,Images,Videos,Programs
 How many bits in ASCII?,7,4,16,32
