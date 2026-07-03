@@ -4,207 +4,6 @@ import kaboom from "https://unpkg.com/kaboom@3000.0.1/dist/kaboom.mjs"
 //Get the canvas element
 const canvas = document.getElementById('gameCanvas')
 
-let gadgetGlobal
-let playerSkin = "bean"
-let levelGlobal = -1
-let currentDivId = "menu"
-let answerStreak = 0
-let upgradeValue = 0
-let highestAnswerStreak = 0
-let highestEnemiesDied = 0
-let coins = 0
-let sparkBlasterGlobal
-let bubbleBlasterGlobal
-let rapidBlasterGlobal
-let beamBlasterGlobal
-let currentQuestion = null
-let questions = []
-
-function getQuestions() {
-    const xhr = new XMLHttpRequest()
-    xhr.open('GET', 'questions.txt', false)
-    xhr.send()
-    if (xhr.status === 200) {
-        return xhr.responseText.trim().split('\n').map(line => {
-            const parts = line.split(',')
-            return {
-                question: parts[0].trim(),
-                answers: parts.slice(1).map(a => a.trim()),
-            }
-        })
-    }
-    console.error('Failed to load questions.txt')
-    return []
-}
-
-questions = getQuestions()
-
-function websiteGoTo(divId) {
-    document.getElementById(currentDivId).style.display = "none"
-    document.getElementById(divId).style.display = "inline-block"
-    currentDivId = divId
-}
-
-function playLevel(level) {
-    levelGlobal = level
-    document.getElementById(currentDivId).style.display = 'none'
-    document.getElementById('gameWindow').style.display = 'inline-block'
-    currentDivId = "gameWindow"
-    go("startButton")
-}
-
-function selectUpgrade(upgradeString, newUpgradeValue) {
-    document.getElementById('chosenUpgrade').textContent = upgradeString || ''
-    upgradeValue = newUpgradeValue
-    document.getElementById('upgradeContinue').style.display = "inline-block"
-}
-
-function purchaseSkin(skinIndex, price, skinName) {
-    if (price > coins){
-    }
-    else{
-        coins = coins - price
-        upgradeValue = skinIndex
-        document.getElementById('coinsCount').textContent = coins || ''
-        document.getElementById('currentSkin').textContent = `Skin: ${skinName}` || ''
-    }
-}
-
-function purchaseGadget(price, gearName) {
-    if (price > coins){
-
-    }
-    else{
-        coins = coins - price
-        if(gearName=="Bubble Blaster (20)"){gadgetGlobal = bubbleBlasterGlobal}
-        if(gearName=="Rapid Blaster (20)"){gadgetGlobal = rapidBlasterGlobal}
-        if(gearName=="Beam Blaster (20)"){gadgetGlobal = beamBlasterGlobal}
-        document.getElementById('coinsCount').textContent = coins || ''
-        document.getElementById('currentGear').textContent = `Gear: ${gearName}` || ''
-    }
-}
-
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
-        const temp = array[i]
-        array[i] = array[j]
-        array[j] = temp
-    }
-    return array
-}
-
-function resetAnswerButtons() {
-    for (let i = 1; i <= 4; i++) {
-        const button = document.getElementById(`answer${i}`)
-        button.disabled = false
-        button.style.backgroundColor = ''
-        button.style.color = ''
-    }
-}
-
-function startQuestion() {
-    websiteGoTo('questions')
-    document.getElementById('continueButton').style.display = 'none'
-    const sourceQuestion = questions[Math.floor(Math.random() * questions.length)]
-    const shuffledAnswers = shuffleArray(sourceQuestion.answers.map((text, idx) => ({
-        text,
-        isCorrect: idx === 0,
-    })))
-    currentQuestion = {
-        question: sourceQuestion.question,
-        answers: shuffledAnswers,
-    }
-    document.getElementById('question').textContent = currentQuestion.question || ''
-    resetAnswerButtons()
-    currentQuestion.answers.forEach((answer, answerNum) => {
-        const button = document.getElementById(`answer${answerNum + 1}`)
-        button.textContent = answer.text || ''
-        button.onclick = () => checkAnswer(answerNum)
-    })
-}
-
-function checkAnswer(answerNum) {
-    if (!currentQuestion) return
-    const selectedAnswer = currentQuestion.answers[answerNum]
-    if (!selectedAnswer) return
-    for (let i = 1; i <= 4; i++) {
-        document.getElementById(`answer${i}`).disabled = true
-    }
-    if (selectedAnswer.isCorrect) {
-        document.getElementById(`answer${answerNum + 1}`).style.backgroundColor = 'lightgreen'
-        answerStreak = answerStreak + 1
-        if (answerStreak > highestAnswerStreak) {
-            highestAnswerStreak = answerStreak
-        }
-    } else {
-        document.getElementById(`answer${answerNum + 1}`).style.backgroundColor = 'salmon'
-        const correctAnswerNum = currentQuestion.answers.findIndex(ans => ans.isCorrect)
-        document.getElementById(`answer${correctAnswerNum + 1}`).style.backgroundColor = 'lightgreen'
-        answerStreak = 0
-    }
-    document.getElementById('answerStreak').textContent = `${answerStreak}`
-    document.getElementById('continueButton').style.display = 'inline-block'
-}
-
-function updateStats() {
-    document.getElementById('answerStreakStat').textContent = `${highestAnswerStreak}` || ''
-    document.getElementById('enemiesDiedStat').textContent = `${highestEnemiesDied}` || ''
-}
-
-function handleUpgradeContinueClick() {
-    const continueButton = document.getElementById('upgradeContinue')
-    if (continueButton) {
-        continueButton.style.display = 'none'
-    }
-    websiteGoTo('shop')
-}
-
-function handleQuestionContinueClick() {
-    const continueButton = document.getElementById('continueButton')
-    if (continueButton) {
-        continueButton.style.display = 'none'
-    }
-    startQuestion()
-}
-
-const bodyElement = document.getElementById('body')
-bodyElement.addEventListener('keypress', (event) => {
-    const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
-    if (event.key === 'm') {
-        event.preventDefault()
-        playLevel(levelGlobal)
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
-        document.getElementById('gameWindow').style.display = 'none'
-        websiteGoTo('menu')
-    }
-})
-
-bodyElement.addEventListener('keypress', (event) => {
-    const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
-    if (event.key === 'k' && gameIsVisible) {
-        event.preventDefault()
-        go(levelGlobal)
-    }
-})
-
-window.websiteGoTo = websiteGoTo
-window.playLevel = playLevel
-window.selectUpgrade = selectUpgrade
-window.purchaseSkin = purchaseSkin
-window.purchaseGadget = purchaseGadget
-window.startQuestion = startQuestion
-window.checkAnswer = checkAnswer
-window.updateStats = updateStats
-window.handleUpgradeContinueClick = handleUpgradeContinueClick
-window.handleQuestionContinueClick = handleQuestionContinueClick
-
-window.addEventListener('DOMContentLoaded', () => {
-    websiteGoTo('menu')
-})
 
 //Initialize kaboom with canvas element
 kaboom({
@@ -405,23 +204,14 @@ scene(2, () => {
     })
 
     //spawnWave(1, 3, 5, 2) // spawns 5 enemies 2x as strong for 3 waves every 1 second
-    let rounds = [[6, 4, 5, 1, false],[5, 2, 3, 2, false],[6, 5, 13, 0.5, false],[1, 1, 1, 1, true]]      // loop through preset round types. (like BTD6).
+    let rounds = [[6, 4, 5, 1.5, false],[5, 2, 3, 3, false],[6, 5, 13, 1.5, false],[1, 1, 1, 1, true]]      // loop through preset round types. (like BTD6).
     let round = 0
 
-    function getRoundConfig(roundIndex) {
-        const roundConfig = rounds[roundIndex] || rounds[rounds.length - 1]
-        return {
-            time: roundConfig[0],
-            waves: roundConfig[1],
-            enemyNum: roundConfig[2],
-            difficulty: roundConfig[3],
-            makeBoss: roundConfig[4],
-        }
-    }
     const enemies = []
-    const minSpawnDist = 500
+    const spawnDist = 500
     let enemiesLeft = -1
     let enemiesDied = 0
+    upgradeValue = 0
     let isPaused = false
     let mouseDown = false
     let waiting = false
@@ -511,17 +301,24 @@ scene(2, () => {
 
     // amazing gadget class can be used for all gadget archetypes
     // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, totalAmmo, isFullAuto, fireRate, penetration
-    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 20, 12, 1, 5, 500, 100, false, 100, 0)
+    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 5, 500, Infinity, false, 100, 1)
     sparkBlasterGlobal = sparkBlaster
-    let bubbleBlaster = new BeamGadget(700, rgb(0, 0, 0), 7, 7, 14, 15, 3000, 100, false, 100, 0)
-    bubbleBlasterGlobal = bubbleBlaster
-    let rapidBlaster = new BeamGadget(800, rgb(50, 50, 50), 12, 30, 1, 6, 2000, 180, true, 80, 10)  // Globalise all gadgets
-    rapidBlasterGlobal = rapidBlaster
-    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 999, 5, 1, 0, 7000, 100, false, 200, 99)
+    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 5, 7, 8, 15, 3000, 100, false, 100, 0)
+    blastBlasterGlobal = blastBlaster
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 3, 30, 1, 6, 2000, 180, true, 70, 3)
+    cyclerBlasterGlobal = cyclerBlaster
+    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 500, 5, 1, 0, 7000, 100, false, 200, 0)
     beamBlasterGlobal = beamBlaster
 
-    gadgetGlobal = sparkBlaster   // Assign global gadget initial object
-    
+    const selectedGadgetName = selectedGadget || "Spark"
+    if(selectedGadgetName=="Blast"){gadgetGlobal = blastBlasterGlobal}
+    if(selectedGadgetName=="Cycler"){gadgetGlobal = cyclerBlasterGlobal}
+    if(selectedGadgetName=="Beam"){gadgetGlobal = beamBlasterGlobal}
+    if(selectedGadgetName=="Spark"){gadgetGlobal = sparkBlasterGlobal}
+    if(!gadgetGlobal){
+        gadgetGlobal = sparkBlasterGlobal
+        selectedGadget = "Spark"
+    }
 
     function spawnDamageNumber(position, damage){
         const damageText = add([
@@ -622,7 +419,7 @@ scene(2, () => {
         color(0, 0, 0),
     ])
     const controlsLabel = add([
-        text("Click to zap"),
+        text("Click to fire"),
         anchor("center"),
         pos(0, 0),
         color(0, 0, 0),
@@ -644,8 +441,8 @@ scene(2, () => {
         let x
         let y
         const angle = Math.random() * 360
-        x = player.pos.x + Math.cos(angle) * minSpawnDist
-        y = player.pos.y + Math.sin(angle) * minSpawnDist
+        x = player.pos.x + Math.cos(angle) * spawnDist
+        y = player.pos.y + Math.sin(angle) * spawnDist
         
         let boss = false
         let enemySprite = "ghosty"
@@ -662,7 +459,8 @@ scene(2, () => {
         const enemy = add([
             sprite(`${enemySprite}`),
             pos(x, y),
-            area({ collisionIgnore: ["tile"]}), 
+            area({ collisionIgnore: ["tile"]}),
+            anchor("center"),
             body(),
             health(enemyHealth),
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
@@ -697,15 +495,20 @@ scene(2, () => {
             if(enemiesDied > highestEnemiesDied){highestEnemiesDied = enemiesDied}
             enemiesLeft = enemiesLeft - 1
             if(enemiesLeft <= 0){
-                canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-                canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
-                canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
-                canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
-                isPaused = true
-                destroyAll("beam")
-                hintLabel.text = `Click to continue with upgrade`
-                websiteGoTo('upgrade')  // Upgrade selection
-                onClick(() => upgrade())
+                if(round >= rounds.length){
+                    go("winScreen")
+                }
+                else{
+                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
+                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
+                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
+                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
+                    isPaused = true
+                    destroyAll("beam")
+                    hintLabel.text = `Click to continue with upgrade`
+                    websiteGoTo('upgrade')  // Upgrade selection
+                    onClick(() => upgrade())
+                }
             }
         })
         return enemy
@@ -726,20 +529,20 @@ scene(2, () => {
             if(upgradeValue==-4){player.use(sprite("dc"))}
             upgradeValue=0  // Reset upgrade so does not reapply on click
 
-            let nextWaveTime = 10
+            let nextWaveTime = 5
             const clock = add([timer()])
             clock.loop(1, () => {
-                nextWaveTimeLabel.text = `Time untill next wave: ${nextWaveTime}`
-                waiting = true
-                nextWaveTime = nextWaveTime - 1
-                if(nextWaveTime <= -1){
-                    nextWaveTimeLabel.text = ``
-                    waiting = false
-                    const nextRound = getRoundConfig(round)
-                    spawnWave(nextRound.time, nextRound.waves, nextRound.enemyNum, nextRound.difficulty, nextRound.makeBoss)
-                    round += 1
-                    if(rounds >= 3){go("winScreen")}
-                    destroy(clock)
+                if(!isPaused){
+                    nextWaveTimeLabel.text = `Time untill next wave: ${nextWaveTime}`
+                    waiting = true
+                    nextWaveTime = nextWaveTime - 1
+                    if(nextWaveTime <= -1){
+                        nextWaveTimeLabel.text = ``
+                        waiting = false
+                        spawnWave(rounds[round][0], rounds[round][1], rounds[round][2], rounds[round][3], rounds[round][4])
+                        round += 1
+                        destroy(clock)
+                    }
                 }
             })
         }
