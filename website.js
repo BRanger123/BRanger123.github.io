@@ -49,100 +49,6 @@ scene("startButton", () => {
 })
 
 scene(1, () => {
-    setGravity(1600)
-    setCursor("default")
-    addLevel([
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "                                                      ",
-        "    ========                           =====          ",
-        "               ============                           ",
-        "                                    ======            ",
-        "                                                      ",
-        "       ======                                 ====    ",
-        "                    =======      =======              ",
-        "                                                      ",
-        "           =======         =                          ",
-        "                                    ===========       ",
-        "                         =======                      ",
-        "       ======                                         ",
-        "                =                                     ",
-        "                    =========           ===           ",
-        "   =======                                            ",
-    ],
-    {
-        //Define the size of tile block
-        tileWidth: 32,
-        tileHeight: 32,
-        //Define what each symbol means, by a function returning a component list (what will be passed to add())
-        tiles: {
-            "=": () => [
-                rect(32, 32),
-                area(),
-                body({ isStatic: true }),
-                color(130, 180, 180),
-                "tile",
-            ]
-        }
-    })
-    let score = 0
-    const scoreLabel = add([
-        text(score),
-        pos(24, 24),
-        color(0, 0, 0),
-    ])
-    const obj = add([
-        text("Survive!"),
-        pos(center().x-80, 24),
-        color(0, 0, 0),
-    ])
-    onUpdate(() => {
-        score++
-        scoreLabel.text = score
-    })
-    add([
-        pos(-600, 850),
-        rect(4000, 40),
-        area(),
-        body({ isStatic: true }),
-        color(0, 0, 0),
-        "death"
-    ])
-    loadBean()
-    const player = add([
-        sprite("bean"),  //Renders as a sprite
-        pos(200, 80),    //Position in world
-        area(),          //Has a collider
-        body(),          //Responds to physics and gravity
-        "player",
-        "friendly",
-        {
-            speed: 300,
-        },
-    ])
-    onKeyPress("space", () => {if (player.isGrounded()) {player.jump()}})
-    onKeyDown("a", () => {player.move(-player.speed, 0)})
-    onKeyDown("d",() => {player.move(+player.speed, 0)})
-    player.onCollide("tile", (tile) => {
-        tile.unuse("tile")  // VERY IMPORTANT!!! All tiles with "tile" tag are checked for collision, so now cracked tiles are no longer checked for collision
-        tile.use(color(255, 0, 0))
-        wait(0.7, () => {
-            shake()
-            tile.use(body({ isStatic: false }))
-            tile.unuse("area")
-        })
-        wait(1.3, () => {
-            tile.destroy()
-        })
-    })
-    player.onCollide("death", () => {
-        go("deathScreen", score)
-    })
-})
-
-scene(2, () => {
     loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
     loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")        // Load assets
     loadSprite("coin", "https://kaboomjs.com/sprites/coin.png")
@@ -196,7 +102,7 @@ scene(2, () => {
                 rect(50, 50),
                 area(),
                 body({ isStatic: true }),
-                color(30, 30, 30),
+                color(138,121,93),
                 "tile",
                 "object",
             ]
@@ -204,7 +110,7 @@ scene(2, () => {
     })
 
     //spawnWave(1, 3, 5, 2) // spawns 5 enemies 2x as strong for 3 waves every 1 second
-    let rounds = [[6, 4, 5, 1.5, false],[5, 2, 3, 3, false],[6, 5, 13, 1.5, false],[1, 1, 1, 1, true]]      // loop through preset round types. (like BTD6).
+    let rounds = [[6, 4, 5, 1.5, false],[5, 2, 3, 3, false],[6, 5, 13, 1.5, false],[1, 1, 1, 1, true],[4, 3, 7, 2, false], [7, 6, 15, 2, false]]      // loop through preset round types. (like BTD6).
     let round = 0
 
     const enemies = []
@@ -305,7 +211,7 @@ scene(2, () => {
     sparkBlasterGlobal = sparkBlaster
     let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 5, 7, 8, 15, 3000, 100, false, 100, 0)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 3, 30, 1, 6, 2000, 180, true, 70, 3)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 4, 30, 1, 6, 2000, 180, true, 70, 3)
     cyclerBlasterGlobal = cyclerBlaster
     let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 500, 5, 1, 0, 7000, 100, false, 200, 0)
     beamBlasterGlobal = beamBlaster
@@ -396,7 +302,7 @@ scene(2, () => {
     // Initialize labels
     const coinsLabel = add([
         text(`Coins: ${coins}`),
-        anchor("center"),
+        anchor("right"),
         pos(0, 0),
         color(0, 0, 0),
     ])
@@ -408,13 +314,13 @@ scene(2, () => {
     ])
     const ammoLabel = add([
         text(`Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`),
-        anchor("center"),
+        anchor("left"),
         pos(0, 0),
         color(0, 0, 0),
     ])
     const healthLabel = add([
         text(`Health: ${player.hp()}`),
-        anchor("center"),
+        anchor("right"),
         pos(0, 0),
         color(0, 0, 0),
     ])
@@ -433,6 +339,12 @@ scene(2, () => {
     const nextWaveTimeLabel = add([
         text(""),
         anchor("center"),
+        pos(0, 0),
+        color(0, 0, 0),
+    ])
+    const roundLabel = add([
+        text("Round: 1"),
+        anchor("left"),
         pos(0, 0),
         color(0, 0, 0),
     ])
@@ -541,6 +453,7 @@ scene(2, () => {
                         waiting = false
                         spawnWave(rounds[round][0], rounds[round][1], rounds[round][2], rounds[round][3], rounds[round][4])
                         round += 1
+                        roundLabel.text = `Round: ${round + 1}`
                         destroy(clock)
                     }
                 }
@@ -669,13 +582,14 @@ scene(2, () => {
 
         // Make labels stay relative to camera
         toWorld(camPos())   // Set world origin to camPos()
-        coinsLabel.pos = camPos().add(vec2(width()/2 - 100, -height()/2 + 24))
-        ammoLabel.pos = camPos().add(vec2(-width()/2 + 120, height()/2 - 24))
-        healthLabel.pos = camPos().add(vec2(width()/2 - 110, height()/2 - 24))
+        coinsLabel.pos = camPos().add(vec2(width()/2 - 20, -height()/2 + 24))
+        ammoLabel.pos = camPos().add(vec2(-width()/2 + 20, height()/2 - 24))
+        healthLabel.pos = camPos().add(vec2(width()/2 - 20, height()/2 - 24))
         hintLabel.pos = camPos().add(vec2(0, -height()/2 + 90))
         controlsLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
         reloadLabel.pos = camPos().add(vec2(0, -height()/2 + 150))
         nextWaveTimeLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
+        roundLabel.pos = camPos().add(vec2(-width()/2 + 20, -height()/2 + 24))
         const diff = mouseWorldPos.sub(player.pos)
         let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)
         blasterSprite.angle = angle
@@ -686,6 +600,141 @@ scene(2, () => {
     player.on("death", () => {
         destroy(player)
         go("deathScreen", enemiesDied+coins)
+    })
+})
+
+scene("deathScreen", (score) => {
+    add([
+        text("Press M to return to menu"),
+        pos(center()),
+        anchor("center"),
+        color(255, 0, 0),
+    ])
+    add([
+        text("Press k to reset"),
+        pos(center().x, center().y-50),
+        anchor("center"),
+        color(255, 0, 0),
+    ])
+    add([
+        text("You died..."),
+        pos(center().x, center().y-100),
+        anchor("center"),
+        color(255, 0, 0),
+    ])
+    const scoreLabel = add([
+        text(`Score: ${score || 0}`),       //If the game does not pass a score, the score will be 0 instead of undefined
+        pos(24, 24),
+        color(0, 0, 0),
+    ])
+})
+
+scene("winScreen", () => {
+    add([
+        text("Press M to return to menu"),
+        pos(center()),
+        anchor("center"),
+        color(0, 0, 255),
+    ])
+    add([
+        text("You won!"),
+        pos(center().x, center().y-100),
+        anchor("center"),
+        color(0, 0, 255),
+    ])
+})
+
+scene(2, () => {
+    setGravity(1600)
+    setCursor("default")
+    addLevel([
+        "                                                      ",
+        "                                                      ",
+        "                                                      ",
+        "                                                      ",
+        "                                                      ",
+        "    ========                           =====          ",
+        "               ============                           ",
+        "                                    ======            ",
+        "                                                      ",
+        "       ======                                 ====    ",
+        "                    =======      =======              ",
+        "                                                      ",
+        "           =======         =                          ",
+        "                                    ===========       ",
+        "                         =======                      ",
+        "       ======                                         ",
+        "                =                                     ",
+        "                    =========           ===           ",
+        "   =======                                            ",
+    ],
+    {
+        //Define the size of tile block
+        tileWidth: 32,
+        tileHeight: 32,
+        //Define what each symbol means, by a function returning a component list (what will be passed to add())
+        tiles: {
+            "=": () => [
+                rect(32, 32),
+                area(),
+                body({ isStatic: true }),
+                color(130, 180, 180),
+                "tile",
+            ]
+        }
+    })
+    let score = 0
+    const scoreLabel = add([
+        text(score),
+        pos(24, 24),
+        color(0, 0, 0),
+    ])
+    const obj = add([
+        text("Survive!"),
+        pos(center().x-80, 24),
+        color(0, 0, 0),
+    ])
+    onUpdate(() => {
+        score++
+        scoreLabel.text = score
+    })
+    add([
+        pos(-600, 850),
+        rect(4000, 40),
+        area(),
+        body({ isStatic: true }),
+        color(0, 0, 0),
+        "death"
+    ])
+    loadBean()
+    const player = add([
+        sprite("bean"),  //Renders as a sprite
+        pos(200, 80),    //Position in world
+        area(),          //Has a collider
+        body(),          //Responds to physics and gravity
+        "player",
+        "friendly",
+        {
+            speed: 300,
+        },
+    ])
+    onKeyPress("space", () => {if (player.isGrounded()) {player.jump()}})
+    onKeyDown("a", () => {player.move(-player.speed, 0)})
+    onKeyDown("d",() => {player.move(+player.speed, 0)})
+    player.onCollide("tile", (tile) => {
+        tile.unuse("tile")  // VERY IMPORTANT!!! All tiles with "tile" tag are checked for collision, so now cracked tiles are no longer checked for collision
+        tile.use(color(255, 0, 0))
+        wait(0.7, () => {
+            shake()
+            tile.use(body({ isStatic: false }))
+            tile.unuse("area")
+        })
+        wait(1.3, () => {
+            tile.destroy()
+        })
+    })
+    player.onCollide("death", () => {
+        go("deathScreen", score)
     })
 })
 
@@ -807,46 +856,4 @@ scene(3, () => {
     onCollide("player", "goal", () => {
         go("winScreen")
     })
-})
-
-
-scene("deathScreen", (score) => {
-    add([
-        text("Press M to return to menu"),
-        pos(center()),
-        anchor("center"),
-        color(255, 0, 0),
-    ])
-    add([
-        text("Press k to reset"),
-        pos(center().x, center().y-50),
-        anchor("center"),
-        color(255, 0, 0),
-    ])
-    add([
-        text("You died..."),
-        pos(center().x, center().y-100),
-        anchor("center"),
-        color(255, 0, 0),
-    ])
-    const scoreLabel = add([
-        text(`Score: ${score || 0}`),       //If the game does not pass a score, the score will be 0 instead of undefined
-        pos(24, 24),
-        color(0, 0, 0),
-    ])
-})
-
-scene("winScreen", () => {
-    add([
-        text("Press M to return to menu"),
-        pos(center()),
-        anchor("center"),
-        color(0, 0, 255),
-    ])
-    add([
-        text("You won!"),
-        pos(center().x, center().y-100),
-        anchor("center"),
-        color(0, 0, 255),
-    ])
 })

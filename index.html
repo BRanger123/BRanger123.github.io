@@ -9,13 +9,13 @@
         <div id="menu">
             <h1>Bricklet</h1>
             <h3>By Barnaby Ranger</h3>
-            <h2>Press M to go back here at any time</h2><br>
+            <h2>Press M to go back here at any time</h2>
         	<div class="buttonContainer">
-                <button id="startButton" onclick="websiteGoTo('levelsMenu')">Start</button><br>
+                <button id="startButton" onclick="upgradeValue=0; websiteGoTo('weaponSelect')">Start</button><br>
                 <button id="questionButton" onclick="startQuestion()">Questions</button><br>
                 <button id="statsButton" onclick="websiteGoTo('stats'); updateStats()">Stats</button><br>
                 <button id="informationButton" onclick="websiteGoTo('information')">Information</button><br>
-
+                <button id="extrasButton" onclick="websiteGoTo('levelsMenu')">Extras</button><br>
             </div>
         </div>
 
@@ -25,11 +25,10 @@
 
         <div id="levelsMenu" style="display: none">
             <h1>Level Select</h1>
-            <h2>My favourite is Ghost Hunters</h2>
+            <h2>Original Test Levels</h2>
             <div class="buttonContainer">
-                <button onclick="playLevel(1)">Block Fall</button><br>
-                <button onclick="upgradeValue=0; websiteGoTo('weaponSelect')">Ghost Hunters</button><br>
-                <button onclick="playLevel(3)">Drop Oclock</button>
+                <button onclick="playLevel(2)">Block Fall</button><br>
+                <button onclick="playLevel(3)">Cubism</button>
             </div>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
@@ -74,7 +73,7 @@
                 <button onclick="selectGadget(`${this.textContent}`)">Beam</button><br>
                 <button onclick="selectGadget(`${this.textContent}`)">Spark</button><br>
             </div>
-            <button id="weaponSelectContinue" onclick="playLevel(2); this.style.display = 'none'" style="display: none;">Continue</button>
+            <button id="weaponSelectContinue" onclick="playLevel(1); this.style.display = 'none'" style="display: none;">Continue</button>
         </div>
 
         <div id="shop" style="display: none;">
