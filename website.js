@@ -43,8 +43,7 @@ function selectUpgrade(upgradeString){
 }
 
 function purchaseSkin(skinIndex, price, skinName){
-    if(price>coins){}
-    else{
+    if(price<=coins){
         coins = coins-price
         upgradeValue = skinIndex
         document.getElementById('coinsCount').textContent = coins || ''

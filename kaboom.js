@@ -153,7 +153,7 @@ scene(1, () => {
     })
 
     //spawnWave(1, 3, 5, 2) // spawns 5 enemies 2x as strong for 3 waves every 1 second
-    let rounds = [[6, 4, 5, 1.5, false],[5, 2, 3, 3, false],[6, 5, 13, 1.5, false],[1, 1, 1, 1, true],[4, 3, 7, 2, false], [7, 6, 15, 2, false]]      // loop through preset round types. (like BTD6).
+    let rounds = [[6, 4, 5, 1.5, false],[5, 2, 3, 2, false],[6, 5, 13, 1.5, false],[1, 1, 1, 1, true],[4, 3, 7, 2, false], [7, 6, 15, 2, false]]      // loop through preset round types. (like BTD6).
     let round = 0
 
     const enemies = []
@@ -433,7 +433,7 @@ scene(1, () => {
                 }
             }
             spawnCoin(enemy.pos)
-            if(Math.random()<0.05){
+            if(Math.random()<0.1){  // 10% chance of ammo bag
                 const ammoBag = add([
                     sprite("ammo"),
                     anchor("center"),
@@ -617,6 +617,8 @@ scene(1, () => {
         }
     })
 
+    camScale(1)
+    camRot(0)
     player.onUpdate(() => {
         // Camera follows point between player and mouse cursor
         const mouseWorldPos = toWorld(mousePos())
