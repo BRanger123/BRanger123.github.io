@@ -54,6 +54,17 @@ kaboom({
     font: "arial",
 })
 
+loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
+loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")        // Load assets
+loadSprite("coin", "https://kaboomjs.com/sprites/coin.png")
+loadSprite("ammo", "https://kaboomjs.com/sprites/jumpy.png")
+loadSprite("blaster", "https://kaboomjs.com/sprites/gun.png")
+loadSprite("mark", "https://kaboomjs.com/sprites/mark.png")
+loadSprite("dino", "https://kaboomjs.com/sprites/dino.png")
+loadSprite("steel", "https://kaboomjs.com/sprites/steel.png")
+loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
+loadBean()
+
 scene("startButton", () => {
     const btn = add([
         rect(240, 80, { radius: 8 }),
@@ -89,16 +100,6 @@ scene("startButton", () => {
 })
 
 scene(1, () => {
-    loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
-    loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")        // Load assets
-    loadSprite("coin", "https://kaboomjs.com/sprites/coin.png")
-    loadSprite("ammo", "https://kaboomjs.com/sprites/jumpy.png")
-    loadSprite("blaster", "https://kaboomjs.com/sprites/gun.png")
-    loadSprite("mark", "https://kaboomjs.com/sprites/mark.png")
-    loadSprite("dino", "https://kaboomjs.com/sprites/dino.png")
-    loadSprite("steel", "https://kaboomjs.com/sprites/steel.png")
-    loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
-    loadBean()
 
     setGravity(0)
     setBackground(rgb(255, 255, 255))
@@ -135,8 +136,8 @@ scene(1, () => {
     ],
     {
         // Define the size of tile block
-        tileWidth: 50,
-        tileHeight: 50,
+        tileWidth: 64,
+        tileHeight: 64,
         // Define what each symbol means
         tiles: {
             "=": () => [
