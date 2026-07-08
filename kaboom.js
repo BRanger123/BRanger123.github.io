@@ -62,6 +62,7 @@ loadSprite("blaster", "https://kaboomjs.com/sprites/gun.png")
 loadSprite("mark", "https://kaboomjs.com/sprites/mark.png")
 loadSprite("dino", "https://kaboomjs.com/sprites/dino.png")
 loadSprite("steel", "https://kaboomjs.com/sprites/steel.png")
+loadSprite("shotgun", "shotgun.png")
 loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
@@ -170,13 +171,15 @@ scene(1, () => {
     
     // Code for beam gadget class
     class BeamGadget{
-        constructor(beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, totalAmmo, isFullAuto = false, fireRate = 100, penetration = 0) {
+        constructor(beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto = false, fireRate = 100, penetration = 0) {
             this.beamSpeed = beamSpeed
             this.beamColor = beamColor
             this.beamDamage = beamDamage
             this.magSize = magSize
             this.ammoInMag = magSize  // Current charge in magazine
-            this.totalAmmo = totalAmmo  // Total charge reserve
+            this.reloadTime = reloadTime  // Seconds to reload the weapon
+            this.isReloading = false
+            this.reloadTimer = 0
             this.beamsFired = beamsFired // So shotguns can use same code, just increase beams fired (pellets?)
             this.spread = spread
             this.recoilForce = recoilForce  // Force of recoil that pushes player back
@@ -187,16 +190,26 @@ scene(1, () => {
         }
         
         canFire(){
-            return this.ammoInMag > 0   // Checks gadget has charge
+            return this.ammoInMag > 0 && !this.isReloading   // Checks gadget has charge and is not reloading
         }
         reload(){
-            if (this.totalAmmo > 0) {
-                const ammoToLoad = Math.min(this.magSize, this.totalAmmo)
-                this.totalAmmo -= ammoToLoad    // Add charge to magazine and remove from reserve
-                this.ammoInMag = ammoToLoad
-                return true // Successful reload
+            if (this.isReloading || this.ammoInMag >= this.magSize) {
+                return false    // Can't reload while already reloading or already full
             }
-            return false    // Unsuccessful reload
+            this.isReloading = true
+            this.reloadTimer = this.reloadTime
+            return true
+        }
+        updateReload(dt){
+            if (!this.isReloading) {
+                return
+            }
+            this.reloadTimer -= dt
+            if (this.reloadTimer <= 0) {
+                this.isReloading = false
+                this.reloadTimer = 0
+                this.ammoInMag = this.magSize
+            }
         }
         fireWeapon(){
             if(!this.canFire()){
@@ -246,27 +259,6 @@ scene(1, () => {
             }
             this.ammoInMag--    // Decrease charge count in magazine
         }
-    }
-
-    // amazing gadget class can be used for all gadget archetypes
-    // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, totalAmmo, isFullAuto, fireRate, penetration
-    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 5, 500, Infinity, false, 100, 1)
-    sparkBlasterGlobal = sparkBlaster
-    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 5, 7, 8, 15, 3000, 100, false, 100, 0)
-    blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 4, 30, 1, 6, 2000, 180, true, 70, 3)
-    cyclerBlasterGlobal = cyclerBlaster
-    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 500, 5, 1, 0, 7000, 100, false, 200, 0)
-    beamBlasterGlobal = beamBlaster
-
-    const selectedGadgetName = selectedGadget || "Spark"
-    if(selectedGadgetName=="Blast"){gadgetGlobal = blastBlasterGlobal}
-    if(selectedGadgetName=="Cycler"){gadgetGlobal = cyclerBlasterGlobal}
-    if(selectedGadgetName=="Beam"){gadgetGlobal = beamBlasterGlobal}
-    if(selectedGadgetName=="Spark"){gadgetGlobal = sparkBlasterGlobal}
-    if(!gadgetGlobal){
-        gadgetGlobal = sparkBlasterGlobal
-        selectedGadget = "Spark"
     }
 
     function spawnDamageNumber(position, damage){
@@ -328,8 +320,10 @@ scene(1, () => {
     
     player.onCollide("ammo", (ammoBag) => {
         destroy(ammoBag)
-        gadgetGlobal.totalAmmo += 50
-        ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
+        gadgetGlobal.ammoInMag = gadgetGlobal.magSize
+        gadgetGlobal.isReloading = false
+        gadgetGlobal.reloadTimer = 0
+        ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
     })
 
     const blasterSprite = add([
@@ -341,6 +335,27 @@ scene(1, () => {
         area({ collisionIgnore: ["object"],}),
         //scale(0.2) // only for large sprites or could use .use(scale(0.2))
     ])
+
+    // amazing gadget class can be used for all gadget archetypes
+    // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto, fireRate, penetration
+    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 5, 500, 1.2, false, 100, 1)
+    sparkBlasterGlobal = sparkBlaster
+    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 5, 7, 8, 15, 3000, 1.8, false, 100, 0)
+    blastBlasterGlobal = blastBlaster
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 4, 30, 1, 6, 2000, 1.4, true, 70, 3)
+    cyclerBlasterGlobal = cyclerBlaster
+    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 500, 5, 1, 0, 7000, 2.5, false, 200, 99)
+    beamBlasterGlobal = beamBlaster
+
+    const selectedGadgetName = selectedGadget || "Spark"
+    if(selectedGadgetName=="Blast"){gadgetGlobal = blastBlasterGlobal; blasterSprite.use(sprite("shotgun")); blasterSprite.use(scale(0.2)); blasterSprite.use(anchor("center"))}
+    if(selectedGadgetName=="Cycler"){gadgetGlobal = cyclerBlasterGlobal}
+    if(selectedGadgetName=="Beam"){gadgetGlobal = beamBlasterGlobal}
+    if(selectedGadgetName=="Spark"){gadgetGlobal = sparkBlasterGlobal}
+    if(!gadgetGlobal){
+        gadgetGlobal = sparkBlasterGlobal
+        selectedGadget = "Spark"
+    }
 
     // Initialize labels
     const coinsLabel = add([
@@ -356,7 +371,7 @@ scene(1, () => {
         color(0, 0, 0),
     ])
     const ammoLabel = add([
-        text(`Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`),
+        text(`Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`),
         anchor("left"),
         pos(0, 0),
         color(0, 0, 0),
@@ -475,7 +490,7 @@ scene(1, () => {
             hintLabel.text = ``
             if(upgradeValue==1){player.heal(100), healthLabel.text = `Health: ${player.hp()}`}
             if(upgradeValue==2){gadgetGlobal.beamDamage += 5}
-            if(upgradeValue==3){gadgetGlobal.magSize += 3, gadgetGlobal.totalAmmo += 3}
+            if(upgradeValue==3){gadgetGlobal.magSize += 3}
             if(upgradeValue==4){coinMagForce += 120000}
             if(upgradeValue==5){gadgetGlobal.isFullAuto = true}
             if(upgradeValue==-1){player.use(sprite("mark"))}
@@ -562,7 +577,7 @@ scene(1, () => {
             return
         }
         gadgetGlobal.fireWeapon()    // Zap once per click for semi-auto gadgets
-        ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
+        ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
         controlsLabel.text = `` // Click to zap hint hidden
         hintLabel.text = ``
         upgrade()
@@ -582,15 +597,29 @@ scene(1, () => {
     onUpdate(() => {
         if (mouseDown && gadgetGlobal.isFullAuto && !isPaused) {
             gadgetGlobal.fireWeapon()    // Automatic zapping while held down
-            ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
+            ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
             controlsLabel.text = ``
+        }
+    })
+    onUpdate(() => {
+        if (gadgetGlobal && gadgetGlobal.updateReload) {
+            gadgetGlobal.updateReload(dt())
+            if (gadgetGlobal.isReloading) {
+                reloadLabel.text = `Reloading... ${gadgetGlobal.reloadTimer.toFixed(1)}s`
+            } else if (reloadLabel.text.startsWith("Reloading")) {
+                reloadLabel.text = ``
+            }
         }
     })
     onKeyPress("e", () => {
         if (gadgetGlobal.reload()) { // If successful
-            reloadLabel.text = `` // Reload hint is hidden
-            ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.totalAmmo}`
+            reloadLabel.text = `Reloading... ${gadgetGlobal.reloadTimer.toFixed(1)}s`
+        } else if (gadgetGlobal.isReloading) {
+            reloadLabel.text = `Reloading... ${gadgetGlobal.reloadTimer.toFixed(1)}s`
+        } else {
+            reloadLabel.text = `Magazine full`
         }
+        ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
     })
 
     onKeyPress("p", () => {
