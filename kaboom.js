@@ -572,11 +572,13 @@ scene(1, () => {
         }
     })
     onKeyPress("e", () => {
-        if (gadgetGlobal.reload()) { // If successful
+        if(gadgetGlobal.reload()){ // If successful
             reloadLabel.text = `Reloading... ${gadgetGlobal.reloadTimer.toFixed(1)}s`
-        } else if (gadgetGlobal.isReloading) {
+        }
+        else if(gadgetGlobal.isReloading){
             reloadLabel.text = `Reloading... ${gadgetGlobal.reloadTimer.toFixed(1)}s`
-        } else {
+        }
+        else{
             reloadLabel.text = `Magazine full`
         }
         ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
@@ -889,5 +891,170 @@ scene(3, () => {
     })
     onCollide("player", "goal", () => {
         go("winScreen")
+    })
+})
+
+scene(4, () => {
+    setGravity(0)
+    setBackground(rgb(247, 247, 247))
+    let score = 0
+    function bullet() {
+        let direction = toWorld(mousePos()).sub(player.pos).unit()
+        const bullet = add([
+            pos(player.pos),
+            rect(8, 8),
+            area(),
+            color(0, 0, 0),
+            "bullet",
+            { speed: 500, dir: direction },
+            offscreen({ destroy: true }),
+        ])
+        bullet.onUpdate(() => {
+            bullet.move(bullet.dir.scale(bullet.speed))
+        })
+        bullet.onCollide("enemy", (enemy) => {
+            enemy.hurt(20)
+            bullet.destroy()
+        })
+    }
+    
+    // Experimental code for weapon class
+    class gun{
+        constructor(fireRate, bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread) {  // ADD RECOIL
+            this.fireRate = fireRate
+            this.bulletSpeed = bulletSpeed
+            this.bulletColor = bulletColor
+            this.bulletDamage = bulletDamage
+            this.magSize = magSize
+            this.bulletsFired = bulletsFired
+            this.spread = spread
+        }
+        fireWeapon(){
+            const baseDir = toWorld(mousePos()).sub(player.pos).unit()  // toWorld() lets func work outside initial map boundaries
+            for (let i = 0; i < this.bulletsFired; i++) {
+                const angle = baseDir.angle() + rand(-this.spread, this.spread)
+                const direction = Vec2.fromAngle(angle)
+                const bullet = add([
+                    pos(player.pos),
+                    rect(8, 8),
+                    area(),
+                    color(this.bulletColor),
+                    "bullet",
+                    { speed: this.bulletSpeed, dir: direction },
+                    offscreen({ destroy: true }),
+                ])
+                bullet.onUpdate(() => {bullet.move(bullet.dir.scale(this.bulletSpeed))})
+                bullet.onCollide("enemy", (enemy) => {enemy.hurt(this.bulletDamage), bullet.destroy()})
+            }
+        }
+    }
+
+    // Player code
+    loadBean()
+    const player = add([
+        sprite("bean"),
+        pos(center()),
+        area(),
+        anchor("center"),   // So bullets spawn at center
+        body(),
+        health(100),
+        "player",
+        { speed: 400 },
+        offscreen({ destroy: true }),
+    ])
+    let gunTest = new gun(10, 700, rgb(41, 41, 41), 20, 5, 7, 10)
+
+    const scoreLabel = add([
+        text(`Score: ${score}`),
+        pos(width()-240, height()-100),
+        color(0, 0, 0),
+    ])
+    const healthLabel = add([
+        text(`Health: ${player.hp()}`),
+        pos(24, height()-100),
+        color(0, 0, 0),
+    ])
+    const obj = add([
+        text("Survive!"),
+        pos(center().x-80, 24),
+        color(0, 0, 0),
+    ])
+    
+    // Make enemies
+    const enemyNum = 7
+    const enemies = []
+    const minSpawnDist = 300
+
+    function spawnEnemy() {
+        let x, y
+        let tries = 0
+
+        do {
+            x = Math.random() * width()
+            y = Math.random() * height()
+            tries++
+        } while (player && player.exists() && player.pos.dist(vec2(x, y)) < minSpawnDist && tries < 50)
+
+        const enemy = add([
+            sprite("bean"),
+            pos(x, y),
+            area(),
+            body(),
+            health(Math.random() * 50 + 20),
+            color(Math.random() * 255, Math.random() * 255, Math.random() * 255),
+            "enemy",
+            { speed: Math.random() * 200 + 50 },
+        ])
+
+        enemy.on("death", () => {
+            destroy(enemy)
+        })
+
+        return enemy
+    }
+
+    for (let i = 0; i < enemyNum; i++) {
+        enemies.push(spawnEnemy())
+    }
+
+    onUpdate(() => {
+        score++
+        scoreLabel.text = `Score: ${score}`
+        healthLabel.text = `Health: ${player.hp()}`
+
+        for (const enemy of enemies) {
+            if (!enemy.exists()) {
+                continue
+            }
+            const direction = player.pos.sub(enemy.pos).unit()
+            enemy.move(direction.scale(enemy.speed))
+        }
+    })
+
+    // Player controls
+    onKeyDown("w", () => player.move(0, -player.speed))
+    onKeyDown("a", () => player.move(-player.speed, 0))
+    onKeyDown("s", () => player.move(0, player.speed))
+    onKeyDown("d", () => player.move(player.speed, 0))
+    onKeyDown("e", () => bullet())
+    onKeyPress("k", () => addKaboom(player.pos))
+    onClick(() => gunTest.fireWeapon())
+
+    // Collision with enemy
+    onCollideUpdate("player", "enemy", () => {
+        player.hurt(1)
+        shake(8)
+    })
+    //player.onUpdate(() => {
+    //    camPos(player.pos)
+    //})
+    onDestroy("enemy", () => {
+        enemies.push(spawnEnemy())
+    })
+
+    onDestroy("player", () => go("deathScreen", score))
+    player.on("death", () => {
+        destroy(player)
+        go("deathScreen", score)
     })
 })
