@@ -12,6 +12,7 @@ kaboom({
     height: window.innerHeight,
     background: [255, 255, 255],
     font: "arial",
+    letterBox: true,
 })
 
 loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
