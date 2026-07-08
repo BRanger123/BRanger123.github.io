@@ -1,46 +1,6 @@
 //Import kaboom.js
 import kaboom from "https://unpkg.com/kaboom@3000.0.1/dist/kaboom.mjs"
 
-function getQuestions() {
-    const xhr = new XMLHttpRequest()
-    xhr.open('GET', 'questions.txt', false)
-    xhr.send()
-    if (xhr.status === 200) {
-        return xhr.responseText.trim().split('\n').map(line => {
-            const parts = line.split(',')
-            return {
-                question: parts[0].trim(),
-                answers: parts.slice(1).map(a => a.trim()),
-            }
-        })
-    }
-    console.error('Failed to load questions.txt')
-    return []
-}
-questions = getQuestions()
-
-var input = document.getElementById("body")
-input.addEventListener("keypress", function(event){
-    const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
-    if (event.key === "m"){
-        event.preventDefault()
-        playLevel(levelGlobal)
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
-        document.getElementById('gameWindow').style.display = 'none'
-        websiteGoTo('menu')
-    }
-})
-input.addEventListener("keypress", function(event) {
-    const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
-    if (event.key === "k" && gameIsVisible){
-        event.preventDefault()
-        go(levelGlobal)
-    }
-})
-
 //Get the canvas element
 const canvas = document.getElementById('gameCanvas')
 
@@ -234,19 +194,18 @@ scene(1, () => {
                 const angle = baseDir.angle() + rand(-this.spread, this.spread) // Use spread as max possible random angle deviation
                 const direction = Vec2.fromAngle(angle)
                 const beam = add([
-                    pos(player.pos),    // Use blasterSprite.pos ?///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    pos(player.pos),
                     rect(8,8),
                     area(),
                     color(this.beamColor),
                     "beam",   // For collision detection
                     "object",
                     { speed: this.beamSpeed, dir: direction, penetration: this.penetration },
-                    offscreen({ destroy: true }),   // Saves processing power, may need to be changed if using camera code///////////////////////////////////////////////////////////////////////////
+                    offscreen({ destroy: true }),   // Save processing power
                 ])
                 beam.onUpdate(() => {beam.move(beam.dir.scale(this.beamSpeed))})    // Moves in dir by speed every frame
                 beam.onCollide("enemy", (enemy) => {
                     spawnDamageNumber(enemy.pos, this.beamDamage)
-                    //enemy.move(beam.dir.scale(this.beamSpeed))  // Enemy pushed back by factor of beam speed//////////////////////////////////////////////////////////////////////////////////////
                     enemy.hurt(this.beamDamage)
                     if(beam.penetration > 0){
                         beam.penetration--
@@ -258,6 +217,7 @@ scene(1, () => {
                 beam.onCollide("tile", () => {beam.destroy()})
             }
             this.ammoInMag--    // Decrease charge count in magazine
+            reloadLabel.text = ``   // Remove mag full message
         }
     }
 
@@ -338,13 +298,13 @@ scene(1, () => {
 
     // amazing gadget class can be used for all gadget archetypes
     // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto, fireRate, penetration
-    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 5, 500, 1.2, false, 100, 1)
+    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 5, 500, 1, false, 100, 1)
     sparkBlasterGlobal = sparkBlaster
-    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 5, 7, 8, 15, 3000, 1.8, false, 100, 0)
+    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 5, 7, 8, 15, 3000, 2, false, 100, 0)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 4, 30, 1, 6, 2000, 1.4, true, 70, 3)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 4, 30, 1, 6, 2000, 2.5, true, 70, 3)
     cyclerBlasterGlobal = cyclerBlaster
-    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 500, 5, 1, 0, 7000, 2.5, false, 200, 99)
+    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 500, 5, 1, 0, 7000, 3, false, 200, 99)
     beamBlasterGlobal = beamBlaster
 
     const selectedGadgetName = selectedGadget || "Spark"
@@ -421,7 +381,7 @@ scene(1, () => {
 
         if(makeBoss){
             enemySprite = "boss"
-            enemyHealth = 1000
+            enemyHealth = 1500
             enemySpeed = 500
             boss = true
         }
@@ -489,8 +449,8 @@ scene(1, () => {
             isPaused = false
             hintLabel.text = ``
             if(upgradeValue==1){player.heal(100), healthLabel.text = `Health: ${player.hp()}`}
-            if(upgradeValue==2){gadgetGlobal.beamDamage += 5}
-            if(upgradeValue==3){gadgetGlobal.magSize += 3}
+            if(upgradeValue==2){gadgetGlobal.beamDamage += Math.floor(gadgetGlobal.beamDamage*0.3)}
+            if(upgradeValue==3){gadgetGlobal.magSize += Math.floor(gadgetGlobal.magSize*0.3); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
             if(upgradeValue==4){coinMagForce += 120000}
             if(upgradeValue==5){gadgetGlobal.isFullAuto = true}
             if(upgradeValue==-1){player.use(sprite("mark"))}

@@ -14,6 +14,52 @@ let cyclerBlasterGlobal
 let beamBlasterGlobal
 let questions
 
+function getQuestions() {
+    const xhr = new XMLHttpRequest()
+    xhr.open('GET', 'questions.txt', false)
+    xhr.send()
+    if (xhr.status === 200) {
+        return xhr.responseText.trim().split('\n').map(line => {
+            const parts = line.split(',')
+            return {
+                question: parts[0].trim(),
+                answers: parts.slice(1).map(a => a.trim()),
+            }
+        })
+    }
+    console.error('Failed to load questions.txt')
+    return []
+}
+questions = getQuestions()
+
+var input = document.getElementById("body")
+input.addEventListener("keypress", function(event){
+    const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
+    if (event.key === "m"){
+        event.preventDefault()
+        playLevel(levelGlobal)
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
+        document.getElementById('gameWindow').style.display = 'none'
+        websiteGoTo('menu')
+    }
+})
+input.addEventListener("keypress", function(event) {
+    const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
+    if (event.key === "k" && gameIsVisible){
+        if(levelGlobal == 1){
+            event.preventDefault()
+            websiteGoTo('weaponSelect')
+        }
+        else{
+            event.preventDefault()
+            go(levelGlobal)
+        }
+    }
+})
+
 const originalTitle = document.title
     document.addEventListener("visibilitychange", () => {
     document.title = document.hidden ? "Come back :(" : originalTitle
