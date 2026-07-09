@@ -122,6 +122,7 @@ scene(1, () => {
     const spawnDist = 500
     let enemiesLeft = -1
     let enemiesDied = 0
+    let enemiesDiedCounter = 0
     upgradeValue = 0
     let isPaused = false
     let mouseDown = false
@@ -132,7 +133,7 @@ scene(1, () => {
     
     // Code for beam gadget class
     class BeamGadget{
-        constructor(beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto = false, fireRate = 100, penetration = 0) {
+        constructor(beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto = false, fireRate = 100, penetration = 0, critChance) {
             this.beamSpeed = beamSpeed
             this.beamColor = beamColor
             this.beamDamage = beamDamage
@@ -148,6 +149,7 @@ scene(1, () => {
             this.fireRate = fireRate      // Milliseconds between shots when full auto is enabled
             this.lastFireTime = 0         // Track time between automatic shots rather than dt()
             this.penetration = penetration // Number of enemies a beam can pass through before disappearing
+            this.critChance = critChance
         }
         
         canFire(){
@@ -206,13 +208,26 @@ scene(1, () => {
                 ])
                 beam.onUpdate(() => {beam.move(beam.dir.scale(this.beamSpeed))})    // Moves in dir by speed every frame
                 beam.onCollide("enemy", (enemy) => {
-                    spawnDamageNumber(enemy.pos, this.beamDamage)
-                    enemy.hurt(this.beamDamage)
-                    if(beam.penetration > 0){
-                        beam.penetration--
+                    if(Math.random() <= this.critChance){
+                        spawnDamageNumber(enemy.pos, this.beamDamage, true)
+                        if(enemy.isBoss){enemy.hurt(this.beamDamage*3)}
+                        else{enemy.hurt(3000)}
+                        if(beam.penetration > 0){
+                            beam.penetration--
+                        }
+                        else{
+                            beam.destroy()
+                        }
                     }
                     else{
-                        beam.destroy()
+                        spawnDamageNumber(enemy.pos, this.beamDamage, false)
+                        enemy.hurt(this.beamDamage)
+                        if(beam.penetration > 0){
+                            beam.penetration--
+                        }
+                        else{
+                            beam.destroy()
+                        }
                     }
                 })
                 beam.onCollide("tile", () => {beam.destroy()})
@@ -222,11 +237,20 @@ scene(1, () => {
         }
     }
 
-    function spawnDamageNumber(position, damage){
+    function spawnDamageNumber(position, damage, crit){
+        let r = 255
+        let g = 0
+        let b = 0
+        let textValue = `${damage}`
+        if(crit){
+            textValue = "Critical Hit!"
+        }
+
         const damageText = add([
-            text(`${damage}`),
+            anchor("center"),
+            text(textValue),
             pos(position.x+Math.random()*20, position.y+Math.random()*20),  // Rand so numbers do not overlap (shotgun)
-            color(255, 0, 0),
+            color(r, g, b),
             { visabilityStep: 1 },
         ])
         
@@ -299,13 +323,13 @@ scene(1, () => {
 
     // amazing gadget class can be used for all gadget archetypes
     // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto, fireRate, penetration
-    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 5, 500, 1, false, 100, 1)
+    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 5, 500, 1, false, 100, 1, 0.3)
     sparkBlasterGlobal = sparkBlaster
-    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 5, 7, 8, 15, 3000, 2, false, 100, 0)
+    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 5, 7, 8, 15, 3000, 2, false, 100, 0, 0.15)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 4, 30, 1, 6, 2000, 2.5, true, 70, 3)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 2000, 2.5, true, 70, 3, 0.05)
     cyclerBlasterGlobal = cyclerBlaster
-    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 500, 5, 1, 0, 7000, 3, false, 200, 99)
+    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 500, 5, 1, 0, 7000, 3, false, 200, 99, 0.2)
     beamBlasterGlobal = beamBlaster
 
     const selectedGadgetName = selectedGadget || "Spark"
@@ -397,7 +421,7 @@ scene(1, () => {
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
             "enemy",    // For collision detection
             "object",
-            { speed: enemySpeed },
+            { speed: enemySpeed, isBoss: boss },
         ])
 
         enemy.on("death", () => {
@@ -409,7 +433,9 @@ scene(1, () => {
                 }
             }
             spawnCoin(enemy.pos)
-            if(Math.random()<0.1){  // 10% chance of ammo bag
+            enemiesDiedCounter++
+            if(enemiesDiedCounter == 7){
+                enemiesDiedCounter = 0
                 const ammoBag = add([
                     sprite("ammo"),
                     anchor("center"),
@@ -577,7 +603,8 @@ scene(1, () => {
             reloadLabel.text = `Reloading... ${gadgetGlobal.reloadTimer.toFixed(1)}s`
         }
         else if(gadgetGlobal.isReloading){
-            reloadLabel.text = `Reloading... ${gadgetGlobal.reloadTimer.toFixed(1)}s`
+            reloadLabel.text = ``
+            gadgetGlobal.isReloading = false
         }
         else{
             reloadLabel.text = `Magazine full`
