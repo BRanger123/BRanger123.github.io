@@ -620,9 +620,10 @@ scene(1, () => {
     onUpdate(() => {
         if (gadgetGlobal && gadgetGlobal.updateReload) {
             gadgetGlobal.updateReload(dt())
-            if (gadgetGlobal.isReloading) {
+            if(gadgetGlobal.isReloading){
                 reloadLabel.text = `Reloading... ${gadgetGlobal.reloadTimer.toFixed(1)}s`
-            } else if (reloadLabel.text.startsWith("Reloading")) {
+            }
+            else if(reloadLabel.text.startsWith("Reloading")){
                 reloadLabel.text = ``
             }
         }
@@ -659,8 +660,8 @@ scene(1, () => {
     // Collision with enemy
     onCollideUpdate("player", "enemy", () => {
         if(!isPaused){
-            player.hurt(1)
-            healthLabel.text = `Health: ${player.hp()}` // Update health label
+            player.hurt(0.5)
+            healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
             shake(8)           
         }
     })
@@ -1105,9 +1106,6 @@ scene(4, () => {
         player.hurt(1)
         shake(8)
     })
-    //player.onUpdate(() => {
-    //    camPos(player.pos)
-    //})
     onDestroy("enemy", () => {
         enemies.push(spawnEnemy())
     })

@@ -11,7 +11,7 @@
             <h3>By Barnaby Ranger</h3>
             <h2>Press M to go back here at any time</h2>
         	<div class="buttonContainer">
-                <button id="startButton" onclick="upgradeValue=0; websiteGoTo('weaponSelect')">Start</button><br>
+                <button id="startButton" onclick="upgradeValue=0; websiteGoTo('weaponSelect'); document.getElementById('currentGear').textContent = 'Gear: Not chosen'; document.getElementById('weaponSelectContinue').style.display = 'none'">Start</button><br>
                 <button id="questionButton" onclick="answerStreak = 0; startQuestion()">Questions</button><br>
                 <button id="statsButton" onclick="websiteGoTo('stats'); updateStats()">Stats</button><br>
                 <button id="settingsButton" onclick="websiteGoTo('settings')">Settings</button><br>
@@ -56,7 +56,7 @@
                 <button onclick="upgradeValue=6; selectUpgrade(`${this.textContent}`)">Crit % +</button><br>  
                 <button onclick="upgradeValue=7; selectUpgrade(`${this.textContent}`)">Magnet +</button><br>  
             </div>
-            <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); this.style.display = 'none'" style="display: none;">Continue</button>
+            <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); this.style.display = 'none'; document.getElementById('chosenUpgrade').textContent = 'Choosen Upgrade'" style="display: none;">Continue</button>
         </div>
 
         <div id="weaponSelect" style="display: none;">
