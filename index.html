@@ -99,16 +99,20 @@
                 <button id="answer4" onclick="checkAnswer(4)"></button>
             </div><br><br>
             <button id="continueButton" onclick="startQuestion()" style="display: none;">Continue</button>
-            <button id="continueGameButton" onclick="document.getElementById('backButton').style.display = 'inline-block'; websiteGoTo('upgrade')" style="display: none;">Continue</button><br><br>
-            <button onclick="websiteGoTo('menu')" id="backButton">Back</button><br>
+            <button id="continueGameButton" onclick="document.getElementById('backButton').style.display = 'inline-block'; gameQuestions=false; websiteGoTo('upgrade')" style="display: none;">Continue</button><br><br>
+            <button onclick="websiteGoTo('menu')" id="questionBackButton">Back</button><br>
         </div>
 
         <div id="settings" style="display: none;">
             <h1>Settings</h1>
             <h3>Questions in-game:</h3>
-            <input type="radio" name="questionsInGame" value="false" onclick="questionsInGame=false" checked>No
-            <input type="radio" name="questionsInGame" value="true" onclick="questionsInGame = true">Yes
-            <br>
+            <input type="radio" name="questionsInGame" onclick="questionsInGame=false" checked>No
+            <input type="radio" name="questionsInGame" onclick="questionsInGame = true">Yes
+            <br><!--
+            <h3>Dark Mode:</h3>
+            <input type="radio" name="darkMode" onclick="darkMode=false" checked>Off
+            <input type="radio" name="darkMode" onclick="darkMode = true">On
+            <br>-->
             <br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>

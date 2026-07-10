@@ -126,7 +126,7 @@ function resetAnswerButtons(){
 function startQuestion(){
     websiteGoTo('questions')
     if(gameQuestions){
-        document.getElementById('backButton').style.display = 'none'
+        document.getElementById('questionBackButton').style.display = 'none'
         document.getElementById('answerStreak').textContent = `Upgrade Multiplier: x${upgradeQuality}`
     }
     else{

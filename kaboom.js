@@ -456,7 +456,7 @@ scene(1, () => {
                 enemiesDiedCounter = 0
                 const ammoBag = add([
                     sprite("ammo"),
-                    scale(0.35),
+                    scale(0.3),
                     anchor("center"),
                     pos(enemy.pos),
                     area({ collisionIgnore: ["enemy"]}),    // Enemies dont get stuck on ammo
