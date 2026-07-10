@@ -23,7 +23,8 @@ loadSprite("blaster", "https://kaboomjs.com/sprites/gun.png")
 loadSprite("mark", "https://kaboomjs.com/sprites/mark.png")
 loadSprite("dino", "https://kaboomjs.com/sprites/dino.png")
 loadSprite("steel", "https://kaboomjs.com/sprites/steel.png")
-loadSprite("shotgun", "shotgun.png")
+loadSprite("blast", "blast.png")
+loadSprite("beam", "beam.png")
 loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
@@ -333,9 +334,19 @@ scene(1, () => {
     beamBlasterGlobal = beamBlaster
 
     const selectedGadgetName = selectedGadget || "Spark"
-    if(selectedGadgetName=="Blast"){gadgetGlobal = blastBlasterGlobal; blasterSprite.use(sprite("shotgun")); blasterSprite.use(scale(0.2)); blasterSprite.use(anchor("center"))}
+    if(selectedGadgetName=="Blast"){
+        gadgetGlobal = blastBlasterGlobal
+        blasterSprite.use(sprite("blast"))
+        blasterSprite.use(scale(0.2))
+        blasterSprite.use(anchor("center"))
+    }
     if(selectedGadgetName=="Cycler"){gadgetGlobal = cyclerBlasterGlobal}
-    if(selectedGadgetName=="Beam"){gadgetGlobal = beamBlasterGlobal}
+    if(selectedGadgetName=="Beam"){
+        gadgetGlobal = beamBlasterGlobal
+        blasterSprite.use(sprite("beam"))
+        blasterSprite.use(scale(0.2))
+        blasterSprite.use(anchor("center"))
+    }
     if(selectedGadgetName=="Spark"){gadgetGlobal = sparkBlasterGlobal}
     if(!gadgetGlobal){
         gadgetGlobal = sparkBlasterGlobal
@@ -496,6 +507,11 @@ scene(1, () => {
                     if(nextWaveTime <= -1){
                         nextWaveTimeLabel.text = ``
                         waiting = false
+                        //set player health to 100
+                        if(player.hp() < 100){
+                            player.heal(100 - player.hp())
+                        }
+                        healthLabel.text = `Health: ${player.hp()}`
                         spawnWave(rounds[round][0], rounds[round][1], rounds[round][2], rounds[round][3], rounds[round][4])
                         round += 1
                         roundLabel.text = `Round: ${round + 1}`
@@ -656,6 +672,9 @@ scene(1, () => {
         roundLabel.pos = camPos().add(vec2(-width()/2 + 20, -height()/2 + 24))
         const diff = mouseWorldPos.sub(player.pos)
         let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)
+        if(selectedGadgetName=="Beam"){
+            angle += 15     // Beam png is rotated in src
+        }
         blasterSprite.angle = angle
         blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
     })
