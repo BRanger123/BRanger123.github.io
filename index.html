@@ -12,9 +12,9 @@
             <h2>Press M to go back here at any time</h2>
         	<div class="buttonContainer">
                 <button id="startButton" onclick="upgradeValue=0; websiteGoTo('weaponSelect')">Start</button><br>
-                <button id="questionButton" onclick="startQuestion()">Questions</button><br>
+                <button id="questionButton" onclick="answerStreak = 0; startQuestion()">Questions</button><br>
                 <button id="statsButton" onclick="websiteGoTo('stats'); updateStats()">Stats</button><br>
-                <button id="informationButton" onclick="websiteGoTo('information')">Information</button><br>
+                <button id="settingsButton" onclick="websiteGoTo('settings')">Settings</button><br>
                 <button id="extrasButton" onclick="websiteGoTo('levelsMenu')">Extras</button><br>
             </div>
         </div>
@@ -44,49 +44,18 @@
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
 
-        <div id="information" style="display: none">
-            <h1>Information</h1>
-            <h2>Version 4.6 Patch Notes:</h2>
-            <h3>Sprites now load during initialization + reload timer + reload cancel + CRIT CHANCE</h3>
-            <text style="white-space: pre-line; width: 500px;">GCSE OCR Computer Science
-            Copyright (c) 2021 Replit
-            Permission is hereby granted, free of charge, to any person obtaining a copy
-            of this software and associated documentation files (the "Software"), to deal
-            in the Software without restriction, including without limitation the rights
-            to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-            copies of the Software, and to permit persons to whom the Software is
-            furnished to do so, subject to the following conditions:
-            The above copyright notice and this permission notice shall be included in all
-            copies or substantial portions of the Software.
-            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-            IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-            FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-            AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-            LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-            OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-            SOFTWARE.
-            </text>
-            <text style="white-space: pre-line; width: 500px;">Sprites not loading is not my fault, please refresh the page.</text><br>
-            <br><br>
-            <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
-        </div>
-
         <div id="upgrade" style="display: none;">
             <h1>Upgrade</h1>
             <h2 id="chosenUpgrade">Choosen Upgrade</h2>
             <div class="buttonContainer">
-                <button onclick="upgradeValue = 2; selectUpgrade(`${this.textContent}`)">Damage +30%</button><br>
-                <button onclick="upgradeValue = 3; selectUpgrade(`${this.textContent}`)">Capacity +30%</button><br>
-                <button onclick="upgradeValue = 4; selectUpgrade(`${this.textContent}`)">Magnet Boost</button><br>
-            </div>  <!--            <div class="buttonContainer">
-                <button onclick="selectUpgrade(`${this.textContent}`)">Damage +</button><br>
-                <button onclick="selectUpgrade(`${this.textContent}`)">Capacity +</button><br>
-                <button onclick="selectUpgrade(`${this.textContent}`)">Speed +</button><br>
-                <button onclick="selectUpgrade(`${this.textContent}`)">Penetration +</button><br>
-                <button onclick="selectUpgrade(`${this.textContent}`)">Shots Fired +</button><br>
-                <button onclick="selectUpgrade(`${this.textContent}`)">Crit Chance +</button><br>  
-                <button onclick="selectUpgrade(`${this.textContent}`)">Magnet +</button><br>  
-            </div>-->
+                <button onclick="upgradeValue=1; selectUpgrade(`${this.textContent}`)">Damage +</button><br>
+                <button onclick="upgradeValue=2; selectUpgrade(`${this.textContent}`)">Capacity +</button><br>
+                <button onclick="upgradeValue=3; selectUpgrade(`${this.textContent}`)">Speed +</button><br>
+                <button onclick="upgradeValue=4; selectUpgrade(`${this.textContent}`)">Penetration +</button><br>
+                <button onclick="upgradeValue=5; selectUpgrade(`${this.textContent}`)">Shots Fired +</button><br>
+                <button onclick="upgradeValue=6; selectUpgrade(`${this.textContent}`)">Crit % +</button><br>  
+                <button onclick="upgradeValue=7; selectUpgrade(`${this.textContent}`)">Magnet +</button><br>  
+            </div>
             <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); this.style.display = 'none'" style="display: none;">Continue</button>
         </div>
 
@@ -129,8 +98,19 @@
                 <button id="answer3" onclick="checkAnswer(3)"></button><br>
                 <button id="answer4" onclick="checkAnswer(4)"></button>
             </div><br><br>
-            <button id="continueButton" onclick="startQuestion()" style="display: none;">Continue</button><br><br>
+            <button id="continueButton" onclick="startQuestion()" style="display: none;">Continue</button>
+            <button id="continueGameButton" onclick="document.getElementById('backButton').style.display = 'inline-block'; websiteGoTo('upgrade')" style="display: none;">Continue</button><br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button><br>
+        </div>
+
+        <div id="settings" style="display: none;">
+            <h1>Settings</h1>
+            <h3>Questions in-game:</h3>
+            <input type="radio" name="questionsInGame" value="false" onclick="questionsInGame=false" checked>No
+            <input type="radio" name="questionsInGame" value="true" onclick="questionsInGame = true">Yes
+            <br>
+            <br>
+            <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
 
         <script type="module" src="kaboom.js"></script>

@@ -1,6 +1,7 @@
 let gadgetGlobal
 let playerSkin = "bean"
 let upgradeValue = 0
+let upgradeQuality = 1
 let levelGlobal = -1        // Globals so Kaboom objects can be seen in entire src
 let currentDivId = "menu"
 let answerStreak = 0
@@ -13,6 +14,8 @@ let sparkBlasterGlobal
 let cyclerBlasterGlobal
 let beamBlasterGlobal
 let questions
+let questionsInGame = false
+let gameQuestions = false
 
 function getQuestions() {
     const xhr = new XMLHttpRequest()
@@ -49,6 +52,10 @@ input.addEventListener("keypress", function(event){
 input.addEventListener("keypress", function(event) {
     const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
     if (event.key === "k" && gameIsVisible){
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
         if(levelGlobal == 1){
             event.preventDefault()
             websiteGoTo('weaponSelect')
@@ -118,7 +125,15 @@ function resetAnswerButtons(){
 
 function startQuestion(){
     websiteGoTo('questions')
+    if(gameQuestions){
+        document.getElementById('backButton').style.display = 'none'
+        document.getElementById('answerStreak').textContent = `Upgrade Multiplier: x${upgradeQuality}`
+    }
+    else{
+        document.getElementById('answerStreak').textContent = `Answer Streak: ${answerStreak}`
+    }
     document.getElementById('continueButton').style.display = 'none'
+    document.getElementById('continueGameButton').style.display = 'none'
     const sourceQuestion = questions[Math.floor(Math.random() * questions.length)]
     const shuffledAnswers = shuffleArray(sourceQuestion.answers.map((text, idx) => ({
         text,
@@ -148,17 +163,31 @@ function checkAnswer(answerNum){
         document.getElementById(`answer${answerNum + 1}`).style.backgroundColor = 'lightgreen'
         answerStreak = answerStreak + 1
         if(answerStreak > highestAnswerStreak){highestAnswerStreak = answerStreak}
+        if(gameQuestions){
+            upgradeQuality += 1
+            document.getElementById('answerStreak').textContent = `Upgrade Multiplier: x${upgradeQuality}`
+            document.getElementById('continueButton').style.display = 'inline-block'
+        }
         // alert('Correct answer!')
     }
     else {
         document.getElementById(`answer${answerNum + 1}`).style.backgroundColor = 'salmon'
         const correctAnswerNum = currentQuestion.answers.findIndex(ans => ans.isCorrect)
         document.getElementById(`answer${correctAnswerNum + 1}`).style.backgroundColor = 'lightgreen'   // Sets correct answer to green
-        answerStreak = 0
+        if(!gameQuestions){answerStreak = 0}
+        else{
+            document.getElementById('answerStreak').textContent = `Final Upgrade Multiplier: x${upgradeQuality}`
+            document.getElementById('continueGameButton').style.display = 'inline-block'
+        }
         // alert('Incorrect answer.')
     }
-    document.getElementById('answerStreak').textContent = `${answerStreak}`
-    document.getElementById('continueButton').style.display = 'inline-block'
+    if(gameQuestions){
+        document.getElementById('answerStreak').textContent = `Upgrade Multiplier: x${upgradeQuality}`
+    }
+    else{
+        document.getElementById('answerStreak').textContent = `Answer Streak: ${answerStreak}`
+        document.getElementById('continueButton').style.display = 'inline-block'
+    }
 }
 
 function updateStats(){

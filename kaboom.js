@@ -18,13 +18,14 @@ kaboom({
 loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
 loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")        // Load assets
 loadSprite("coin", "https://kaboomjs.com/sprites/coin.png")
-loadSprite("ammo", "https://kaboomjs.com/sprites/jumpy.png")
+loadSprite("ammo", "ammo.png")
 loadSprite("blaster", "https://kaboomjs.com/sprites/gun.png")
 loadSprite("mark", "https://kaboomjs.com/sprites/mark.png")
 loadSprite("dino", "https://kaboomjs.com/sprites/dino.png")
 loadSprite("steel", "https://kaboomjs.com/sprites/steel.png")
 loadSprite("blast", "blast.png")
 loadSprite("beam", "beam.png")
+loadSprite("cycler", "cycler.png")
 loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
@@ -125,6 +126,7 @@ scene(1, () => {
     let enemiesDied = 0
     let enemiesDiedCounter = 0
     upgradeValue = 0
+    upgradeQuality = 1
     let isPaused = false
     let mouseDown = false
     let waiting = false
@@ -340,7 +342,12 @@ scene(1, () => {
         blasterSprite.use(scale(0.2))
         blasterSprite.use(anchor("center"))
     }
-    if(selectedGadgetName=="Cycler"){gadgetGlobal = cyclerBlasterGlobal}
+    if(selectedGadgetName=="Cycler"){
+        gadgetGlobal = cyclerBlasterGlobal
+        blasterSprite.use(sprite("cycler"))
+        blasterSprite.use(scale(0.2))
+        blasterSprite.use(anchor("center"))
+    }
     if(selectedGadgetName=="Beam"){
         gadgetGlobal = beamBlasterGlobal
         blasterSprite.use(sprite("beam"))
@@ -449,6 +456,7 @@ scene(1, () => {
                 enemiesDiedCounter = 0
                 const ammoBag = add([
                     sprite("ammo"),
+                    scale(0.35),
                     anchor("center"),
                     pos(enemy.pos),
                     area({ collisionIgnore: ["enemy"]}),    // Enemies dont get stuck on ammo
@@ -474,7 +482,9 @@ scene(1, () => {
                     isPaused = true
                     destroyAll("beam")
                     hintLabel.text = `Click to continue with upgrade`
-                    websiteGoTo('upgrade')  // Upgrade selection
+                    gameQuestions = true
+                    if(questionsInGame){startQuestion()}
+                    else{websiteGoTo('upgrade')}
                     onClick(() => upgrade())
                 }
             }
@@ -486,16 +496,19 @@ scene(1, () => {
         if(upgradeValue!=0){
             isPaused = false
             hintLabel.text = ``
-            if(upgradeValue==1){player.heal(100), healthLabel.text = `Health: ${player.hp()}`}
-            if(upgradeValue==2){gadgetGlobal.beamDamage += Math.floor(gadgetGlobal.beamDamage*0.3)}
-            if(upgradeValue==3){gadgetGlobal.magSize += Math.floor(gadgetGlobal.magSize*0.3); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
-            if(upgradeValue==4){coinMagForce += 120000}
-            if(upgradeValue==5){gadgetGlobal.isFullAuto = true}
+            if(upgradeValue==1){gadgetGlobal.beamDamage += Math.floor(gadgetGlobal.beamDamage*0.3*upgradeQuality)}
+            if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(gadgetGlobal.magSize*0.3*upgradeQuality); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
+            if(upgradeValue==3){player.speed += Math.floor(player.speed*0.3*upgradeQuality)}
+            if(upgradeValue==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
+            if(upgradeValue==5){gadgetGlobal.beamsFired += Math.floor(1*upgradeQuality)}
+            if(upgradeValue==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
+            if(upgradeValue==7){coinMagForce += 120000*upgradeQuality}
             if(upgradeValue==-1){player.use(sprite("mark"))}
             if(upgradeValue==-2){player.use(sprite("ghosty"))}
             if(upgradeValue==-3){player.use(sprite("dino"))}
             if(upgradeValue==-4){player.use(sprite("dc"))}
             upgradeValue=0  // Reset upgrade so does not reapply on click
+            upgradeQuality = 1
 
             let nextWaveTime = 5
             const clock = add([timer()])
@@ -679,10 +692,10 @@ scene(1, () => {
         blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
     })
 
-    onDestroy("player", () => go("deathScreen", enemiesDied+coins)) // If off screen
+    onDestroy("player", () => go("deathScreen", enemiesDied*coins)) // If off screen
     player.on("death", () => {
         destroy(player)
-        go("deathScreen", enemiesDied+coins)
+        go("deathScreen", enemiesDied*coins)
     })
 })
 
