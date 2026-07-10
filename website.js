@@ -164,7 +164,8 @@ function checkAnswer(answerNum){
         answerStreak = answerStreak + 1
         if(answerStreak > highestAnswerStreak){highestAnswerStreak = answerStreak}
         if(gameQuestions){
-            upgradeQuality += 1
+            upgradeQuality += 0.2
+            upgradeQuality = parseFloat(upgradeQuality.toFixed(1))  // Floating point error
             document.getElementById('answerStreak').textContent = `Upgrade Multiplier: x${upgradeQuality}`
             document.getElementById('continueButton').style.display = 'inline-block'
         }
