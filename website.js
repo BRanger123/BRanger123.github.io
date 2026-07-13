@@ -16,6 +16,7 @@ let beamBlasterGlobal
 let questions
 let questionsInGame = false
 let gameQuestions = false
+let darkMode = false
 
 function getQuestions() {
     const xhr = new XMLHttpRequest()

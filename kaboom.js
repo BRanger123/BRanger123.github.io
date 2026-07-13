@@ -30,6 +30,13 @@ loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203
 loadBean()
 
 scene("startButton", () => {
+    let red = 255
+    let green = 255
+    let blue = 255
+    let textColor = rgb(0, 0, 0)
+    if(darkMode){red = 0; green = 0; blue = 0; textColor = rgb(255, 255, 255)}
+    else{red = 255; green = 255; blue = 255; textColor = rgb(0, 0, 0)}
+    setBackground(rgb(red, green, blue))
     const btn = add([
         rect(240, 80, { radius: 8 }),
         pos(center()),
@@ -64,9 +71,14 @@ scene("startButton", () => {
 })
 
 scene(1, () => {
-
+    let red = 255
+    let green = 255
+    let blue = 255
+    let textColor = rgb(0, 0, 0)
+    if(darkMode){red = 0; green = 0; blue = 0; textColor = rgb(255, 255, 255)}
+    else{red = 255; green = 255; blue = 255; textColor = rgb(0, 0, 0)}
+    setBackground(rgb(red, green, blue))
     setGravity(0)
-    setBackground(rgb(255, 255, 255))
     addLevel([
         "===================================================================================================",
         "=                                                                                                 =",
@@ -203,7 +215,7 @@ scene(1, () => {
                     pos(player.pos),
                     rect(8,8),
                     area(),
-                    color(this.beamColor),
+                    color(textColor),
                     "beam",   // For collision detection
                     "object",
                     { speed: this.beamSpeed, dir: direction, penetration: this.penetration },
@@ -365,49 +377,49 @@ scene(1, () => {
         text(`Coins: ${coins}`),
         anchor("right"),
         pos(0, 0),
-        color(0, 0, 0),
+        color(textColor),
     ])
     const hintLabel = add([
         text(""),
         anchor("center"),
         pos(0, 0),
-        color(0, 0, 0),
+        color(textColor),
     ])
     const ammoLabel = add([
         text(`Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`),
         anchor("left"),
         pos(0, 0),
-        color(0, 0, 0),
+        color(textColor),
     ])
     const healthLabel = add([
         text(`Health: ${player.hp()}`),
         anchor("right"),
         pos(0, 0),
-        color(0, 0, 0),
+        color(textColor),
     ])
     const controlsLabel = add([
         text("Click to fire"),
         anchor("center"),
         pos(0, 0),
-        color(0, 0, 0),
+        color(textColor),
     ])
     const reloadLabel = add([
         text(""),
         anchor("center"),
         pos(0, 0),
-        color(0, 0, 0),
+        color(textColor),
     ])
     const nextWaveTimeLabel = add([
         text(""),
         anchor("center"),
         pos(0, 0),
-        color(0, 0, 0),
+        color(textColor),
     ])
     const roundLabel = add([
         text("Round: 1"),
         anchor("left"),
         pos(0, 0),
-        color(0, 0, 0),
+        color(textColor),
     ])
 
     function spawnEnemy(difficulty, makeBoss){
@@ -701,6 +713,12 @@ scene(1, () => {
 })
 
 scene("deathScreen", (score) => {
+    let red = 255
+    let green = 255
+    let blue = 255
+    if(darkMode){red = 0; green = 0; blue = 0}
+    else{red = 255; green = 255; blue = 255}
+    setBackground(rgb(red, green, blue))
     add([
         text("Press M to return to menu"),
         pos(center()),
@@ -727,6 +745,12 @@ scene("deathScreen", (score) => {
 })
 
 scene("winScreen", () => {
+    let red = 255
+    let green = 255
+    let blue = 255
+    if(darkMode){red = 0; green = 0; blue = 0}
+    else{red = 255; green = 255; blue = 255}
+    setBackground(rgb(red, green, blue))
     add([
         text("Press M to return to menu"),
         pos(center()),
@@ -742,6 +766,13 @@ scene("winScreen", () => {
 })
 
 scene(2, () => {
+    let red = 255
+    let green = 255
+    let blue = 255
+    let textColor = rgb(0, 0, 0)
+    if(darkMode){red = 0; green = 0; blue = 0; textColor = rgb(255, 255, 255)}
+    else{red = 255; green = 255; blue = 255; textColor = rgb(0, 0, 0)}
+    setBackground(rgb(red, green, blue))
     setGravity(1600)
     setCursor("default")
     addLevel([
@@ -784,12 +815,12 @@ scene(2, () => {
     const scoreLabel = add([
         text(score),
         pos(24, 24),
-        color(0, 0, 0),
+        color(textColor),
     ])
     const obj = add([
         text("Survive!"),
         pos(center().x-80, 24),
-        color(0, 0, 0),
+        color(textColor),
     ])
     onUpdate(() => {
         score++
@@ -836,6 +867,13 @@ scene(2, () => {
 })
 
 scene(3, () => {
+    let red = 255
+    let green = 255
+    let blue = 255
+    let textColor = rgb(0, 0, 0)
+    if(darkMode){red = 0; green = 0; blue = 0; textColor = rgb(255, 255, 255)}
+    else{red = 255; green = 255; blue = 255; textColor = rgb(0, 0, 0)}
+    setBackground(rgb(red, green, blue))
     setGravity(1600)
     setCursor("default")
     addLevel([
@@ -897,12 +935,12 @@ scene(3, () => {
     const controlsLabel = add([
         text("Press e to place blocks"),
         pos(center().x-250, 24),
-        color(0, 0, 0),
+        color(textColor),
     ])
     const hintLabel = add([
         text("Press k to restart"),
         pos(width()-450, height()-100),
-        color(0, 0, 0),
+        color(textColor),
     ])
     onKeyPress("space", () => {
         if (player.isGrounded()) {
@@ -934,7 +972,7 @@ scene(3, () => {
     const blockLabel = add([
         text(`Blocks: ${blocks}`),
         pos(24, 24),
-        color(0, 0, 0),
+        color(textColor),
     ])
     onKeyPress("e", () => {
         if (blocks >0) {
