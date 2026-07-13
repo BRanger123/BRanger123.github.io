@@ -75,8 +75,23 @@ button:active{
 #startButton{background-color: #e0fbfc;}
 #questionButton{background-color: #c2dfe3;}
 #statsButton{background-color: #9db4c0;}
-#settingsButton{background-color: #5c6b73; color: rgb(230, 230, 230);}
+#settingsButton{background-color: #5c6b73; color: rgb(255, 255, 255);}
 #extrasButton{background-color: #253237; color: white;}
+
+#answer1{
+
+}
+#answer2{
+
+}
+#answer3{
+
+}
+#answer4{
+
+}
+
+
 #gameCanvas{
     display: inline-block;
     margin: 0 auto;

@@ -111,14 +111,11 @@ scene(1, () => {
         "===================================================================================================",
     ],
     {
-        // Define the size of tile block
-        tileWidth: 64,
+        tileWidth: 64,  // Same size as steel sprite
         tileHeight: 64,
-        // Define what each symbol means
         tiles: {
             "=": () => [
                 sprite("steel"),
-
                 area(),
                 body({ isStatic: true }),
                 color(138,121,93),

@@ -52,7 +52,7 @@ input.addEventListener("keypress", function(event){
 })
 input.addEventListener("keypress", function(event) {
     const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
-    if (event.key === "k" && gameIsVisible){
+    if (event.key === "k" && gameIsVisible && levelGlobal != 4){
         canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
         canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
         canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
@@ -72,10 +72,6 @@ const originalTitle = document.title
     document.addEventListener("visibilitychange", () => {
     document.title = document.hidden ? "Come back :(" : originalTitle
 })
-
-// Now define functions for website navigation and level loading
-
-
 
 function websiteGoTo(divId){
     document.getElementById(currentDivId).style.display = "none"        // When called, must use div id in '' for function call
