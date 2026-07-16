@@ -113,6 +113,12 @@
             <input type="radio" name="darkMode" onclick="document.getElementById('body').style.backgroundColor = 'white'; document.getElementById('body').style.color = 'black'; darkMode = false" checked>Off
             <input type="radio" name="darkMode" onclick="document.getElementById('body').style.backgroundColor = 'black'; document.getElementById('body').style.color = 'white'; darkMode = true">On
             <br>
+            <h3>Change questions:</h3>
+            <textarea id="customQuestions" placeholder="<Format:> 
+Question1,CorrectAnswer,Answer,Answer,Answer
+Question2,CorrectAnswer,Answer,Answer,Answer" rows="18" cols="55"></textarea><br>
+            <button onclick="if(document.getElementById('customQuestions').value != ''){questions = changeQuestions()}">Use</button>
+            <br>
             <br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>

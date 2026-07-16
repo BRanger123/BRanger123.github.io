@@ -27,6 +27,7 @@ loadSprite("blast", "blast.png")
 loadSprite("beam", "beam.png")
 loadSprite("cycler", "cycler.png")
 loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
+loadSprite("treasure", "https://th.bing.com/th/id/OIP.7TqZRNeJth1vSAPD073pywAAAA?w=96&h=96&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
 scene("startButton", () => {
@@ -79,6 +80,31 @@ scene(1, () => {
     else{red = 255; green = 255; blue = 255; textColor = rgb(0, 0, 0)}
     setBackground(rgb(red, green, blue))
     setGravity(0)
+
+    let buildings = [
+        [
+            "====================",
+            "                   =",
+            "              t    =",
+            "=                  =",
+            "=      b           =",
+            "=                  =",
+            "=                  =",
+            "=                  =",
+            "=                  =",
+            "===========bbb======",
+        ],
+        [
+
+        ],
+        [
+
+        ],
+        [
+
+        ]
+    ]
+
     addLevel([
         "===================================================================================================",
         "=                                                                                                 =",
@@ -113,6 +139,7 @@ scene(1, () => {
     {
         tileWidth: 64,  // Same size as steel sprite
         tileHeight: 64,
+        //  pos: vec2(100, 200),
         tiles: {
             "=": () => [
                 sprite("steel"),
@@ -120,6 +147,20 @@ scene(1, () => {
                 body({ isStatic: true }),
                 color(138,121,93),
                 "tile",
+                "object",
+            ],
+            "t": () => [
+                sprite("treasure"),
+                area(),
+                body({ isStatic: true }),
+                "treasure",
+                "object",
+            ],
+            "b": () => [
+                sprite("steel"),
+                area(),
+                body(),
+                "box",
                 "object",
             ]
         }

@@ -36,6 +36,16 @@ function getQuestions() {
 }
 questions = getQuestions()
 
+function changeQuestions(){
+    return document.getElementById('customQuestions').value.trim().split('\n').map(line => {
+        const parts = line.split(',')
+        return {
+            question: parts[0].trim(),
+            answers: parts.slice(1).map(a => a.trim()),
+        }
+    })
+}
+
 var input = document.getElementById("body")
 input.addEventListener("keypress", function(event){
     const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
