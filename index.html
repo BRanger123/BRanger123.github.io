@@ -117,7 +117,7 @@
             <textarea id="customQuestions" placeholder="<Format:> 
 Question1,CorrectAnswer,Answer,Answer,Answer
 Question2,CorrectAnswer,Answer,Answer,Answer" rows="18" cols="55"></textarea><br>
-            <button onclick="if(document.getElementById('customQuestions').value != ''){questions = changeQuestions()}">Use</button>
+            <button onclick="if(document.getElementById('customQuestions').value != ''){questions = changeQuestions()}else{alert('Cannot use no questions!')}">Use</button>
             <br>
             <br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>

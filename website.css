@@ -1,6 +1,6 @@
 body{
     text-align: center;
-    font-family: "Century Gothic";
+    font-family: "Verdana";
     background-color:rgb(255, 255, 255);
     color: rgb(0, 0, 0)
 }
@@ -20,7 +20,6 @@ button{
     border-color: black;
     border-width: 2px;
     border-radius: 6px;
-    font-family: 'Century Gothic';
     font-weight: 1000;
     background-color: rgb(231, 231, 231);
     cursor: pointer;

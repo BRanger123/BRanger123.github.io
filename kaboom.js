@@ -10,7 +10,7 @@ kaboom({
     canvas: canvas,
     width: window.innerWidth,
     height: window.innerHeight,
-    background: [255, 255, 255],
+    background: [0, 0, 0],              //////////////////////redgreenblue/////////////////////////////////////////////////////////////
     font: "arial",
     letterBox: true,
 })
@@ -1032,8 +1032,14 @@ scene(3, () => {
 })
 
 scene(4, () => {
+    let red = 255
+    let green = 255
+    let blue = 255
+    let textColor = rgb(0, 0, 0)
+    if(darkMode){red = 0; green = 0; blue = 0; textColor = rgb(255, 255, 255)}
+    else{red = 255; green = 255; blue = 255; textColor = rgb(0, 0, 0)}
+    setBackground(rgb(red, green, blue))
     setGravity(0)
-    setBackground(rgb(247, 247, 247))
     let score = 0
     function bullet() {
         let direction = toWorld(mousePos()).sub(player.pos).unit()
@@ -1104,17 +1110,17 @@ scene(4, () => {
     const scoreLabel = add([
         text(`Score: ${score}`),
         pos(width()-240, height()-100),
-        color(0, 0, 0),
+        color(textColor),
     ])
     const healthLabel = add([
         text(`Health: ${player.hp()}`),
         pos(24, height()-100),
-        color(0, 0, 0),
+        color(textColor),
     ])
     const obj = add([
         text("Survive!"),
         pos(center().x-80, 24),
-        color(0, 0, 0),
+        color(textColor),
     ])
     
     // Make enemies
