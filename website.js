@@ -17,9 +17,7 @@ let questions
 let questionsInGame = false
 let gameQuestions = false
 let darkMode = false
-    let red = 255
-    let green = 255
-    let blue = 255
+
 
 function getQuestions() {
     const xhr = new XMLHttpRequest()
