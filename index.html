@@ -11,8 +11,8 @@
             <h3>By Barnaby Ranger</h3>
             <h2>Press M to go back here at any time</h2>
         	<div class="buttonContainer">
-                <button id="startButton" onclick="upgradeValue=0; websiteGoTo('weaponSelect'); document.getElementById('currentGear').textContent = 'Gear: Not chosen'; document.getElementById('weaponSelectContinue').style.display = 'none'">Start</button><br>
-                <button id="questionButton" onclick="answerStreak = 0; startQuestion()">Questions</button><br>
+                <button id="startButton" onclick="upgradeValue=0; websiteGoTo('weaponSelect'); document.getElementById('currentGear').textContent = 'Gear: Not chosen'; document.getElementById('weaponSelectContinue').style.display = 'none'">Game</button><br>
+                <button id="questionButton" onclick="answerStreak = 0; startQuestion()">Quiz</button><br>
                 <button id="statsButton" onclick="websiteGoTo('stats'); updateStats()">Stats</button><br>
                 <button id="settingsButton" onclick="websiteGoTo('settings')">Settings</button><br>
                 <button id="extrasButton" onclick="websiteGoTo('levelsMenu')">Extras</button><br>
@@ -118,7 +118,7 @@
             <textarea id="customQuestions" placeholder="<Format:> 
 Question1,CorrectAnswer,Answer,Answer,Answer
 Question2,CorrectAnswer,Answer,Answer,Answer" rows="18" cols="45"></textarea><br>
-            <button onclick="if(document.getElementById('customQuestions').value != ''){questions = changeQuestions()}else{alert('Cannot use no questions!')}">Use</button>
+            <button onclick="if(document.getElementById('customQuestions').value != ''){questions = changeQuestions()}else{alert('Cannot use no questions!')}">Use Custom Questions</button>
             <br>
             <br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
