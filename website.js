@@ -15,7 +15,7 @@ let cyclerBlasterGlobal
 let beamBlasterGlobal
 let questions
 let questionsInGame = false
-let gameQuestions = false
+let gameQuestions = true
 let darkMode = false
 
 
