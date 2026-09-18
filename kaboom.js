@@ -81,66 +81,10 @@ scene(1, () => {
     setBackground(rgb(red, green, blue))
     setGravity(0)
 
-    addLevel([
-        "===================================================================================================",
-        "=                                                                                                 =",
-        "=                                                                                                 =",
-        "=                         =                                              =                        =",
-        "=                         =                                              =                        =",
-        "=                         =                   =                          =                        =",
-        "=    ========             =                   =                          =                        =",
-        "=                         =                   =                          =                        =",
-        "=                                             =                          =                        =",
-        "=                                             =                                    ==             =",
-        "=                                             =                                     ==            =",
-        "=                ==========                   =                                      ==           =",
-        "=                                  ==                                                 ==          =",
-        "=                                 ==                                                              =",
-        "=                                ==                     ==================                        =",
-        "=                               ==                                                                =",
-        "=                              ==                                                                 =",
-        "=                             ==               =              =                                   =",
-        "=                                              =              =                                   =",
-        "=           ===========                        =              =                ==                 =",
-        "=           =                                  =                              ==                  =",
-        "=           =                             ======                             ==                   =",
-        "=           =                                                               ==                    =",
-        "=           =                     =                                        ==                     =",
-        "=           =                     =                                       ==                      =",
-        "=                                 =                                      ==                       =",
-        "=                                                                       ==                        =",
-        "=                                                                                                 =",
-        "===================================================================================================",
-    ],
-    {
-        tileWidth: 64,  // Same size as steel sprite
-        tileHeight: 64,
-        //  pos: vec2(100, 200),
-        tiles: {
-            "=": () => [
-                sprite("steel"),
-                area(),
-                body({ isStatic: true }),
-                color(138,121,93),
-                "tile",
-                "object",
-            ],
-            "t": () => [
-                sprite("treasure"),
-                area(),
-                body({ isStatic: true }),
-                "treasure",
-                "object",
-            ],
-            "b": () => [
-                sprite("steel"),
-                area(),
-                body(),
-                "box",
-                "object",
-            ]
-        }
-    })
+    const minX = 0
+    const minY = 0
+    const maxX = 1000
+    const maxY = 1000
 
     //spawnWave(1, 3, 5, 2) // spawns 5 enemies 2x as strong for 3 waves every 1 second
     let rounds = [[6, 4, 5, 1.5, false],[5, 2, 3, 2, false],[6, 5, 13, 1.5, false],[1, 1, 1, 1, true],[4, 3, 7, 2, false], [7, 6, 15, 2, false]]      // loop through preset round types. (like BTD6).
@@ -238,9 +182,8 @@ scene(1, () => {
                 beam.onUpdate(() => {beam.move(beam.dir.scale(this.beamSpeed))})    // Moves in dir by speed every frame
                 beam.onCollide("enemy", (enemy) => {
                     if(Math.random() <= this.critChance){
-                        spawnDamageNumber(enemy.pos, this.beamDamage, true)
-                        if(enemy.isBoss){enemy.hurt(this.beamDamage*3)}
-                        else{enemy.hurt(3000)}
+                        spawnText(enemy.pos, this.beamDamage, true)
+                        enemy.hurt(this.beamDamage*3)
                         if(beam.penetration > 0){
                             beam.penetration--
                         }
@@ -249,7 +192,7 @@ scene(1, () => {
                         }
                     }
                     else{
-                        spawnDamageNumber(enemy.pos, this.beamDamage, false)
+                        spawnText(enemy.pos, this.beamDamage, false)
                         enemy.hurt(this.beamDamage)
                         if(beam.penetration > 0){
                             beam.penetration--
@@ -265,34 +208,33 @@ scene(1, () => {
             reloadLabel.text = ``   // Remove mag full message
         }
     }
-
-    function spawnDamageNumber(position, damage, crit){
-        let r = 255
-        let g = 0
-        let b = 0
-        let textValue = `${damage}`
+    
+    function spawnText(position, textContent, crit){
         if(crit){
-            textValue = "Critical Hit!"
+            textColor = rgb(255, 0, 0)
+            textContent = "Critical Hit!" 
         }
 
-        const damageText = add([
+
+        const textObject = add([
             anchor("center"),
-            text(textValue),
+            text(`${textContent}`),
             pos(position.x+Math.random()*20, position.y+Math.random()*20),  // Rand so numbers do not overlap (shotgun)
-            color(r, g, b),
+            color(textColor),
             { visabilityStep: 1 },
         ])
-        
-        damageText.onUpdate(() => {
-            damageText.pos.y -= 100 * dt()  // Float upward (backwards coordinates)
-            damageText.visabilityStep -= dt()   // Use deltatime() for smooth changes
-            damageText.opacity = damageText.visabilityStep
+       
+        textObject.onUpdate(() => {
+            textObject.pos.y -= 100 * dt()  // Float upward (backwards coordinates)
+            textObject.visabilityStep -= dt()   // Use deltatime() for smooth changes
+            textObject.opacity = textObject.visabilityStep
         })
-        
+       
         wait(1, () => {
-            destroy(damageText)
+            destroy(textObject)
         })
     }
+
 
     function spawnCoin(xy){ // Argument cannot be "pos"
         const coin = add([
@@ -315,7 +257,7 @@ scene(1, () => {
     // Player code
     const player = add([
         sprite("bean"),
-        pos(center()),
+        pos(maxX/2, maxY/2),
         area(),
         anchor("center"),   // So beams spawn at center
         body(),
@@ -601,6 +543,8 @@ scene(1, () => {
         if (isKeyDown("s")){dir.y = 1}
         const unitVec = dir.unit()  // Vector normalisation (fixes diagonals)
         player.move(unitVec.scale(player.speed))    // Moves in dir by speed every frame
+        player.pos.x = Math.max(0, Math.min(player.pos.x, maxX - 32))
+        player.pos.y = Math.max(0, Math.min(player.pos.y, maxY - 32))
 
         if (player.recoil && player.recoil.len() > 0){ // If recoil vector exists and is not zero
             const recoilDamping = 15
