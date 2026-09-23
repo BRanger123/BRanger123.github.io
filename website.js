@@ -17,6 +17,8 @@ let questions
 let questionsInGame = false 
 let gameQuestions = false
 let darkMode = false
+let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }
+let bindingTarget = null
 
 
 function getQuestions() {
@@ -48,6 +50,14 @@ function changeQuestions(){
 }
 
 var input = document.getElementById("body")
+input.addEventListener("keydown", function(event){
+    if(!bindingTarget || event.key.length !== 1) return
+    event.preventDefault()
+    controlBindings[bindingTarget] = event.key.toLowerCase()
+    document.getElementById(`control-${bindingTarget}`).textContent = event.key.toUpperCase()
+    document.getElementById('controlStatus').textContent = 'Control updated.'
+    bindingTarget = null
+})
 input.addEventListener("keypress", function(event){
     const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
     if (event.key === "m"){
@@ -207,7 +217,23 @@ function updateStats(){
 function selectGadget(gearName) {
     selectedGadget = `${gearName}`
     document.getElementById('currentGear').textContent = `Gear: ${gearName}` || ''
+    const info = {
+        Blast: 'High spread buckshot blaster.',
+        Cycler: 'Fully automatic with a large ammo pool.',
+        Beam: 'Long range piercing projectile cannon.',
+        Spark: '6-shot sidearm with fast reload and critical hits.',
+    }
+    document.getElementById('weaponInfo').textContent = info[gearName] || ''
     document.getElementById('weaponSelectContinue').style.display = "inline-block"        
 }
+
+function beginControlBind(control) {
+    bindingTarget = control
+    document.getElementById('controlStatus').textContent = `Press a key for ${control}.`
+}
+
+//window.addEventListener('beforeunload', (event) => {
+//    event.preventDefault()
+//})
 
 websiteGoTo('menu')

@@ -87,8 +87,7 @@ scene(1, () => {
     const maxY = 1000
 
     //spawnWave(1, 3, 5, 2) // spawns 5 enemies 2x as strong for 3 waves every 1 second
-    let rounds = [[6, 4, 5, 1.5, false],[5, 2, 3, 2, false],[6, 5, 13, 1.5, false],[1, 1, 1, 1, true],[4, 3, 7, 2, false], [7, 6, 15, 2, false]]      // loop through preset round types. (like BTD6).
-    let round = 0
+    let round = 1
 
     const enemies = []
     const spawnDist = 500
@@ -211,7 +210,6 @@ scene(1, () => {
     
     function spawnText(position, textContent, crit){
         if(crit){
-            textColor = rgb(255, 0, 0)
             textContent = "Critical Hit!" 
         }
 
@@ -264,7 +262,7 @@ scene(1, () => {
         health(100),
         "player",   // For collision detection
         "object",
-        { speed: 400, recoil: vec2(0, 0) }, // Recoil 2d vector for fluid recoil
+        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, dodge: 0 }, // Recoil 2d vector for fluid recoil
     ])
     
     player.onCollide("coin", (coin) => {
@@ -379,22 +377,39 @@ scene(1, () => {
     ])
 
     function spawnEnemy(difficulty, makeBoss){
-        let x
-        let y
-        const angle = Math.random() * 360
-        x = player.pos.x + Math.cos(angle) * spawnDist
-        y = player.pos.y + Math.sin(angle) * spawnDist
-        
+        const x = rand(minX + 40, maxX - 40)
+        const y = rand(minY + 40, maxY - 40)
+        const marker = add([
+            pos(x, y), circle(24), color(255, 0, 0), opacity(0.75),
+            outline(4, textColor), "spawnMarker",
+        ])
+        wait(1.25, () => {
+            if (marker.exists()) destroy(marker)
+            if (!isPaused && player.exists()) createEnemy(x, y, difficulty, makeBoss)
+        })
+    }
+
+    function createEnemy(x, y, difficulty, makeBoss){
         let boss = false
         let enemySprite = "ghosty"
         let enemyHealth = (Math.random() * 30 + 10) * difficulty
         let enemySpeed = ((Math.random() * 200) + 50) * difficulty
+        let enemyType = "chaser"
 
         if(makeBoss){
             enemySprite = "boss"
             enemyHealth = 1500
             enemySpeed = 500
             boss = true
+        }
+        else if(Math.random() < 0.25){
+            enemyType = "charger"
+            enemySpeed *= 1.4
+            enemyHealth *= 1.25
+        }
+        else if(Math.random() < 0.25){
+            enemyType = "shooter"
+            enemySpeed *= 0.7
         }
 
         const enemy = add([
@@ -407,14 +422,14 @@ scene(1, () => {
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
             "enemy",    // For collision detection
             "object",
-            { speed: enemySpeed, isBoss: boss },
+            { speed: enemySpeed, isBoss: boss, enemyType, attackCooldown: 1.5, chargeDirection: null, chargeTimer: 0 },
         ])
 
         enemy.on("death", () => {
             if(Math.random()*1 < 0.7){  // 70% chance of explosion
                 addKaboom(enemy.pos)
                 shake(8)
-                if(player.pos.dist(enemy.pos) < 80){    // Player takes damage if too close
+                if(player.pos.dist(enemy.pos) < 80 && Math.random() >= player.dodge){    // Player takes damage if too close
                     player.hurt(20)
                 }
             }
@@ -439,10 +454,7 @@ scene(1, () => {
             if(enemiesDied > highestEnemiesDied){highestEnemiesDied = enemiesDied}
             enemiesLeft = enemiesLeft - 1
             if(enemiesLeft <= 0){
-                if(round >= rounds.length){
-                    go("winScreen")
-                }
-                else{
+                {
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
@@ -468,9 +480,10 @@ scene(1, () => {
             if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(gadgetGlobal.magSize*0.3*upgradeQuality); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
             if(upgradeValue==3){player.speed += Math.floor(player.speed*0.3*upgradeQuality)}
             if(upgradeValue==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
-            if(upgradeValue==5){gadgetGlobal.beamsFired += Math.floor(1*upgradeQuality)}
+            if(upgradeValue==5){player.dodge = Math.min(0.75, player.dodge + 0.05*upgradeQuality)}
             if(upgradeValue==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
             if(upgradeValue==7){coinMagForce += 120000*upgradeQuality}
+            if(upgradeValue==8){player.maxHealth += Math.floor(25*upgradeQuality); player.heal(player.maxHealth - player.hp())}
             if(upgradeValue==-1){player.use(sprite("mark"))}
             if(upgradeValue==-2){player.use(sprite("ghosty"))}
             if(upgradeValue==-3){player.use(sprite("dino"))}
@@ -489,13 +502,11 @@ scene(1, () => {
                         nextWaveTimeLabel.text = ``
                         waiting = false
                         //set player health to 100
-                        if(player.hp() < 100){
-                            player.heal(100 - player.hp())
+                        if(player.hp() < player.maxHealth){
+                            player.heal(player.maxHealth - player.hp())
                         }
                         healthLabel.text = `Health: ${player.hp()}`
-                        spawnWave(rounds[round][0], rounds[round][1], rounds[round][2], rounds[round][3], rounds[round][4])
-                        round += 1
-                        roundLabel.text = `Round: ${round + 1}`
+                        startRound()
                         destroy(clock)
                     }
                 }
@@ -510,23 +521,58 @@ scene(1, () => {
         clock.loop(time, () => {
             if(!isPaused && clockLoopCycle < waves+1){
                 for(let i=0; i<enemyNum; i++){
-                    enemies.push(spawnEnemy(difficulty, makeBoss))
+                    spawnEnemy(difficulty, makeBoss)
                 }
                 clockLoopCycle += 1
             }
         })
     }
-    //spawnWave(1, 3, 5, 2, false) // spawns 5 non boss enemies 2x as strong for 3 waves every 1 second
-    spawnWave(1, 1, 3, 0.5, false) // Tutorial
+    function startRound(){
+        const enemyNum = Math.floor(2 + round * 1.5)
+        const waves = Math.min(5, 1 + Math.floor(round / 3))
+        const difficulty = 0.5 + round * 0.12
+        const makeBoss = round % 5 === 0
+        roundLabel.text = `Round: ${round}`
+        spawnWave(Math.max(0.45, 1.2 - round * 0.03), waves, enemyNum, difficulty, makeBoss)
+        round++
+    }
+    startRound()
 
     onUpdate(() => {
-        for (const enemy of enemies) {
+        for (const enemy of get("enemy")) {
             if (!enemy.exists()) {  // Check if enemy destroyed
                 continue
             }
-            if(!isPaused){  // if not paused
-                const direction = player.pos.sub(enemy.pos).unit()  // Dir to player found
-                enemy.move(direction.scale(enemy.speed))    // Moves in dir by speed every frame
+            if(!isPaused){
+                const direction = player.pos.sub(enemy.pos).unit()
+                if(enemy.enemyType === "charger"){
+                    if(enemy.chargeTimer <= 0){
+                        enemy.chargeDirection = direction
+                        enemy.chargeTimer = 1.5
+                    }
+                    enemy.move(enemy.chargeDirection.scale(enemy.speed * 1.5))
+                    enemy.chargeTimer -= dt()
+                }
+                else if(enemy.enemyType === "shooter"){
+                    const distance = enemy.pos.dist(player.pos)
+                    if(distance > 360) enemy.move(direction.scale(enemy.speed))
+                    else if(distance < 240) enemy.move(direction.scale(-enemy.speed))
+                    enemy.attackCooldown -= dt()
+                    if(enemy.attackCooldown <= 0){
+                        const projectile = add([
+                            pos(enemy.pos), rect(12, 12), area(), color(255, 20, 20),
+                            "enemyProjectile", "object",
+                            { speed: 260, dir: direction }, offscreen({ destroy: true }),
+                        ])
+                        projectile.onUpdate(() => projectile.move(projectile.dir.scale(projectile.speed)))
+                        projectile.onCollide("player", () => {
+                            if(Math.random() >= player.dodge) player.hurt(12)
+                            destroy(projectile)
+                        })
+                        enemy.attackCooldown = 2
+                    }
+                }
+                else enemy.move(direction.scale(enemy.speed))
             }
         }
     })
@@ -537,10 +583,10 @@ scene(1, () => {
             return
         }
         const dir = vec2(0, 0)  // Dir because normalised
-        if (isKeyDown("a")){dir.x = -1}
-        if (isKeyDown("d")){dir.x = 1} // Inputs
-        if (isKeyDown("w")){dir.y = -1}
-        if (isKeyDown("s")){dir.y = 1}
+        if (isKeyDown(controlBindings.left)){dir.x = -1}
+        if (isKeyDown(controlBindings.right)){dir.x = 1}
+        if (isKeyDown(controlBindings.up)){dir.y = -1}
+        if (isKeyDown(controlBindings.down)){dir.y = 1}
         const unitVec = dir.unit()  // Vector normalisation (fixes diagonals)
         player.move(unitVec.scale(player.speed))    // Moves in dir by speed every frame
         player.pos.x = Math.max(0, Math.min(player.pos.x, maxX - 32))
@@ -555,6 +601,17 @@ scene(1, () => {
                 player.recoil = vec2(0, 0)  // Reset recoil vector to zero
             }
         }
+
+        if (player.momentum && player.momentum.len() > 0){
+            const momentumDamping = 2	//lower damping for further movement
+            const momentumStep = player.momentum.scale(1 - Math.exp(-momentumDamping * dt()))	//momentum code for separate attribute
+            player.move(momentumStep)
+            player.momentum = player.momentum.sub(momentumStep)
+            if (player.momentum.len() < 1) {
+                player.momentum = vec2(0, 0)
+            }
+        }
+
     })
 
     onClick(() => {
@@ -587,6 +644,10 @@ scene(1, () => {
             controlsLabel.text = ``
         }
     })
+    onKeyPress(controlBindings.dash, () => {
+        player.momentum = player.momentum.add(toWorld(mousePos()).sub(player.pos).unit().scale(20000))
+    })
+
     onUpdate(() => {
         if (gadgetGlobal && gadgetGlobal.updateReload) {
             gadgetGlobal.updateReload(dt())
@@ -598,7 +659,7 @@ scene(1, () => {
             }
         }
     })
-    onKeyPress("e", () => {
+    onKeyPress(controlBindings.reload, () => {
         if(gadgetGlobal.reload()){ // If successful
             reloadLabel.text = `Reloading... ${gadgetGlobal.reloadTimer.toFixed(1)}s`
         }
@@ -630,7 +691,7 @@ scene(1, () => {
     // Collision with enemy
     onCollideUpdate("player", "enemy", () => {
         if(!isPaused){
-            player.hurt(0.5)
+            if(Math.random() >= player.dodge) player.hurt(0.5)
             healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
             shake(8)           
         }
@@ -663,14 +724,14 @@ scene(1, () => {
         blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
     })
 
-    onDestroy("player", () => go("deathScreen", enemiesDied*coins)) // If off screen
+    onDestroy("player", () => go("deathScreen", { score: enemiesDied*coins, round: Math.max(1, round - 1) })) // If off screen
     player.on("death", () => {
         destroy(player)
-        go("deathScreen", enemiesDied*coins)
+        go("deathScreen", { score: enemiesDied*coins, round: Math.max(1, round - 1) })
     })
 })
 
-scene("deathScreen", (score) => {
+scene("deathScreen", (result) => {
     let red = 255
     let green = 255
     let blue = 255
@@ -696,8 +757,13 @@ scene("deathScreen", (score) => {
         color(255, 0, 0),
     ])
     const scoreLabel = add([
-        text(`Score: ${score || 0}`),       //If the game does not pass a score, the score will be 0 instead of undefined
+        text(`Score: ${result?.score || 0}`),
         pos(24, 24),
+        color(0, 0, 0),
+    ])
+    add([
+        text(`Round reached: ${result?.round || 1}`),
+        pos(24, 58),
         color(0, 0, 0),
     ])
 })

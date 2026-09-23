@@ -11,7 +11,7 @@
             <h3>By Barnaby Ranger</h3>
             <h2>Press M to go back here at any time</h2>
         	<div class="buttonContainer">
-                <button id="startButton" onclick="upgradeValue=0; websiteGoTo('weaponSelect'); document.getElementById('currentGear').textContent = 'Gear: Not chosen'; document.getElementById('weaponSelectContinue').style.display = 'none'">Game</button><br>
+                <button id="startButton" onclick="upgradeValue=0; websiteGoTo('weaponSelect'); document.getElementById('currentGear').textContent = 'Gear: Not chosen'; document.getElementById('weaponSelectContinue').style.display = 'none'; document.getElementById('weaponInfo').textContent = 'Select a gadget to see its stats.'">Game</button><br>
                 <button id="questionButton" onclick="answerStreak = 0; startQuestion()">Quiz</button><br>
                 <button id="statsButton" onclick="websiteGoTo('stats'); updateStats()">Stats</button><br>
                 <button id="settingsButton" onclick="websiteGoTo('settings')">Settings</button><br>
@@ -46,28 +46,30 @@
 
         <div id="upgrade" style="display: none;">
             <h1>Upgrade</h1>
-            <h2 id="chosenUpgrade">Choosen Upgrade</h2>
-            <div class="buttonContainer">
-                <button onclick="upgradeValue=1; selectUpgrade(`${this.textContent}`)">Damage +</button><br>
-                <button onclick="upgradeValue=2; selectUpgrade(`${this.textContent}`)">Capacity +</button><br>
-                <button onclick="upgradeValue=3; selectUpgrade(`${this.textContent}`)">Speed +</button><br>
-                <button onclick="upgradeValue=4; selectUpgrade(`${this.textContent}`)">Penetration +</button><br>
-                <button onclick="upgradeValue=5; selectUpgrade(`${this.textContent}`)">Shots Fired +</button><br>
-                <button onclick="upgradeValue=6; selectUpgrade(`${this.textContent}`)">Crit % +</button><br>  
-                <button onclick="upgradeValue=7; selectUpgrade(`${this.textContent}`)">Magnet +</button><br>  
+            <p id="upgradeHint">Choose one upgrade for the next round.</p>
+            <div class="upgradeGrid">
+                <button onclick="upgradeValue=1; selectUpgrade('Damage +')"><strong>Damage +</strong><small>More power per hit</small></button>
+                <button onclick="upgradeValue=2; selectUpgrade('Capacity +')"><strong>Capacity +</strong><small>More shots per magazine</small></button>
+                <button onclick="upgradeValue=3; selectUpgrade('Speed +')"><strong>Speed +</strong><small>Move faster</small></button>
+                <button onclick="upgradeValue=4; selectUpgrade('Penetration +')"><strong>Penetration +</strong><small>Pass through enemies</small></button>
+                <button onclick="upgradeValue=5; selectUpgrade('Dodge +')"><strong>Dodge +</strong><small>Chance to avoid damage</small></button>
+                <button onclick="upgradeValue=6; selectUpgrade('Crit % +')"><strong>Crit % +</strong><small>More critical hits</small></button>
+                <button onclick="upgradeValue=7; selectUpgrade('Magnet +')"><strong>Magnet +</strong><small>Pull coins faster</small></button>
+                <button onclick="upgradeValue=8; selectUpgrade('Health +')"><strong>Health +</strong><small>Bigger health pool</small></button>
             </div>
-            <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); this.style.display = 'none'; document.getElementById('chosenUpgrade').textContent = 'Choosen Upgrade'" style="display: none;">Continue</button>
+            <h2 id="chosenUpgrade">Choose an upgrade</h2>
+            <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); this.style.display = 'none'; document.getElementById('chosenUpgrade').textContent = 'Choose an upgrade'" style="display: none;">Continue</button>
         </div>
 
         <div id="weaponSelect" style="display: none;">
             <h1>Weapon Select</h1>
             <h2 id="currentGear">Gear: Not chosen</h2>
-            <h3>Select a gadget:</h3>
-            <div class="buttonContainer">
-                <button onclick="selectGadget(`${this.textContent}`)">Blast</button><br>
-                <button onclick="selectGadget(`${this.textContent}`)">Cycler</button><br>
-                <button onclick="selectGadget(`${this.textContent}`)">Beam</button><br>
-                <button onclick="selectGadget(`${this.textContent}`)">Spark</button>
+            <p id="weaponInfo">Select a gadget to see its stats.</p>
+            <div class="weaponGrid">
+                <button onclick="selectGadget('Blast')">Blast<small>Buckshot | Close Range</small></button>
+                <button onclick="selectGadget('Cycler')">Cycler<small>Automatic | Big Magazine</small></button>
+                <button onclick="selectGadget('Beam')">Beam<small>High Damage | Piercing</small></button>
+                <button onclick="selectGadget('Spark')">Spark<small>Critical Hits | Fast Reload</small></button>
             </div>
             <button id="weaponSelectContinue" onclick="playLevel(1); this.style.display = 'none'" style="display: none;">Continue</button><br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button><br>
@@ -113,6 +115,17 @@
             <h3>Dark Mode:</h3>
             <input type="radio" name="darkMode" onclick="document.getElementById('body').style.backgroundColor = 'white'; document.getElementById('body').style.color = 'black'; darkMode = false" checked>Off
             <input type="radio" name="darkMode" onclick="document.getElementById('body').style.backgroundColor = 'black'; document.getElementById('body').style.color = 'white'; darkMode = true">On
+            <br>
+            <h3>Controls</h3>
+            <p id="controlStatus">Select a control, then press a key.</p>
+            <div id="controlsMenu" class="controlsGrid">
+                <button onclick="beginControlBind('up')">Move up: <span id="control-up">W</span></button>
+                <button onclick="beginControlBind('left')">Move left: <span id="control-left">A</span></button>
+                <button onclick="beginControlBind('down')">Move down: <span id="control-down">S</span></button>
+                <button onclick="beginControlBind('right')">Move right: <span id="control-right">D</span></button>
+                <button onclick="beginControlBind('dash')">Dash: <span id="control-dash">Q</span></button>
+                <button onclick="beginControlBind('reload')">Reload: <span id="control-reload">E</span></button>
+            </div>
             <br>
             <h3>Change questions:</h3>
             <textarea id="customQuestions" placeholder="<Format:> 
