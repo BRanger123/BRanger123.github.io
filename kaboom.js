@@ -11,8 +11,11 @@ kaboom({
     width: window.innerWidth,
     height: window.innerHeight,
     background: [0, 0, 0],              //////////////////////redgreenblue/////////////////////////////////////////////////////////////
-    font: "arial",
     letterBox: true,
+})
+
+loadFont("customFont", "customFont.ttf", { 
+    outline: 4
 })
 
 loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
@@ -48,7 +51,10 @@ scene("startButton", () => {
         color(220, 220, 220),
     ])
     btn.add([
-        text(`Start`),
+        text(`Start`, { 
+            font: "arial",
+            size: 32 
+        }),
         anchor("center"),
         color(0, 0, 0),
     ])
@@ -64,7 +70,10 @@ scene("startButton", () => {
     })
     btn.onClick(() => go(levelGlobal))
     add([
-        text("Press M to return to menu"),
+        text("Press M to return to menu", { 
+            font: "arial",
+            size: 32 
+        }),
         pos(center().x, center().y+100),
         anchor("center"),
         color(0, 0, 0),
@@ -75,16 +84,53 @@ scene(1, () => {
     let red = 255
     let green = 255
     let blue = 255
-    let textColor = rgb(0, 0, 0)
-    if(darkMode){red = 0; green = 0; blue = 0; textColor = rgb(255, 255, 255)}
-    else{red = 255; green = 255; blue = 255; textColor = rgb(0, 0, 0)}
-    setBackground(rgb(red, green, blue))
+    let textColor = rgb(255, 255, 255)
+    //if(darkMode){red = 0; green = 0; blue = 0; textColor = rgb(255, 255, 255)}
+    //else{red = 255; green = 255; blue = 255; textColor = rgb(255, 255, 255)}
+    setBackground(rgb(0, 0, 0))
     setGravity(0)
+
+    /*
+loadShader("vignette", null, `
+    uniform vec2 u_resolution;
+    uniform float u_intensity; // Controls overall darkness
+    uniform float u_roundness; // Higher values make it more circular
+
+    vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
+        // Fetch the base game rendering color
+        vec4 baseColor = texture2D(tex, pos);
+        
+        // Calculate distance of current UV coordinate from the center (0.5, 0.5)
+        vec2 uvCenter = uv - vec2(0.5);
+        
+        // Compute vignette mask strength based on distance from center
+        float dist = length(uvCenter);
+        float vignette = smoothstep(0.8, u_roundness, dist * u_intensity);
+        
+        // Multiply original colors by the vignette calculation
+        return baseColor * vec4(vec3(vignette), 1.0) * color;
+    }
+`);
+usePostEffect("vignette", {
+    "u_resolution": vec2(width(), height()),
+    "u_intensity": 1.5,   // Tweak this to increase/decrease edge shadow spread
+    "u_roundness": 0.4,   // Tweak this to sharpen or soften the vignette falloff
+});
+*/
 
     const minX = 0
     const minY = 0
-    const maxX = 1000
-    const maxY = 1000
+    const maxX = 1200
+    const maxY = 1200
+
+    add([
+        pos(minX, minY),
+        rect(maxX, maxY),
+        area({ collisionIgnore: ["object"],}),
+        body({ isStatic: true }),
+        color(255, 255, 255),
+        opacity(0.5)
+    ])
 
     //spawnWave(1, 3, 5, 2) // spawns 5 enemies 2x as strong for 3 waves every 1 second
     let round = 1
@@ -172,7 +218,7 @@ scene(1, () => {
                     pos(player.pos),
                     rect(8,8),
                     area(),
-                    color(textColor),
+                    color(0,0,0),
                     "beam",   // For collision detection
                     "object",
                     { speed: this.beamSpeed, dir: direction, penetration: this.penetration },
@@ -216,7 +262,10 @@ scene(1, () => {
 
         const textObject = add([
             anchor("center"),
-            text(`${textContent}`),
+            text(textContent, { 
+                font: "customFont",
+                size: 32 
+            }),
             pos(position.x+Math.random()*20, position.y+Math.random()*20),  // Rand so numbers do not overlap (shotgun)
             color(textColor),
             { visabilityStep: 1 },
@@ -287,6 +336,7 @@ scene(1, () => {
         body(),
         rotate(0),
         area({ collisionIgnore: ["object"],}),
+        "object"
         //scale(0.2) // only for large sprites or could use .use(scale(0.2))
     ])
 
@@ -328,49 +378,73 @@ scene(1, () => {
 
     // Initialize labels
     const coinsLabel = add([
-        text(`Coins: ${coins}`),
+        text(`Coins: ${coins}`, { 
+            font: "customFont",
+            size: 32 
+        }),
         anchor("right"),
         pos(0, 0),
         color(textColor),
     ])
     const hintLabel = add([
-        text(""),
+        text("", { 
+            font: "customFont",
+            size: 32 
+        }),
         anchor("center"),
         pos(0, 0),
         color(textColor),
     ])
     const ammoLabel = add([
-        text(`Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`),
+        text(`Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`, { 
+            font: "customFont",
+            size: 32 
+        }),
         anchor("left"),
         pos(0, 0),
         color(textColor),
     ])
     const healthLabel = add([
-        text(`Health: ${player.hp()}`),
+        text(`Health: ${player.hp()}`, { 
+                font: "customFont",
+                size: 32 
+            }),
         anchor("right"),
         pos(0, 0),
         color(textColor),
     ])
     const controlsLabel = add([
-        text("Click to fire"),
+        text("Click to fire", { 
+            font: "customFont",
+            size: 32 
+        }),
         anchor("center"),
         pos(0, 0),
         color(textColor),
     ])
     const reloadLabel = add([
-        text(""),
+        text("", { 
+            font: "customFont",
+            size: 32 
+        }),
         anchor("center"),
         pos(0, 0),
         color(textColor),
     ])
     const nextWaveTimeLabel = add([
-        text(""),
+        text("", { 
+            font: "customFont",
+            size: 32 
+        }),
         anchor("center"),
         pos(0, 0),
         color(textColor),
     ])
     const roundLabel = add([
-        text("Round: 1"),
+        text("Round: 1", { 
+            font: "customFont",
+            size: 32 
+        }),
         anchor("left"),
         pos(0, 0),
         color(textColor),
@@ -645,7 +719,7 @@ scene(1, () => {
         }
     })
     onKeyPress(controlBindings.dash, () => {
-        player.momentum = player.momentum.add(toWorld(mousePos()).sub(player.pos).unit().scale(20000))
+        player.momentum = player.momentum.add(toWorld(mousePos()).sub(player.pos).unit().scale(35000))
     })
 
     onUpdate(() => {
@@ -739,13 +813,19 @@ scene("deathScreen", (result) => {
     else{red = 255; green = 255; blue = 255}
     setBackground(rgb(red, green, blue))
     add([
-        text("Press M to return to menu"),
+        text("Press M to return to menu", { 
+            font: "arial",
+            size: 32 
+        }),
         pos(center()),
         anchor("center"),
         color(255, 0, 0),
     ])
     add([
-        text("Press k to reset"),
+        text("Press k to reset", { 
+            font: "arial",
+            size: 32 
+        }),
         pos(center().x, center().y-50),
         anchor("center"),
         color(255, 0, 0),
@@ -757,12 +837,18 @@ scene("deathScreen", (result) => {
         color(255, 0, 0),
     ])
     const scoreLabel = add([
-        text(`Score: ${result?.score || 0}`),
+        text(`Score: ${result?.score || 0}`, { 
+            font: "arial",
+            size: 32 
+        }),
         pos(24, 24),
         color(0, 0, 0),
     ])
     add([
-        text(`Round reached: ${result?.round || 1}`),
+        text(`Round reached: ${result?.round || 1}`, { 
+            font: "arial",
+            size: 32 
+        }),
         pos(24, 58),
         color(0, 0, 0),
     ])
