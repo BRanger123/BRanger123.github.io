@@ -705,8 +705,8 @@ usePostEffect("vignette", {
             controlsLabel.text = ``
         }
     })
-    onKeyDown(controlBindings.dash, () => {
-        player.momentum = player.momentum.add(toWorld(mousePos()).sub(player.pos).unit().scale(2000))
+    onKeyPress(controlBindings.dash, () => {
+        player.momentum = player.momentum.add(toWorld(mousePos()).sub(player.pos).unit().scale(35000))
     })
 
     onUpdate(() => {
