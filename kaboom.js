@@ -122,8 +122,8 @@ usePostEffect("vignette", {
 
     const minX = 0
     const minY = 0
-    const maxX = 1400
-    const maxY = 800
+    const maxX = 1600
+    const maxY = 1000
 
     add([
         pos(minX, minY),
@@ -576,7 +576,7 @@ usePostEffect("vignette", {
         clock.loop(time, () => {
             if(!isPaused && clockLoopCycle < waves+1){
                 for(let i=0; i<enemyNum; i++){
-                    spawnEnemy(difficulty, false)
+                    spawnEnemy(difficulty, false) //bosses broken rn
                 }
                 clockLoopCycle += 1
             }
