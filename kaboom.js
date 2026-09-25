@@ -466,8 +466,8 @@ usePostEffect("vignette", {
 
         if(makeBoss){
             enemySprite = "boss"
-            enemyHealth = 1500
-            enemySpeed = 500
+            enemyHealth = (Math.random() * 120 + 100) * difficulty
+            enemySpeed = ((Math.random() * 350) + 100) * difficulty
             boss = true
         }
         else if(Math.random() < 0.25){
@@ -569,14 +569,17 @@ usePostEffect("vignette", {
         }
     }
 
-    function spawnWave(time, waves, enemyNum, difficulty, makeBoss){
+    function spawnWave(time, waves, enemyNum, difficulty, bosses){
+        for(let i=0; i<bosses; i++){
+            spawnEnemy(difficulty, true)
+        }
         let clockLoopCycle = 1
         enemiesLeft = enemyNum*waves
         const clock = add([timer()])
         clock.loop(time, () => {
             if(!isPaused && clockLoopCycle < waves+1){
                 for(let i=0; i<enemyNum; i++){
-                    spawnEnemy(difficulty, false) //bosses broken rn
+                    spawnEnemy(difficulty, false)
                 }
                 clockLoopCycle += 1
             }
@@ -586,9 +589,9 @@ usePostEffect("vignette", {
         const enemyNum = Math.floor(2 + round * 1.5)
         const waves = Math.min(5, 1 + Math.floor(round / 3))
         const difficulty = 0.5 + round * 0.12
-        const makeBoss = round % 5 === 0
+        const bosses = Math.floor(round/5)
         roundLabel.text = `Round: ${round}`
-        spawnWave(round*0.75, waves, enemyNum, difficulty, makeBoss)
+        spawnWave(round*0.75, waves, enemyNum, difficulty, bosses)
         round++
     }
     startRound()
