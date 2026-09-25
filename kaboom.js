@@ -312,7 +312,7 @@ usePostEffect("vignette", {
         health(100),
         "player",   // For collision detection
         "object",
-        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, dodge: 0 }, // Recoil 2d vector for fluid recoil
+        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100 }, // Recoil 2d vector for fluid recoil
     ])
     
     player.onCollide("coin", (coin) => {
@@ -497,7 +497,7 @@ usePostEffect("vignette", {
             if(Math.random()*1 < 0.7){  // 70% chance of explosion
                 addKaboom(enemy.pos)
                 shake(8)
-                if(player.pos.dist(enemy.pos) < 80 && Math.random() >= player.dodge){    // Player takes damage if too close
+                if(player.pos.dist(enemy.pos) < 80){    // Player takes damage if too close
                     player.hurt(20)
                 }
             }
@@ -536,7 +536,7 @@ usePostEffect("vignette", {
             if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(gadgetGlobal.magSize*0.3*upgradeQuality); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
             if(upgradeValue==3){player.speed += Math.floor(player.speed*0.3*upgradeQuality)}
             if(upgradeValue==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
-            if(upgradeValue==5){player.dodge = Math.min(0.75, player.dodge + 0.05*upgradeQuality)}
+            if(upgradeValue==5){}
             if(upgradeValue==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
             if(upgradeValue==7){coinMagForce += 120000*upgradeQuality}
             if(upgradeValue==8){player.maxHealth += Math.floor(25*upgradeQuality); player.heal(player.maxHealth - player.hp())}
@@ -624,8 +624,10 @@ usePostEffect("vignette", {
                             { speed: 260, dir: direction }, offscreen({ destroy: true }),
                         ])
                         projectile.onUpdate(() => projectile.move(projectile.dir.scale(projectile.speed)))
-                        projectile.onCollide("player", () => {
-                            if(Math.random() >= player.dodge) player.hurt(12)
+                        projectile.onCollide("player", (player) => {
+                            player.hurt(12)
+                            healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
+                            shake(20)
                             destroy(projectile)
                         })
                         enemy.attackCooldown = 2
@@ -662,7 +664,7 @@ usePostEffect("vignette", {
         }
 
         if (player.momentum && player.momentum.len() > 0){
-            const momentumDamping = 2	//lower damping for further movement
+            const momentumDamping = 1	//lower damping for further movement
             const momentumStep = player.momentum.scale(1 - Math.exp(-momentumDamping * dt()))	//momentum code for separate attribute
             player.move(momentumStep)
             player.momentum = player.momentum.sub(momentumStep)
@@ -703,8 +705,8 @@ usePostEffect("vignette", {
             controlsLabel.text = ``
         }
     })
-    onKeyPress(controlBindings.dash, () => {
-        player.momentum = player.momentum.add(toWorld(mousePos()).sub(player.pos).unit().scale(35000))
+    onKeyDown(controlBindings.dash, () => {
+        player.momentum = player.momentum.add(toWorld(mousePos()).sub(player.pos).unit().scale(2000))
     })
 
     onUpdate(() => {
@@ -732,6 +734,7 @@ usePostEffect("vignette", {
         ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
     })
 
+    /*
     onKeyPress("p", () => {
         canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
         canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
@@ -746,11 +749,12 @@ usePostEffect("vignette", {
             hintLabel.text = ``
         })
     })
+    */
 
     // Collision with enemy
     onCollideUpdate("player", "enemy", () => {
         if(!isPaused){
-            if(Math.random() >= player.dodge) player.hurt(0.5)
+            player.hurt(0.5)
             healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
             shake(8)           
         }
