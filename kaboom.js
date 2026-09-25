@@ -83,7 +83,6 @@ scene("startButton", () => {
 })
 
 scene(1, () => {
-    setCursor("grab")
     let red = 255
     let green = 255
     let blue = 255
@@ -323,14 +322,6 @@ usePostEffect("vignette", {
         coinsLabel.text = `Coins: ${coins}`
         document.getElementById("coinsCount").textContent = coins   // Update coins in HTML
     })
-    
-    player.onCollide("ammo", (ammoBag) => {
-        destroy(ammoBag)
-        gadgetGlobal.ammoInMag = gadgetGlobal.magSize
-        gadgetGlobal.isReloading = false
-        gadgetGlobal.reloadTimer = 0
-        ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
-    })
 
     const blasterSprite = add([
         sprite("blaster"),
@@ -344,14 +335,14 @@ usePostEffect("vignette", {
     ])
 
     // amazing gadget class can be used for all gadget archetypes
-    // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto, fireRate, penetration
-    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 5, 500, 1, false, 100, 1, 0.3)
+    // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto = false, fireRate = 100, penetration = 0, critChance
+    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 5, 1000, 1, false, 200, 0, 0.3)
     sparkBlasterGlobal = sparkBlaster
-    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 5, 7, 8, 15, 3000, 2, false, 100, 0, 0.15)
+    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 8000, 1.5, false, 100, 1, 0.15)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 2000, 2.5, true, 70, 3, 0.05)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 3000, 2.5, true, 70, 3, 0.05)
     cyclerBlasterGlobal = cyclerBlaster
-    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 500, 5, 1, 0, 7000, 3, false, 200, 99, 0.2)
+    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 500, 5, 1, 0, 9000, 3, false, 200, 99, 0.2)
     beamBlasterGlobal = beamBlaster
 
     const selectedGadgetName = selectedGadget || "Spark"
@@ -410,7 +401,7 @@ usePostEffect("vignette", {
     const healthLabel = add([
         text(`Health: ${player.hp()}`, { 
                 font: "",
-                size: 32 
+                size: 32
             }),
         anchor("right"),
         pos(0, 0),
@@ -585,7 +576,7 @@ usePostEffect("vignette", {
         clock.loop(time, () => {
             if(!isPaused && clockLoopCycle < waves+1){
                 for(let i=0; i<enemyNum; i++){
-                    spawnEnemy(difficulty, makeBoss)
+                    spawnEnemy(difficulty, false)
                 }
                 clockLoopCycle += 1
             }
