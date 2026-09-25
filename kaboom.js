@@ -81,6 +81,7 @@ scene("startButton", () => {
 })
 
 scene(1, () => {
+    setCursor("grab")
     let red = 255
     let green = 255
     let blue = 255
@@ -120,8 +121,8 @@ usePostEffect("vignette", {
 
     const minX = 0
     const minY = 0
-    const maxX = 1200
-    const maxY = 1200
+    const maxX = 1400
+    const maxY = 800
 
     add([
         pos(minX, minY),
