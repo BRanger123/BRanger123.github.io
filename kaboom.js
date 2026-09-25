@@ -14,9 +14,11 @@ kaboom({
     letterBox: true,
 })
 
-loadFont("customFont", "customFont.ttf", { 
+/*
+loadFont("", "customFont.ttf", { 
     outline: 4
 })
+*/
 
 loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
 loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")        // Load assets
@@ -264,7 +266,7 @@ usePostEffect("vignette", {
         const textObject = add([
             anchor("center"),
             text(textContent, { 
-                font: "customFont",
+                font: "",
                 size: 32 
             }),
             pos(position.x+Math.random()*20, position.y+Math.random()*20),  // Rand so numbers do not overlap (shotgun)
@@ -380,7 +382,7 @@ usePostEffect("vignette", {
     // Initialize labels
     const coinsLabel = add([
         text(`Coins: ${coins}`, { 
-            font: "customFont",
+            font: "",
             size: 32 
         }),
         anchor("right"),
@@ -389,7 +391,7 @@ usePostEffect("vignette", {
     ])
     const hintLabel = add([
         text("", { 
-            font: "customFont",
+            font: "",
             size: 32 
         }),
         anchor("center"),
@@ -398,7 +400,7 @@ usePostEffect("vignette", {
     ])
     const ammoLabel = add([
         text(`Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`, { 
-            font: "customFont",
+            font: "",
             size: 32 
         }),
         anchor("left"),
@@ -407,7 +409,7 @@ usePostEffect("vignette", {
     ])
     const healthLabel = add([
         text(`Health: ${player.hp()}`, { 
-                font: "customFont",
+                font: "",
                 size: 32 
             }),
         anchor("right"),
@@ -416,7 +418,7 @@ usePostEffect("vignette", {
     ])
     const controlsLabel = add([
         text("Click to fire", { 
-            font: "customFont",
+            font: "",
             size: 32 
         }),
         anchor("center"),
@@ -425,7 +427,7 @@ usePostEffect("vignette", {
     ])
     const reloadLabel = add([
         text("", { 
-            font: "customFont",
+            font: "",
             size: 32 
         }),
         anchor("center"),
@@ -434,7 +436,7 @@ usePostEffect("vignette", {
     ])
     const nextWaveTimeLabel = add([
         text("", { 
-            font: "customFont",
+            font: "",
             size: 32 
         }),
         anchor("center"),
@@ -443,7 +445,7 @@ usePostEffect("vignette", {
     ])
     const roundLabel = add([
         text("Round: 1", { 
-            font: "customFont",
+            font: "",
             size: 32 
         }),
         anchor("left"),
@@ -510,19 +512,6 @@ usePostEffect("vignette", {
             }
             spawnCoin(enemy.pos)
             enemiesDiedCounter++
-            if(enemiesDiedCounter == 7){
-                enemiesDiedCounter = 0
-                const ammoBag = add([
-                    sprite("ammo"),
-                    scale(0.3),
-                    anchor("center"),
-                    pos(enemy.pos),
-                    area({ collisionIgnore: ["enemy"]}),    // Enemies dont get stuck on ammo
-                    body(),
-                    "ammo", // For collision detection with player
-                    "object",
-                ])
-            }
             destroy(enemy)
             burp()  // Sound effects built into Kaboom library
             enemiesDied++
@@ -608,7 +597,7 @@ usePostEffect("vignette", {
         const difficulty = 0.5 + round * 0.12
         const makeBoss = round % 5 === 0
         roundLabel.text = `Round: ${round}`
-        spawnWave(Math.max(0.45, 1.2 - round * 0.03), waves, enemyNum, difficulty, makeBoss)
+        spawnWave(round*0.75, waves, enemyNum, difficulty, makeBoss)
         round++
     }
     startRound()
