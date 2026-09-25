@@ -20,19 +20,18 @@ loadFont("", "customFont.ttf", {
 })
 */
 
-loadSprite("ghosty", "https://kaboomjs.com/sprites/ghosty.png")
-loadSprite("boss", "https://kaboomjs.com/sprites/gigagantrum.png")        // Load assets
-loadSprite("coin", "https://kaboomjs.com/sprites/coin.png")
+loadSprite("ghosty", "ghosty.png")
+loadSprite("boss", "gigagantrum.png")
+loadSprite("coin", "coin.png")
 loadSprite("ammo", "ammo.png")
-loadSprite("blaster", "https://kaboomjs.com/sprites/gun.png")
-loadSprite("mark", "https://kaboomjs.com/sprites/mark.png")
-loadSprite("dino", "https://kaboomjs.com/sprites/dino.png")
-loadSprite("steel", "https://kaboomjs.com/sprites/steel.png")
+loadSprite("blaster", "gun.png")
+//loadSprite("mark", "https://kaboomjs.com/sprites/mark.png")
+//loadSprite("dino", "https://kaboomjs.com/sprites/dino.png")
+//loadSprite("steel", "https://kaboomjs.com/sprites/steel.png")
 loadSprite("blast", "blast.png")
 loadSprite("beam", "beam.png")
 loadSprite("cycler", "cycler.png")
-loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
-loadSprite("treasure", "https://th.bing.com/th/id/OIP.7TqZRNeJth1vSAPD073pywAAAA?w=96&h=96&c=7&r=0&o=7&pid=1.7&rm=3")
+//loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
 scene("startButton", () => {
@@ -122,8 +121,8 @@ usePostEffect("vignette", {
 
     const minX = 0
     const minY = 0
-    const maxX = 1600
-    const maxY = 1000
+    const maxX = 1800
+    const maxY = 1200
 
     add([
         pos(minX, minY),
@@ -494,6 +493,7 @@ usePostEffect("vignette", {
         ])
 
         enemy.on("death", () => {
+            
             if(Math.random()*1 < 0.7){  // 70% chance of explosion
                 addKaboom(enemy.pos)
                 shake(8)
@@ -501,6 +501,7 @@ usePostEffect("vignette", {
                     player.hurt(20)
                 }
             }
+            
             spawnCoin(enemy.pos)
             enemiesDiedCounter++
             destroy(enemy)
