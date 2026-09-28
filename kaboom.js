@@ -23,14 +23,14 @@ loadFont("", "customFont.ttf", {
 loadSprite("ghosty", "ghosty.png")
 loadSprite("boss", "gigagantrum.png")
 loadSprite("coin", "coin.png")
-loadSprite("ammo", "ammo.png")
 loadSprite("blaster", "gun.png")
 //loadSprite("mark", "https://kaboomjs.com/sprites/mark.png")
-//loadSprite("dino", "https://kaboomjs.com/sprites/dino.png")
+loadSprite("dino", "dino.png")
 //loadSprite("steel", "https://kaboomjs.com/sprites/steel.png")
 loadSprite("blast", "blast.png")
 loadSprite("beam", "beam.png")
 loadSprite("cycler", "cycler.png")
+loadSprite("bag", "bag.png")
 //loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
@@ -348,7 +348,7 @@ usePostEffect("vignette", {
     if(selectedGadgetName=="Blast"){
         gadgetGlobal = blastBlasterGlobal
         blasterSprite.use(sprite("blast"))
-        blasterSprite.use(scale(0.2))
+        blasterSprite.use(scale(0.12))
         blasterSprite.use(anchor("center"))
     }
     if(selectedGadgetName=="Cycler"){
@@ -360,7 +360,7 @@ usePostEffect("vignette", {
     if(selectedGadgetName=="Beam"){
         gadgetGlobal = beamBlasterGlobal
         blasterSprite.use(sprite("beam"))
-        blasterSprite.use(scale(0.2))
+        blasterSprite.use(scale(0.12))
         blasterSprite.use(anchor("center"))
     }
     if(selectedGadgetName=="Spark"){gadgetGlobal = sparkBlasterGlobal}
@@ -470,11 +470,13 @@ usePostEffect("vignette", {
             boss = true
         }
         else if(Math.random() < 0.25){
+            enemySprite = "bag"
             enemyType = "charger"
             enemySpeed *= 1.4
             enemyHealth *= 1.25
         }
         else if(Math.random() < 0.25){
+            enemySprite = "dino"
             enemyType = "shooter"
             enemySpeed *= 0.7
         }
@@ -780,9 +782,6 @@ usePostEffect("vignette", {
         roundLabel.pos = camPos().add(vec2(-width()/2 + 20, -height()/2 + 24))
         const diff = mouseWorldPos.sub(player.pos)
         let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)
-        if(selectedGadgetName=="Beam"){
-            angle += 15     // Beam png is rotated in src
-        }
         blasterSprite.angle = angle
         blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
     })
