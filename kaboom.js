@@ -25,7 +25,7 @@ loadSprite("boss", "gigagantrum.png")
 loadSprite("coin", "coin.png")
 loadSprite("blaster", "gun.png")
 //loadSprite("mark", "https://kaboomjs.com/sprites/mark.png")
-loadSprite("dino", "dino.png")
+//loadSprite("dino", "dino.png")
 //loadSprite("steel", "https://kaboomjs.com/sprites/steel.png")
 loadSprite("blast", "blast.png")
 loadSprite("beam", "beam.png")
@@ -348,19 +348,19 @@ usePostEffect("vignette", {
     if(selectedGadgetName=="Blast"){
         gadgetGlobal = blastBlasterGlobal
         blasterSprite.use(sprite("blast"))
-        //blasterSprite.use(scale(0.12))
+        blasterSprite.use(scale(2))
         blasterSprite.use(anchor("center"))
     }
     if(selectedGadgetName=="Cycler"){
         gadgetGlobal = cyclerBlasterGlobal
         blasterSprite.use(sprite("cycler"))
-        blasterSprite.use(scale(0.2))
-        blasterSprite.use(anchor("center"))
+        blasterSprite.use(scale(2))
+        blasterSprite.use(anchor("top"))
     }
     if(selectedGadgetName=="Beam"){
         gadgetGlobal = beamBlasterGlobal
         blasterSprite.use(sprite("beam"))
-        blasterSprite.use(scale(0.12))
+        blasterSprite.use(scale(2))
         blasterSprite.use(anchor("center"))
     }
     if(selectedGadgetName=="Spark"){gadgetGlobal = sparkBlasterGlobal}
@@ -476,7 +476,7 @@ usePostEffect("vignette", {
             enemyHealth *= 1.25
         }
         else if(Math.random() < 0.25){
-            enemySprite = "dino"
+            //enemySprite = "dino"
             enemyType = "shooter"
             enemySpeed *= 0.7
         }
