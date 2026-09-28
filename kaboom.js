@@ -30,7 +30,7 @@ loadSprite("dino", "dino.png")
 loadSprite("blast", "blast.png")
 loadSprite("beam", "beam.png")
 loadSprite("cycler", "cycler.png")
-loadSprite("bag", "bag.png")
+//loadSprite("bag", "bag.png")
 //loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
@@ -348,7 +348,7 @@ usePostEffect("vignette", {
     if(selectedGadgetName=="Blast"){
         gadgetGlobal = blastBlasterGlobal
         blasterSprite.use(sprite("blast"))
-        blasterSprite.use(scale(0.12))
+        //blasterSprite.use(scale(0.12))
         blasterSprite.use(anchor("center"))
     }
     if(selectedGadgetName=="Cycler"){
@@ -470,7 +470,7 @@ usePostEffect("vignette", {
             boss = true
         }
         else if(Math.random() < 0.25){
-            enemySprite = "bag"
+            //enemySprite = "bag"
             enemyType = "charger"
             enemySpeed *= 1.4
             enemyHealth *= 1.25
