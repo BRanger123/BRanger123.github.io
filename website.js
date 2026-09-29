@@ -62,6 +62,7 @@ input.addEventListener("keypress", function(event){
     const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
     if (event.key === "m"){
         event.preventDefault()
+        gameQuestions = false
         playLevel(levelGlobal)
         canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
         canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
