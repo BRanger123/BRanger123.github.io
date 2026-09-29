@@ -127,16 +127,20 @@ usePostEffect("vignette", {
     const maxX = 1800
     const maxY = 1200
 
+    let mapRed = rand(50, 220)
+    let mapGreen = rand(50, 220)
+    let mapBlue = rand(50, 220)
+
     add([
         pos(minX, minY),
         rect(maxX, maxY),
         area({ collisionIgnore: ["object"],}),
         body({ isStatic: true }),
-        color(255, 255, 255),
+        color(mapRed, mapGreen, mapBlue),
         opacity(0.5)
     ])
 
-    for(let i = 0; i<5; i++){
+    for(let i = 0; i<15; i++){
         const x = rand(minX + 100, maxX - 100)
         const y = rand(minY + 100, maxY - 100)
         //while(){}
@@ -145,6 +149,7 @@ usePostEffect("vignette", {
             sprite("grass"),
             area({ collisionIgnore: ["object"],}),
             body({ isStatic: true }),
+            color(mapRed, mapGreen, mapBlue)
         ])
     }
 
