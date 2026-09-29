@@ -33,6 +33,7 @@ loadSprite("blast", "blast.png")
 loadSprite("beam", "beam.png")
 loadSprite("cycler", "cycler.png")
 loadSprite("bag", "bag.png")
+loadSprite("grass", "spike.png")
 //loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
@@ -134,6 +135,17 @@ usePostEffect("vignette", {
         color(255, 255, 255),
         opacity(0.5)
     ])
+
+    for(let i = 0; i<5; i++){
+        const x = rand(minX + 100, maxX - 100)
+        const y = rand(minY + 100, maxY - 100)
+        const marker = add([
+            pos(x, y),
+            sprite("grass"),
+            area({ collisionIgnore: ["object"],}),
+            body({ isStatic: true }),
+        ])
+    }
 
     //spawnWave(1, 3, 5, 2) // spawns 5 enemies 2x as strong for 3 waves every 1 second
     let round = 1
@@ -537,7 +549,7 @@ usePostEffect("vignette", {
             isPaused = false
             hintLabel.text = ``
             if(upgradeValue==1){gadgetGlobal.beamDamage += Math.floor(gadgetGlobal.beamDamage*0.3*upgradeQuality)}
-            if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(gadgetGlobal.magSize*0.3*upgradeQuality); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
+            if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(gadgetGlobal.magSize*0.5*upgradeQuality); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
             if(upgradeValue==3){player.speed += Math.floor(player.speed*0.3*upgradeQuality)}
             if(upgradeValue==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
             if(upgradeValue==5){}
