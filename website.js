@@ -1,5 +1,33 @@
+const words = [
+    "apple", "adventure", "alpaca", "barn", "barnaby", "banana", "berry", "blossom", "boom", "breeze",
+    "carrot", "cattle", "chick", "chicken", "clover", "corn", "cow", "crop", "cultivate", "coop",
+    "dairy", "dirt", "duck", "duckling", "dawn", "dusk", "dig", "discovery", "dynamite", "drone",
+    "egg", "earth", "emerald", "energy", "explore", "estate", "engine", "echo", "epic", "element",
+    "farm", "farmer", "field", "flora", "foal", "forest", "fruit", "fence", "furrow", "feeder",
+    "goat", "goose", "grain", "grass", "greenhouse", "grow", "garden", "gate", "gander", "gold",
+    "harvest", "hay", "hen", "herd", "hive", "honey", "horse", "hoe", "hatch", "homestead",
+    "irrigate", "island", "item", "ivy", "impact", "iron", "infinite", "invent", "insight", "igloo",
+    "juice", "joy", "journey", "jumper", "jungle", "jackpot", "jam", "jasper", "jostle", "journal",
+    "kaboom", "kernel", "kiwi", "king", "knight", "kitten", "koala", "kudos", "kinetic", "key",
+    "llama", "lamb", "land", "leaf", "livestock", "log", "loader", "legend", "level", "laser",
+    "meadow", "milk", "milling", "moo", "mud", "market", "melon", "moss", "machinery", "maple",
+    "nature", "nest", "newt", "nugget", "nutrient", "nectar", "network", "nebula", "notable", "oasis",
+    "oats", "oink", "orchard", "organic", "owl", "oxen", "outpost", "orbit", "ore", "opal",
+    "paddock", "pasture", "peach", "pig", "piglet", "plant", "plow", "pond", "pony", "produce",
+    "quail", "quarry", "quest", "quick", "quartz", "quantum", "quasar", "quiet", "quilt", "quote",
+    "rooster", "ranch", "radish", "rain", "rake", "reap", "river", "roots", "rural", "ranger",
+    "silo", "soil", "seed", "sheep", "sprout", "stable", "straw", "sunflower", "scarecrow",
+    "tractor", "tree", "trough", "turkey", "till", "timber", "tomato", "treasure",
+    "unearth", "urban", "utilize", "upgrade", "universe", "ultra", "underground", "unique",
+    "vine", "valley", "vegetable", "vintage", "village", "vibrant", "valve", "vault", "vector",
+    "wheat", "windmill", "wagon", "water", "weather", "weed", "well", "wool", "worker", "wildlife",
+    "yard", "yarn", "yeast", "yellow", "yield", "yodel", 
+    "zebra", "zenith", "zigzag", "zipline", "zodiac", "zoology"
+];
+
 let gadgetGlobal
-let playerSkin = "bean"
+let playerSprite = "bean"
+let spritesOwned = ["bean"]
 let upgradeValue = 0
 let upgradeQuality = 1
 let levelGlobal = -1        // Globals so Kaboom objects can be seen in entire src
@@ -7,7 +35,7 @@ let currentDivId = "menu"
 let answerStreak = 0
 let highestAnswerStreak = 0
 let highestEnemiesDied = 0
-let coins
+let coins = 0
 let selectedGadget = ""
 let blastBlasterGlobal
 let sparkBlasterGlobal
@@ -114,12 +142,22 @@ function selectUpgrade(upgradeString){
     document.getElementById('upgradeContinue').style.display = "inline-block"
 }
 
-function purchaseSkin(skinIndex, price, skinName){
-    if(price<=coins){
+function purchaseSkin(sprite, price, button){
+    if(spritesOwned.includes(sprite)){
+        document.getElementById('currentSkin').textContent = `Skin: ${sprite}` || ''
+        playerSprite = sprite
+    }    
+    else if(price<=coins){
         coins = coins-price
-        upgradeValue = skinIndex
-        document.getElementById('coinsCount').textContent = coins || ''
-        document.getElementById('currentSkin').textContent = `Skin: ${skinName}` || ''
+        playerSprite = sprite
+        document.getElementById('coinsCount').textContent = `Coins: ${coins}`
+        document.getElementById('currentSkin').textContent = `Skin: ${sprite}` || ''
+        button.textContent = sprite
+        spritesOwned.push(sprite)
+        //this.onclick = purchaseSkin(sprite, 0, this)  funny line of code, infinately called causing stack overflow/ maximum cell exceeded
+    }
+    else{
+        alert(`You cannot afford ${sprite} skin.`)
     }
 }
 

@@ -16,6 +16,7 @@
                 <button id="questionButton" onclick="answerStreak = 0; startQuestion(); document.getElementById('questionBackButton').style.display = 'inline-block'">Quiz</button><br>
                 <button id="statsButton" onclick="websiteGoTo('stats'); updateStats()">Stats</button><br>
                 <button id="settingsButton" onclick="websiteGoTo('settings')">Settings</button><br>
+                <button id="storyButton" onclick="websiteGoTo('story')">The Story</button><br>
                 <button id="extrasButton" onclick="websiteGoTo('levelsMenu')">Extras</button><br>
             </div>
         </div>
@@ -72,21 +73,24 @@
                 <button onclick="selectGadget('Spark')">Spark<small>Critical Hits | Fast Reload</small></button>
             </div>
             <button id="weaponSelectContinue" onclick="playLevel(1); this.style.display = 'none'" style="display: none;">Continue</button><br><br>
+            <button onclick="websiteGoTo('shop'); document.getElementById('coinsCount').textContent = `Coins: ${coins}`">Skins</button><br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button><br>
         </div>
 
         <div id="shop" style="display: none;">
             <h1>Shop</h1>
             <h2 id="coinsCount">coins not found</h2>
-            <h2 id="currentSkin">Skin: Bean</h2>
+            <h2 id="currentSkin">Skin: bean</h2>
             <h3>Purchase Skin:</h3>
             <div class="buttonContainer">
-                <button onclick="purchaseSkin(-1, 30, `${this.textContent}`)">Mark (30)</button><br>
-                <button onclick="purchaseSkin(-2, 20, `${this.textContent}`)">Ghosty (20)</button><br>
-                <button onclick="purchaseSkin(-3, 10, `${this.textContent}`)">Dino (10)</button><br>
-                <button onclick="purchaseSkin(-4, 5, `${this.textContent}`)">Don Cheadle (5)</button><br>
+                <button onclick="purchaseSkin('bean', 0, this)">bean</button><br>
+                <button onclick="purchaseSkin('dino', 20, this)">dino (20)</button><br>
+                <button onclick="purchaseSkin('bag', 35, this)">bag (35)</button><br>
+                <button onclick="purchaseSkin('ghosty', 50, this)">ghosty (50)</button><br>
+                <button onclick="purchaseSkin('mark', 200, this)">mark (200)</button><br>
+                <button onclick="purchaseSkin('gigagantrum', 500, this)">gigagantrum (500)</button><br>
             </div>
-            <button onclick="websiteGoTo('gameWindow')">Continue</button>
+            <button onclick="websiteGoTo('weaponSelect')">Continue</button>
         </div>
 
         <div id="questions" style="display: none;">
@@ -134,6 +138,14 @@ Question2,CorrectAnswer,Answer,Answer,Answer" rows="18" cols="45"></textarea><br
             <button onclick="if(document.getElementById('customQuestions').value != ''){questions = changeQuestions()}else{alert('Cannot use no questions!')}">Use Custom Questions</button>
             <br>
             <br>
+            <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
+        </div>
+
+        <div id="story" style="display: none">
+            <h1>The Story of Bricklet</h1>
+            <h2>Click button to reveal story...</h2>
+            <textarea id="storyBox" rows="30" cols="80" readonly></textarea><br><br>
+            <button onclick="document.getElementById('storyBox').textContent += `${choose(words)} `">Click me!</button><br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
 

@@ -1,5 +1,6 @@
 //Import kaboom.js
 import kaboom from "https://unpkg.com/kaboom@3000.0.1/dist/kaboom.mjs"
+ 
 
 //Get the canvas element
 const canvas = document.getElementById('gameCanvas')
@@ -127,9 +128,9 @@ usePostEffect("vignette", {
     const maxX = 2400
     const maxY = 1800
 
-    let mapRed = rand(150, 220)
-    let mapGreen = rand(150, 220)
-    let mapBlue = rand(150, 220)
+    let mapRed = rand(150, 255)
+    let mapGreen = rand(150, 255)
+    let mapBlue = rand(150, 255)
 
     add([
         pos(minX, minY),
@@ -166,7 +167,6 @@ usePostEffect("vignette", {
     let isPaused = false
     let mouseDown = false
     let waiting = false
-    coins = 0
     let coinMagForce = 35000
     document.getElementById("coinsCount").textContent = `Coins: ${coins}`
     
@@ -324,7 +324,7 @@ usePostEffect("vignette", {
 
     // Player code
     const player = add([
-        sprite("bean"),
+        sprite(`${playerSprite}`),
         pos(maxX/2, maxY/2),
         area(),
         anchor("center"),   // So beams spawn at center
@@ -380,7 +380,7 @@ usePostEffect("vignette", {
     if(selectedGadgetName=="Beam"){
         gadgetGlobal = beamBlasterGlobal
         blasterSprite.use(sprite("beam"))
-        blasterSprite.use(scale(2))
+        blasterSprite.use(scale(1.8))
         blasterSprite.use(anchor("center"))
     }
     if(selectedGadgetName=="Spark"){gadgetGlobal = sparkBlasterGlobal}
@@ -516,18 +516,17 @@ usePostEffect("vignette", {
 
         enemy.on("death", () => {
             
-            if(Math.random()*1 < 0.7){  // 70% chance of explosion
+            //if(Math.random()*1 < 0.7){  // 70% chance of explosion
                 addKaboom(enemy.pos)
                 shake(8)
-                if(player.pos.dist(enemy.pos) < 80){    // Player takes damage if too close
-                    player.hurt(20)
-                }
-            }
+                //if(player.pos.dist(enemy.pos) < 80){    // Player takes damage if too close
+                //    player.hurt(20)
+                //}
+            //}
             
             spawnCoin(enemy.pos)
             enemiesDiedCounter++
             destroy(enemy)
-            burp()  // Sound effects built into Kaboom library
             enemiesDied++
             if(enemiesDied > highestEnemiesDied){highestEnemiesDied = enemiesDied}
             enemiesLeft = enemiesLeft - 1
@@ -562,10 +561,6 @@ usePostEffect("vignette", {
             if(upgradeValue==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
             if(upgradeValue==7){coinMagForce += 120000*upgradeQuality}
             if(upgradeValue==8){player.maxHealth += Math.floor(25*upgradeQuality); player.heal(player.maxHealth - player.hp())}
-            if(upgradeValue==-1){player.use(sprite("mark"))}
-            if(upgradeValue==-2){player.use(sprite("ghosty"))}
-            if(upgradeValue==-3){player.use(sprite("dino"))}
-            if(upgradeValue==-4){player.use(sprite("dc"))}
             upgradeValue=0  // Reset upgrade so does not reapply on click
             upgradeQuality = 1
 
@@ -755,6 +750,11 @@ usePostEffect("vignette", {
             reloadLabel.text = `Magazine full`
         }
         ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
+    })
+
+    onKeyPress("o", () => {
+        spawnText(player.pos, choose(words), false)
+        burp()
     })
 
     /*
