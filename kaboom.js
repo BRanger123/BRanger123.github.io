@@ -139,6 +139,7 @@ usePostEffect("vignette", {
     for(let i = 0; i<5; i++){
         const x = rand(minX + 100, maxX - 100)
         const y = rand(minY + 100, maxY - 100)
+        //while(){}
         const marker = add([
             pos(x, y),
             sprite("grass"),
@@ -589,6 +590,7 @@ usePostEffect("vignette", {
     function spawnWave(time, waves, enemyNum, difficulty, bosses){
         for(let i=0; i<bosses; i++){
             spawnEnemy(difficulty, true)
+            enemiesLeft = enemiesLeft + 1   //No early upgrade
         }
         let clockLoopCycle = 1
         enemiesLeft = enemyNum*waves
@@ -808,6 +810,7 @@ usePostEffect("vignette", {
 })
 
 scene("deathScreen", (result) => {
+    gameQuestions = false //could work, upgrade screen opens when played game then using quiz.
     let red = 255
     let green = 255
     let blue = 255
