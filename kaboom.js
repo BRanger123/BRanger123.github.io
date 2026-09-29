@@ -128,9 +128,9 @@ usePostEffect("vignette", {
     const maxX = 2400
     const maxY = 1800
 
-    let mapRed = rand(150, 255)
-    let mapGreen = rand(150, 255)
-    let mapBlue = rand(150, 255)
+    let mapRed = rand(100, 255)
+    let mapGreen = rand(100, 255)
+    let mapBlue = rand(100, 255)
 
     add([
         pos(minX, minY),
@@ -189,6 +189,7 @@ usePostEffect("vignette", {
             this.lastFireTime = 0         // Track time between automatic shots rather than dt()
             this.penetration = penetration // Number of enemies a beam can pass through before disappearing
             this.critChance = critChance
+            this.lifeSteal = 0
         }
         
         canFire(){
@@ -248,6 +249,11 @@ usePostEffect("vignette", {
                 beam.onUpdate(() => {beam.move(beam.dir.scale(this.beamSpeed))})    // Moves in dir by speed every frame
                 beam.onCollide("enemy", (enemy) => {
                     if(Math.random() <= this.critChance){
+                        player.heal(this.lifeSteal*this.beamDamage*3)
+                        if(player.hp() > player.maxHealth){
+                            player.hurt(player.hp() - player.maxHealth)
+                        }
+                        healthLabel.text = `Health: ${player.hp()}`
                         spawnText(enemy.pos, this.beamDamage, true)
                         enemy.hurt(this.beamDamage*3)
                         if(beam.penetration > 0){
@@ -258,6 +264,11 @@ usePostEffect("vignette", {
                         }
                     }
                     else{
+                        player.heal(this.lifeSteal*this.beamDamage)
+                        if(player.hp() > player.maxHealth){
+                            player.hurt(player.hp() - player.maxHealth)
+                        }
+                        healthLabel.text = `Health: ${player.hp()}`
                         spawnText(enemy.pos, this.beamDamage, false)
                         enemy.hurt(this.beamDamage)
                         if(beam.penetration > 0){
@@ -557,7 +568,7 @@ usePostEffect("vignette", {
             if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(gadgetGlobal.magSize*0.5*upgradeQuality); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
             if(upgradeValue==3){player.speed += Math.floor(player.speed*0.3*upgradeQuality)}
             if(upgradeValue==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
-            if(upgradeValue==5){}
+            if(upgradeValue==5){gadgetGlobal.lifeSteal += 2 * upgradeQuality}
             if(upgradeValue==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
             if(upgradeValue==7){coinMagForce += 120000*upgradeQuality}
             if(upgradeValue==8){player.maxHealth += Math.floor(25*upgradeQuality); player.heal(player.maxHealth - player.hp())}
