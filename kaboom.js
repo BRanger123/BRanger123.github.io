@@ -124,12 +124,12 @@ usePostEffect("vignette", {
 
     const minX = 0
     const minY = 0
-    const maxX = 1800
-    const maxY = 1200
+    const maxX = 2400
+    const maxY = 1800
 
-    let mapRed = rand(50, 220)
-    let mapGreen = rand(50, 220)
-    let mapBlue = rand(50, 220)
+    let mapRed = rand(100, 220)
+    let mapGreen = rand(100, 220)
+    let mapBlue = rand(100, 220)
 
     add([
         pos(minX, minY),
