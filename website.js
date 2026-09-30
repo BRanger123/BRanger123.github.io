@@ -48,6 +48,10 @@ let darkMode = false
 let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }
 let bindingTarget = null
 
+    let red = 255
+    let green = 255
+    let blue = 255
+
 
 function getQuestions() {
     const xhr = new XMLHttpRequest()

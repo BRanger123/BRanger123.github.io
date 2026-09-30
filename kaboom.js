@@ -11,7 +11,7 @@ kaboom({
     canvas: canvas,
     width: window.innerWidth,
     height: window.innerHeight,
-    background: [0, 0, 0],              //////////////////////redgreenblue/////////////////////////////////////////////////////////////
+    background: [red, green, blue],              //////////////////////redgreenblue/////////////////////////////////////////////////////////////
     letterBox: true,
 })
 
@@ -39,12 +39,7 @@ loadSprite("grass", "spike.png")
 loadBean()
 
 scene("startButton", () => {
-    let red = 255
-    let green = 255
-    let blue = 255
     let textColor = rgb(0, 0, 0)
-    if(darkMode){red = 0; green = 0; blue = 0; textColor = rgb(255, 255, 255)}
-    else{red = 255; green = 255; blue = 255; textColor = rgb(0, 0, 0)}
     setBackground(rgb(red, green, blue))
     const btn = add([
         rect(240, 80, { radius: 8 }),
@@ -343,7 +338,7 @@ usePostEffect("vignette", {
         health(100),
         "player",   // For collision detection
         "object",
-        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100 }, // Recoil 2d vector for fluid recoil
+        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 1.5 }, // Recoil 2d vector for fluid recoil
     ])
     
     player.onCollide("coin", (coin) => {
@@ -370,7 +365,7 @@ usePostEffect("vignette", {
     sparkBlasterGlobal = sparkBlaster
     let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 8000, 1.5, false, 100, 1, 0.15)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 3000, 2.5, true, 70, 3, 0.05)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 3000, 2.5, true, 40, 3, 0.05)
     cyclerBlasterGlobal = cyclerBlaster
     let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 500, 5, 1, 0, 9000, 3, false, 200, 99, 0.2)
     beamBlasterGlobal = beamBlaster
@@ -659,10 +654,12 @@ usePostEffect("vignette", {
                         ])
                         projectile.onUpdate(() => projectile.move(projectile.dir.scale(projectile.speed)))
                         projectile.onCollide("player", (player) => {
-                            player.hurt(12)
-                            healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
-                            shake(20)
-                            destroy(projectile)
+                            if(player.momentum.len() < 3000){
+                                player.hurt(12)
+                                healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
+                                shake(20)
+                                destroy(projectile)
+                            }
                         })
                         enemy.attackCooldown = 2
                     }
@@ -698,7 +695,7 @@ usePostEffect("vignette", {
         }
 
         if (player.momentum && player.momentum.len() > 0){
-            const momentumDamping = 1	//lower damping for further movement
+            const momentumDamping = 3	//lower damping for further movement
             const momentumStep = player.momentum.scale(1 - Math.exp(-momentumDamping * dt()))	//momentum code for separate attribute
             player.move(momentumStep)
             player.momentum = player.momentum.sub(momentumStep)
@@ -706,6 +703,7 @@ usePostEffect("vignette", {
                 player.momentum = vec2(0, 0)
             }
         }
+        player.cooldown -= dt()
 
     })
 
@@ -740,7 +738,10 @@ usePostEffect("vignette", {
         }
     })
     onKeyPress(controlBindings.dash, () => {
-        player.momentum = player.momentum.add(toWorld(mousePos()).sub(player.pos).unit().scale(35000))
+        if(player.cooldown <= 0){
+            player.momentum = player.momentum.add(toWorld(mousePos()).sub(player.pos).unit().scale(55000))
+            player.cooldown = 1.5
+        }
     })
 
     onUpdate(() => {
@@ -792,7 +793,7 @@ usePostEffect("vignette", {
 
     // Collision with enemy
     onCollideUpdate("player", "enemy", () => {
-        if(!isPaused){
+        if(!isPaused && player.momentum.len() < 3000){
             player.hurt(0.5)
             healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
             shake(8)           
