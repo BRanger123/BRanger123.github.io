@@ -16,7 +16,6 @@
                 <button id="questionButton" onclick="answerStreak = 0; startQuestion(); document.getElementById('questionBackButton').style.display = 'inline-block'">Quiz</button><br>
                 <button id="statsButton" onclick="websiteGoTo('stats'); updateStats()">Stats</button><br>
                 <button id="settingsButton" onclick="websiteGoTo('settings')">Settings</button><br>
-                <button id="storyButton" onclick="websiteGoTo('story')">The Story</button><br>
                 <button id="extrasButton" onclick="websiteGoTo('levelsMenu')">Extras</button><br>
             </div>
         </div>
@@ -139,14 +138,6 @@ Question2,CorrectAnswer,Answer,Answer,Answer" rows="18" cols="45"></textarea><br
             <button onclick="if(document.getElementById('customQuestions').value != ''){questions = changeQuestions()}else{alert('Cannot use no questions!')}">Use Custom Questions</button>
             <br>
             <br>
-            <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
-        </div>
-
-        <div id="story" style="display: none">
-            <h1>The Story of Bricklet</h1>
-            <h2>Click button to reveal story...</h2>
-            <textarea id="storyBox" rows="30" cols="80" readonly></textarea><br><br>
-            <button onclick="document.getElementById('storyBox').textContent += `${choose(words)} `">Click me!</button><br><br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
         </div>
 

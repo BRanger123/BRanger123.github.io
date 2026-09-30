@@ -1,29 +1,32 @@
 const words = [
-    "apple", "adventure", "alpaca", "barn", "barnaby", "banana", "berry", "beam", "boom", "blast",
-    "carrot", "cattle", "chick", "chicken", "bricklet", "corn", "cow", "crop", "cultivate", "coop",
-    "dairy", "dirt", "duck", "duckling", "dawn", "dusk", "dig", "discovery", "dynamite", "drone",
-    "egg", "earth", "emerald", "energy", "explore", "estate", "engine", "echo", "epic", "element",
-    "farm", "farmer", "field", "flora", "foal", "forest", "fruit", "fence", "furrow", "feeder",
-    "goat", "goose", "grain", "grass", "greenhouse", "grow", "garden", "gate", "gander", "gold",
-    "harvest", "hay", "hen", "herd", "hive", "honey", "horse", "hoe", "hatch", "homestead",
-    "irrigate", "island", "item", "ivy", "impact", "iron", "hello", "invent", "insight", "igloo",
-    "juice", "joy", "journey", "jumper", "jungle", "jackpot", "jam", "jasper", "jostle", "journal",
-    "kaboom", "kernel", "kiwi", "king", "knight", "kitten", "koala", "kudos", "kinetic", "key",
-    "llama", "lamb", "land", "leaf", "linux", "log", "loader", "legend", "level", "laser",
-    "meadow", "milk", "milling", "moo", "mud", "market", "melon", "moss", "machinery", "maple",
-    "nature", "nest", "newt", "nugget", "nutrient",
-    "oats", "oink", "orchard", "owl",
-    "zoink", "goo", "peach", "pig", "piglet", "plant", "plow", "pond", "pony",
-    "quest", "quartz", "quantum", "quasar", "quiet",
-    "rooster", "ranch", "radish", "rain", "ranger",
-    "silo", "soil", "seed", "sheep", "sprout", "stable", "straw", "sunflower", "scarecrow",
-    "tractor", "tree", "trough", "turkey", "timber", "tomato", "treasure",
-    "upgrade", "universe", "ultra", "underground", "unique",
-    "vine", "valley", "vegetable", "vintage", "village", "vibrant",
-    "wheat", "windmill", "wagon", "water", "weather", "weed", "well", "wool", "worker", "wildlife",
-    "yard", "yarn", "yeast", "yellow", "yield", "yodel", 
-    "zebra", "zenith", "zigzag", "zipline", "zodiac", "zoology"
-];
+    "blabber", "blabble", "blab", "blah", "donk", "jarp", "raggle", "abbles", "plonk"
+]
+
+const sentences = [
+    [5, "get","out","of","my","farm"],
+    ["","","","","","",""],
+    ["","","","","","",""],
+    ["","","","","","",""],
+    ["","","","","","",""],
+    ["","","","","","",""],
+    ["","","","","","",""],
+]
+
+function blabber(){
+    const consonants = "bcdfghjklmnpqrstvwxyz"
+    const vowels = "aeiou"
+    const wordLength = Math.floor(Math.random() * 4) + 4
+    let word = ""
+    for(let i = 0; i < wordLength; i++){
+        if(i % 2 === 0){
+            word += consonants[Math.floor(Math.random() * consonants.length)]
+        }
+        else{
+            word += vowels[Math.floor(Math.random() * vowels.length)]
+        }
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1)
+}
 
 let gadgetGlobal
 let playerSprite = "bean"

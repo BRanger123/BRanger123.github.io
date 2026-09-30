@@ -769,27 +769,10 @@ usePostEffect("vignette", {
         ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
     })
 
-    onKeyPress("o", () => {
-        spawnText(player.pos, choose(words), false)
+    onKeyPress("b", () => {
+        spawnText(player.pos, blabber(), false)
         burp()
     })
-
-    /*
-    onKeyPress("p", () => {
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
-        isPaused = true
-        destroyAll("beam")
-        hintLabel.text = `Click to continue`
-        websiteGoTo('shop')
-        onClick(() => {
-            isPaused = false
-            hintLabel.text = ``
-        })
-    })
-    */
 
     // Collision with enemy
     onCollideUpdate("player", "enemy", () => {
