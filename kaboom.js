@@ -249,7 +249,7 @@ usePostEffect("vignette", {
                 beam.onUpdate(() => {beam.move(beam.dir.scale(this.beamSpeed))})    // Moves in dir by speed every frame
                 beam.onCollide("enemy", (enemy) => {
                     if(Math.random() <= this.critChance){
-                        player.heal(this.lifeSteal*this.beamDamage*3*0.01)
+                        player.heal(this.lifeSteal*3)
                         if(player.hp() > player.maxHealth){
                             player.hurt(player.hp() - player.maxHealth)
                         }
@@ -264,7 +264,7 @@ usePostEffect("vignette", {
                         }
                     }
                     else{
-                        player.heal(this.lifeSteal*this.beamDamage*0.01)
+                        player.heal(this.lifeSteal)
                         if(player.hp() > player.maxHealth){
                             player.hurt(player.hp() - player.maxHealth)
                         }
