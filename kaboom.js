@@ -241,7 +241,7 @@ usePostEffect("vignette", {
                     { speed: this.beamSpeed, dir: direction, penetration: this.penetration },
                     offscreen({ destroy: true }),   // Save processing power
                 ])
-                beam.onUpdate(() => {beam.move(beam.dir.scale(this.beamSpeed))})    // Moves in dir by speed every frame
+                beam.onUpdate(() => {if(!isPaused){beam.move(beam.dir.scale(this.beamSpeed))}})    // Moves in dir by speed every frame
                 beam.onCollide("enemy", (enemy) => {
                     if(Math.random() <= this.critChance){
                         player.heal(this.lifeSteal*3)
@@ -650,9 +650,10 @@ usePostEffect("vignette", {
                         const projectile = add([
                             pos(enemy.pos), rect(12, 12), area(), color(255, 20, 20),
                             "enemyBeam", "object",
-                            { speed: 260, dir: direction }, offscreen({ destroy: true }),
+                            { speed: 260, dir: direction },
+                            offscreen({ destroy: true }),
                         ])
-                        projectile.onUpdate(() => projectile.move(projectile.dir.scale(projectile.speed)))
+                        projectile.onUpdate(() => {if(!isPaused){projectile.move(projectile.dir.scale(projectile.speed))}})
                         projectile.onCollide("player", (player) => {
                             if(player.momentum.len() < 3000){
                                 player.hurt(12)
@@ -774,6 +775,13 @@ usePostEffect("vignette", {
         burp()
     })
 
+    onKeyPress("p", () => {
+        if(isPaused){isPaused = false; spawnText(player.pos, "Unpaused", false)}
+        else{isPaused = true; spawnText(player.pos, "Paused", false)}
+        
+
+    })
+
     // Collision with enemy
     onCollideUpdate("player", "enemy", () => {
         if(!isPaused && player.momentum.len() < 3000){
@@ -786,25 +794,27 @@ usePostEffect("vignette", {
     camScale(1)
     camRot(0)
     player.onUpdate(() => {
-        // Camera follows point between player and mouse cursor
-        const mouseWorldPos = toWorld(mousePos())
-        const targetPos = player.pos.add(mouseWorldPos).scale(0.5)
-        camPos(targetPos)
+        if(!isPaused){
+            // Camera follows point between player and mouse cursor
+            const mouseWorldPos = toWorld(mousePos())
+            const targetPos = player.pos.add(mouseWorldPos).scale(0.5)
+            camPos(targetPos)
 
-        // Make labels stay relative to camera
-        toWorld(camPos())   // Set world origin to camPos()
-        coinsLabel.pos = camPos().add(vec2(width()/2 - 20, -height()/2 + 24))
-        ammoLabel.pos = camPos().add(vec2(-width()/2 + 20, height()/2 - 24))
-        healthLabel.pos = camPos().add(vec2(width()/2 - 20, height()/2 - 24))
-        hintLabel.pos = camPos().add(vec2(0, -height()/2 + 90))
-        controlsLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
-        reloadLabel.pos = camPos().add(vec2(0, -height()/2 + 150))
-        nextWaveTimeLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
-        roundLabel.pos = camPos().add(vec2(-width()/2 + 20, -height()/2 + 24))
-        const diff = mouseWorldPos.sub(player.pos)
-        let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)
-        blasterSprite.angle = angle
-        blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
+            // Make labels stay relative to camera
+            toWorld(camPos())   // Set world origin to camPos()
+            coinsLabel.pos = camPos().add(vec2(width()/2 - 20, -height()/2 + 24))
+            ammoLabel.pos = camPos().add(vec2(-width()/2 + 20, height()/2 - 24))
+            healthLabel.pos = camPos().add(vec2(width()/2 - 20, height()/2 - 24))
+            hintLabel.pos = camPos().add(vec2(0, -height()/2 + 90))
+            controlsLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
+            reloadLabel.pos = camPos().add(vec2(0, -height()/2 + 150))
+            nextWaveTimeLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
+            roundLabel.pos = camPos().add(vec2(-width()/2 + 20, -height()/2 + 24))
+            const diff = mouseWorldPos.sub(player.pos)
+            let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)
+            blasterSprite.angle = angle
+            blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
+        }
     })
 
     onDestroy("player", () => go("deathScreen", { score: enemiesDied*coins, round: Math.max(1, round - 1) })) // If off screen
