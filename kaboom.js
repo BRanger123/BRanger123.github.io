@@ -599,12 +599,12 @@ usePostEffect("vignette", {
     }
 
     function spawnWave(time, waves, enemyNum, difficulty, bosses){
+        enemiesLeft = waves * enemyNum
         for(let i=0; i<bosses; i++){
             spawnEnemy(difficulty, true)
-            enemiesLeft = enemiesLeft + 1   //No early upgrade
+            enemiesLeft++
         }
         let clockLoopCycle = 1
-        enemiesLeft = enemyNum*waves
         const clock = add([timer()])
         clock.loop(time, () => {
             if(!isPaused && clockLoopCycle < waves+1){
