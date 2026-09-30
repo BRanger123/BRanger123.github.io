@@ -141,7 +141,7 @@ usePostEffect("vignette", {
         opacity(0.5)
     ])
 
-    for(let i = 0; i<15; i++){
+    for(let i = 0; i<30; i++){
         const x = rand(minX + 100, maxX - 100)
         const y = rand(minY + 100, maxY - 100)
         //while(){}
@@ -366,7 +366,7 @@ usePostEffect("vignette", {
 
     // amazing gadget class can be used for all gadget archetypes
     // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto = false, fireRate = 100, penetration = 0, critChance
-    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 5, 1000, 1, false, 200, 0, 0.3)
+    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 3, 1000, 1, false, 200, 0, 0.3)
     sparkBlasterGlobal = sparkBlaster
     let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 8000, 1.5, false, 100, 1, 0.15)
     blastBlasterGlobal = blastBlaster
@@ -549,6 +549,7 @@ usePostEffect("vignette", {
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
                     isPaused = true
                     destroyAll("beam")
+                    destroyAll("enemyBeam")
                     hintLabel.text = `Click to continue with upgrade`
                     gameQuestions = true
                     if(questionsInGame){startQuestion()}
@@ -568,10 +569,14 @@ usePostEffect("vignette", {
             if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(gadgetGlobal.magSize*0.5*upgradeQuality); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
             if(upgradeValue==3){player.speed += Math.floor(player.speed*0.3*upgradeQuality)}
             if(upgradeValue==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
-            if(upgradeValue==5){gadgetGlobal.lifeSteal += 2 * upgradeQuality}
+            if(upgradeValue==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
             if(upgradeValue==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
             if(upgradeValue==7){coinMagForce += 120000*upgradeQuality}
-            if(upgradeValue==8){player.maxHealth += Math.floor(25*upgradeQuality); player.heal(player.maxHealth - player.hp())}
+            if(upgradeValue==8){
+                player.maxHealth += Math.floor(25*upgradeQuality)
+                player.heal(player.maxHealth - player.hp())
+                healthLabel.text = `Health: ${player.hp()}`
+            }
             upgradeValue=0  // Reset upgrade so does not reapply on click
             upgradeQuality = 1
 
@@ -649,7 +654,7 @@ usePostEffect("vignette", {
                     if(enemy.attackCooldown <= 0){
                         const projectile = add([
                             pos(enemy.pos), rect(12, 12), area(), color(255, 20, 20),
-                            "enemyProjectile", "object",
+                            "enemyBeam", "object",
                             { speed: 260, dir: direction }, offscreen({ destroy: true }),
                         ])
                         projectile.onUpdate(() => projectile.move(projectile.dir.scale(projectile.speed)))
