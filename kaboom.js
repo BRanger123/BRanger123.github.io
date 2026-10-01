@@ -90,7 +90,7 @@ scene(1, () => {
     setBackground(rgb(0, 0, 0))
     setGravity(0)
 
-    /*
+/*
 loadShader("vignette", null, `
     uniform vec2 u_resolution;
     uniform float u_intensity; // Controls overall darkness
@@ -101,7 +101,7 @@ loadShader("vignette", null, `
         vec4 baseColor = texture2D(tex, pos);
         
         // Calculate distance of current UV coordinate from the center (0.5, 0.5)
-        vec2 uvCenter = uv - vec2(0.5);
+        vec2 uvCenter = uv - vec2(0.5,0.5);
         
         // Compute vignette mask strength based on distance from center
         float dist = length(uvCenter);
@@ -517,7 +517,7 @@ usePostEffect("vignette", {
             color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
             "enemy",    // For collision detection
             "object",
-            { speed: enemySpeed, isBoss: boss, enemyType, attackCooldown: 1.5, chargeDirection: null, chargeTimer: 0 },
+            { speed: enemySpeed, isBoss: boss, enemyType, attackCooldown: 0.5, chargeDirection: null, chargeTimer: 0 },
         ])
 
         enemy.on("death", () => {
@@ -599,10 +599,9 @@ usePostEffect("vignette", {
     }
 
     function spawnWave(time, waves, enemyNum, difficulty, bosses){
-        enemiesLeft = waves * enemyNum
+        enemiesLeft = (waves * enemyNum) + bosses
         for(let i=0; i<bosses; i++){
             spawnEnemy(difficulty, true)
-            enemiesLeft++
         }
         let clockLoopCycle = 1
         const clock = add([timer()])
@@ -648,21 +647,21 @@ usePostEffect("vignette", {
                     enemy.attackCooldown -= dt()
                     if(enemy.attackCooldown <= 0){
                         const projectile = add([
-                            pos(enemy.pos), rect(12, 12), area(), color(255, 20, 20),
+                            pos(enemy.pos), circle(16), area(), color(255, 20, 20),
                             "enemyBeam", "object",
-                            { speed: 260, dir: direction },
+                            { speed: 500 , dir: direction },
                             offscreen({ destroy: true }),
                         ])
                         projectile.onUpdate(() => {if(!isPaused){projectile.move(projectile.dir.scale(projectile.speed))}})
                         projectile.onCollide("player", (player) => {
                             if(player.momentum.len() < 3000){
-                                player.hurt(12)
+                                player.hurt(20)
                                 healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
                                 shake(20)
                                 destroy(projectile)
                             }
                         })
-                        enemy.attackCooldown = 2
+                        enemy.attackCooldown = 1
                     }
                 }
                 else enemy.move(direction.scale(enemy.speed))
