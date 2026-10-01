@@ -12,6 +12,24 @@ const sentences = [
     ["","","","","","",""],
 ]
 
+const colors = [
+    "2191fb","b9faf8","dc6acf","d84727","f3c969",
+    "c56b59","6eb83d","f194b4","c5ebc3","6fbcec",
+    "aafac8","c7ffed","ffa770","d3c1d2","cb769e",
+    "ff6b35","f7c59f","6fd08c","b47eb3","17b2b5",
+    "fffd98","339989","7f4fba","c00c3f","c6d4ff"
+]
+
+//#questionButton
+//#statsButton
+//#settingsButton
+//#extrasButton
+document.getElementById("startButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
+document.getElementById("questionButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
+document.getElementById("statsButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
+document.getElementById("settingsButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
+document.getElementById("extrasButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
+
 function blabber(){
     const consonants = "bcdfghjklmnpqrstvwxyz"
     const vowels = "aeiou"

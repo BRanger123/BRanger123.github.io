@@ -123,29 +123,27 @@ usePostEffect("vignette", {
     const maxX = 2400
     const maxY = 1800
 
-    let mapRed = rand(100, 255)
-    let mapGreen = rand(100, 255)
-    let mapBlue = rand(100, 255)
+    //let mapRed = rand(100, 255)
+    //let mapGreen = rand(100, 255)
+    //let mapBlue = rand(100, 255)
+    let mapRGB = choose(colors)
 
     add([
         pos(minX, minY),
         rect(maxX, maxY),
         area({ collisionIgnore: ["object"],}),
         body({ isStatic: true }),
-        color(mapRed, mapGreen, mapBlue),
+        color(mapRGB),
         opacity(0.5)
     ])
 
     for(let i = 0; i<30; i++){
-        const x = rand(minX + 100, maxX - 100)
-        const y = rand(minY + 100, maxY - 100)
-        //while(){}
         const marker = add([
-            pos(x, y),
+            pos(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100)),
             sprite("grass"),
             area({ collisionIgnore: ["object"],}),
             body({ isStatic: true }),
-            color(mapRed, mapGreen, mapBlue)
+            color(mapRGB)
         ])
     }
 
@@ -249,7 +247,7 @@ usePostEffect("vignette", {
                             player.hurt(player.hp() - player.maxHealth)
                         }
                         healthLabel.text = `Health: ${player.hp()}`
-                        spawnText(enemy.pos, this.beamDamage, true)
+                        spawnText(enemy.pos, "Critical Hit!")
                         enemy.hurt(this.beamDamage*3)
                         if(beam.penetration > 0){
                             beam.penetration--
@@ -264,7 +262,7 @@ usePostEffect("vignette", {
                             player.hurt(player.hp() - player.maxHealth)
                         }
                         healthLabel.text = `Health: ${player.hp()}`
-                        spawnText(enemy.pos, this.beamDamage, false)
+                        spawnText(enemy.pos, this.beamDamage)
                         enemy.hurt(this.beamDamage)
                         if(beam.penetration > 0){
                             beam.penetration--
@@ -281,11 +279,7 @@ usePostEffect("vignette", {
         }
     }
     
-    function spawnText(position, textContent, crit){
-        if(crit){
-            textContent = "Critical Hit!" 
-        }
-
+    function spawnText(position, textContent, colour){
 
         const textObject = add([
             anchor("center"),
@@ -294,7 +288,7 @@ usePostEffect("vignette", {
                 size: 32 
             }),
             pos(position.x+Math.random()*20, position.y+Math.random()*20),  // Rand so numbers do not overlap (shotgun)
-            color(textColor),
+            color(colour || textColor),
             { visabilityStep: 1 },
         ])
        
@@ -338,7 +332,7 @@ usePostEffect("vignette", {
         health(100),
         "player",   // For collision detection
         "object",
-        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 1.5 }, // Recoil 2d vector for fluid recoil
+        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0 }, // Recoil 2d vector for fluid recoil
     ])
     
     player.onCollide("coin", (coin) => {
@@ -644,7 +638,6 @@ usePostEffect("vignette", {
                     const distance = enemy.pos.dist(player.pos)
                     if(distance > 360) enemy.move(direction.scale(enemy.speed))
                     else if(distance < 240) enemy.move(direction.scale(-enemy.speed))
-                    enemy.attackCooldown -= dt()
                     if(enemy.attackCooldown <= 0){
                         const projectile = add([
                             pos(enemy.pos), circle(16), area(), color(255, 20, 20),
@@ -666,6 +659,7 @@ usePostEffect("vignette", {
                 }
                 else enemy.move(direction.scale(enemy.speed))
             }
+            enemy.attackCooldown -= dt()
         }
     })
 
@@ -770,7 +764,7 @@ usePostEffect("vignette", {
     })
 
     onKeyPress("b", () => {
-        spawnText(player.pos, blabber(), false)
+        spawnText(player.pos, blabber())
         burp()
     })
 
@@ -782,11 +776,16 @@ usePostEffect("vignette", {
     })
 
     // Collision with enemy
-    onCollideUpdate("player", "enemy", () => {
+    onCollideUpdate("player", "enemy", (player, enemy) => {
         if(!isPaused && player.momentum.len() < 3000){
-            player.hurt(0.5)
+            if(enemy.attackCooldown > 0){
+                return
+            }
+            if(enemy.enemyType == "charger"){player.hurt(10)}
+            else{player.hurt(5)}
             healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
-            shake(8)           
+            shake(8)
+            enemy.attackCooldown = 0.5
         }
     })
 
