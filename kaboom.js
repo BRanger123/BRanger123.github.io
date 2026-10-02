@@ -83,6 +83,8 @@ scene("startButton", () => {
 })
 
 scene(1, () => {
+    document.getElementById("dodgeUpgrade").style.display = "inline-block"
+
     let red = 255
     let green = 255
     let blue = 255
@@ -610,7 +612,7 @@ usePostEffect("vignette", {
             if(upgradeValue==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
             if(upgradeValue==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
             if(upgradeValue==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
-            if(upgradeValue==7){player.dodge += 5*upgradeQuality}
+            if(upgradeValue==7){player.dodge += 5*upgradeQuality; if(player.dodge > 55){player.dodge = 60; document.getElementById("dodgeUpgrade").style.display = "none"}}
             if(upgradeValue==8){
                 player.maxHealth += Math.floor(25*upgradeQuality)
                 player.heal(player.maxHealth - player.hp())
