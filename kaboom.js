@@ -176,7 +176,7 @@ usePostEffect("vignette", {
 
     const enemies = []
     const spawnDist = 500
-    let enemiesLeft = -1
+    let enemiesLeft
     let enemiesDied = 0
     let enemiesDiedCounter = 0
     upgradeValue = 0
@@ -336,14 +336,18 @@ usePostEffect("vignette", {
             shake(damage)
             spawnText(player.pos, `-${damage}`)
             player.use(color(rgb(255, 0, 0)))
-            player.redness = 1
+            //player.redness = 1
+            /*
             player.onUpdate(() => {
-                player.redness -= dt()
-                player.use(color(rgb(255, 255*(1-player.redness), 255*(1-player.redness))))
+                if(player.redness <= 0){
+                    player.redness -= dt()
+                    player.use(color(rgb(255, 255*(1-player.redness), 255*(1-player.redness))))
+                }
+                else{player.redness = 0}
             })
-            wait(1, () => {
+            */
+            wait(0.2, () => {
                 player.use(color(rgb(255, 255, 255)))
-                player.redness = 0
             })
         }
     }
@@ -412,11 +416,11 @@ usePostEffect("vignette", {
     // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto = false, fireRate = 100, penetration = 0, critChance
     let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 3, 1000, 1, false, 200, 0, 0.3)
     sparkBlasterGlobal = sparkBlaster
-    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 8000, 1.5, false, 100, 1, 0.15)
+    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 4000, 1.5, false, 100, 1, 0.15)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 3000, 2.5, true, 40, 3, 0.05)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 1000, 2.5, true, 40, 3, 0.05)
     cyclerBlasterGlobal = cyclerBlaster
-    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 9000, 3, false, 200, 99, 0.2)
+    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 3, false, 200, 99, 0.2)
     beamBlasterGlobal = beamBlaster
 
     const selectedGadgetName = selectedGadget || "Spark"
@@ -570,7 +574,7 @@ usePostEffect("vignette", {
         ])
 
         enemy.on("death", () => {
-            
+            enemiesLeft--
             //if(Math.random()*1 < 0.7){  // 70% chance of explosion
                 addKaboom(enemy.pos)
                 shake(8)
@@ -584,7 +588,6 @@ usePostEffect("vignette", {
             destroy(enemy)
             enemiesDied++
             if(enemiesDied > highestEnemiesDied){highestEnemiesDied = enemiesDied}
-            enemiesLeft = enemiesLeft - 1
             if(enemiesLeft <= 0){
                 {
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
@@ -616,14 +619,16 @@ usePostEffect("vignette", {
             if(upgradeValue==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
             if(upgradeValue==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
             if(upgradeValue==7){player.dodge += 5*upgradeQuality; if(player.dodge > 55){player.dodge = 60; document.getElementById("dodgeUpgrade").style.display = "none"}}
-            if(upgradeValue==8){
-                player.maxHealth += Math.floor(25*upgradeQuality)
-                player.heal(player.maxHealth - player.hp())
-                healthLabel.text = `Health: ${player.hp()}`
-            }
+            if(upgradeValue==8){player.maxHealth += Math.floor(25*upgradeQuality)}
             upgradeValue=0  // Reset upgrade so does not reapply on click
             upgradeQuality = 1
+            
+            if(player.hp() < player.maxHealth){
+                player.heal(player.maxHealth - player.hp())
+            }
+            healthLabel.text = `Health: ${player.hp()}`
 
+            //enemiesLeft = 0
             let nextWaveTime = 5
             const clock = add([timer()])
             clock.loop(1, () => {
@@ -634,11 +639,6 @@ usePostEffect("vignette", {
                     if(nextWaveTime <= -1){
                         nextWaveTimeLabel.text = ``
                         waiting = false
-                        //set player health to 100
-                        if(player.hp() < player.maxHealth){
-                            player.heal(player.maxHealth - player.hp())
-                        }
-                        healthLabel.text = `Health: ${player.hp()}`
                         startRound()
                         destroy(clock)
                     }
@@ -648,18 +648,17 @@ usePostEffect("vignette", {
     }
 
     function spawnWave(time, waves, enemyNum, difficulty, bosses){
-        enemiesLeft = (waves * enemyNum) + bosses
         for(let i=0; i<bosses; i++){
             spawnEnemy(difficulty, true)
         }
-        let clockLoopCycle = 1
+        let clockLoopCycle = 0
         const clock = add([timer()])
         clock.loop(time, () => {
-            if(!isPaused && clockLoopCycle < waves+1){
+            if(!isPaused && clockLoopCycle < waves){
                 for(let i=0; i<enemyNum; i++){
                     spawnEnemy(difficulty, false)
                 }
-                clockLoopCycle += 1
+                clockLoopCycle ++
             }
         })
     }
@@ -669,6 +668,7 @@ usePostEffect("vignette", {
         const difficulty = 0.5 + round * 0.12
         const bosses = Math.floor(round/5)
         roundLabel.text = `Round: ${round}`
+        enemiesLeft = (waves * enemyNum) + bosses
         spawnWave(round*0.75, waves, enemyNum, difficulty, bosses)
         round++
     }
@@ -788,6 +788,10 @@ usePostEffect("vignette", {
         if(player.cooldown <= 0){
             player.momentum = player.momentum.add(toWorld(mousePos()).sub(player.pos).unit().scale(80*player.speed))
             player.cooldown = 1.5
+            player.use("rock")
+            wait(0.3, () => {
+                player.unuse("rock")
+            })
         }
     })
 

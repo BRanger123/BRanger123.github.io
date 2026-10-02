@@ -22,15 +22,13 @@ const colors = [
     "d4e09b","f6f4d2","cbdfbd","f19c79","f991cc"
 ]
 
-//#questionButton
-//#statsButton
-//#settingsButton
-//#extrasButton
+/*
 document.getElementById("startButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
 document.getElementById("questionButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
 document.getElementById("statsButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
 document.getElementById("settingsButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
 document.getElementById("extrasButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
+*/
 
 function blabber(){
     const consonants = "bcdfghjklmnpqrstvwxyz"
