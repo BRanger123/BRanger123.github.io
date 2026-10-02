@@ -167,8 +167,7 @@ usePostEffect("vignette", {
             sprite("mushroom"),
             area({ collisionIgnore: ["object"],}),
             body({ isStatic: true }),
-            //color(mapRGB),
-            //"object", "rock", "mushroom"
+            "object", "rock", "mushroom"
         ])
     }
 
@@ -234,7 +233,7 @@ usePostEffect("vignette", {
         }
         fireWeapon(){
             if(!this.canFire()){
-                reloadLabel.text = `Reload! (e)`
+                reloadLabel.text = `Reload! (${controlBindings.reload})`
                 return  // Cannot fire if no charge in gadget
             }
             if(this.isFullAuto){
@@ -389,10 +388,14 @@ usePostEffect("vignette", {
         document.getElementById("coinsCount").textContent = coins   // Update coins in HTML
     })
 
-    //player.onCollide("mushroom", (player, mushroom) => {
-    //    destroy(mushroom)
-    //    player.momentum = player.momentum.add((Math.random()*360).unit().scale(80*player.speed))
-    //})
+    /*
+    player.onCollide("mushroom", (player, mushroom) => {
+        destroy(mushroom)
+        player.heal(20)
+        player.heal(player.maxHealth - player.hp())
+        healthLabel.text = `Health: ${player.hp()}`
+    })
+        */
 
     const blasterSprite = add([
         sprite("blaster"),
