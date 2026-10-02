@@ -326,11 +326,25 @@ usePostEffect("vignette", {
     }
 
     function attackPlayer(damage){
-        //if(add dodge code here){
+        if(Math.random()*100 < player.dodge){
+            spawnText(player.pos, "Dodge!")
+        }
+        else{
             player.hurt(damage)
             healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
             shake(damage)
-        //}
+            spawnText(player.pos, `-${damage}`)
+            player.use(color(rgb(255, 0, 0)))
+            player.redness = 1
+            player.onUpdate(() => {
+                player.redness -= dt()
+                player.use(color(rgb(255, 255*(1-player.redness), 255*(1-player.redness))))
+            })
+            wait(1, () => {
+                player.use(color(rgb(255, 255, 255)))
+                player.redness = 0
+            })
+        }
     }
 
 
@@ -359,10 +373,11 @@ usePostEffect("vignette", {
         area(),
         anchor("center"),   // So beams spawn at center
         body(),
+        color(255, 255, 255),
         health(100),
         "player",   // For collision detection
         "object",
-        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0 }, // Recoil 2d vector for fluid recoil
+        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0, redness: 0 }, // Recoil 2d vector for fluid recoil
     ])
     
     player.onCollide("coin", (coin) => {
@@ -589,13 +604,13 @@ usePostEffect("vignette", {
         if(upgradeValue!=0){
             isPaused = false
             hintLabel.text = ``
-            if(upgradeValue==1){gadgetGlobal.beamDamage += Math.floor(gadgetGlobal.beamDamage*0.3*upgradeQuality)}
-            if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(gadgetGlobal.magSize*0.5*upgradeQuality); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
-            if(upgradeValue==3){player.speed += Math.floor(player.speed*0.3*upgradeQuality)}
+            if(upgradeValue==1){gadgetGlobal.beamDamage += Math.floor(2*upgradeQuality)}
+            if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(2*upgradeQuality); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
+            if(upgradeValue==3){player.speed += Math.floor(100*upgradeQuality)}
             if(upgradeValue==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
             if(upgradeValue==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
             if(upgradeValue==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
-            if(upgradeValue==7){coinMagForce += 120000*upgradeQuality}
+            if(upgradeValue==7){player.dodge += 5*upgradeQuality}
             if(upgradeValue==8){
                 player.maxHealth += Math.floor(25*upgradeQuality)
                 player.heal(player.maxHealth - player.hp())
@@ -683,9 +698,7 @@ usePostEffect("vignette", {
                         projectile.onUpdate(() => {if(!isPaused){projectile.move(projectile.dir.scale(projectile.speed))}})
                         projectile.onCollide("player", (player) => {
                             if(player.momentum.len() < 3000){
-                                player.hurt(15)
-                                healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
-                                shake(20)
+                                attackPlayer(15)
                                 destroy(projectile)
                             }
                         })
@@ -816,10 +829,8 @@ usePostEffect("vignette", {
             if(enemy.attackCooldown > 0){
                 return
             }
-            if(enemy.enemyType == "charger"){player.hurt(10)}
-            else{player.hurt(5)}
-            healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
-            shake(8)
+            if(enemy.enemyType == "charger"){attackPlayer(10)}
+            else{attackPlayer(5)}
             enemy.attackCooldown = 0.5
         }
     })
