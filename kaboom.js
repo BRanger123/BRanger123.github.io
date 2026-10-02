@@ -35,6 +35,8 @@ loadSprite("beam", "beam.png")
 loadSprite("cycler", "cycler.png")
 loadSprite("bag", "bag.png")
 loadSprite("grass", "spike.png")
+loadSprite("rock", "rock.png")
+loadSprite("mushroom", "mushroom.png")
 //loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
@@ -137,13 +139,34 @@ usePostEffect("vignette", {
         opacity(0.5)
     ])
 
-    for(let i = 0; i<30; i++){
-        const marker = add([
+    for(let i = 0; i<15; i++){
+        const grass = add([
             pos(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100)),
             sprite("grass"),
             area({ collisionIgnore: ["object"],}),
             body({ isStatic: true }),
             color(mapRGB)
+        ])
+    }
+    
+    for(let i = 0; i<10; i++){
+        const rock = add([
+            pos(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100)),
+            sprite("rock"),
+            area({ collisionIgnore: ["object"],}),
+            body({ isStatic: true }),
+            color(mapRGB),
+            //"object", "rock"
+        ])
+    }
+    for(let i = 0; i<5; i++){
+        const mushroom = add([
+            pos(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100)),
+            sprite("mushroom"),
+            area({ collisionIgnore: ["object"],}),
+            body({ isStatic: true }),
+            //color(mapRGB),
+            //"object", "rock", "mushroom"
         ])
     }
 
@@ -272,7 +295,6 @@ usePostEffect("vignette", {
                         }
                     }
                 })
-                beam.onCollide("tile", () => {beam.destroy()})
             }
             this.ammoInMag--    // Decrease charge count in magazine
             reloadLabel.text = ``   // Remove mag full message
@@ -301,6 +323,14 @@ usePostEffect("vignette", {
         wait(1, () => {
             destroy(textObject)
         })
+    }
+
+    function attackPlayer(damage){
+        //if(add dodge code here){
+            player.hurt(damage)
+            healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
+            shake(damage)
+        //}
     }
 
 
@@ -342,6 +372,11 @@ usePostEffect("vignette", {
         document.getElementById("coinsCount").textContent = coins   // Update coins in HTML
     })
 
+    //player.onCollide("mushroom", (player, mushroom) => {
+    //    destroy(mushroom)
+    //    player.momentum = player.momentum.add((Math.random()*360).unit().scale(80*player.speed))
+    //})
+
     const blasterSprite = add([
         sprite("blaster"),
         pos(player.pos),
@@ -361,7 +396,7 @@ usePostEffect("vignette", {
     blastBlasterGlobal = blastBlaster
     let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 3000, 2.5, true, 40, 3, 0.05)
     cyclerBlasterGlobal = cyclerBlaster
-    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 500, 5, 1, 0, 9000, 3, false, 200, 99, 0.2)
+    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 9000, 3, false, 200, 99, 0.2)
     beamBlasterGlobal = beamBlaster
 
     const selectedGadgetName = selectedGadget || "Spark"
@@ -467,7 +502,7 @@ usePostEffect("vignette", {
         const x = rand(minX + 40, maxX - 40)
         const y = rand(minY + 40, maxY - 40)
         const marker = add([
-            pos(x, y), circle(24), color(255, 0, 0), opacity(0.75),
+            pos(x, y), circle(24),outline(4), color(255, 0, 0), opacity(0.75),
             outline(4, textColor), "spawnMarker",
         ])
         wait(1.25, () => {
@@ -504,7 +539,7 @@ usePostEffect("vignette", {
         const enemy = add([
             sprite(`${enemySprite}`),
             pos(x, y),
-            area({ collisionIgnore: ["tile"]}),
+            area({ collisionIgnore: ["rock"]}),
             anchor("center"),
             body(),
             health(enemyHealth),
@@ -648,7 +683,7 @@ usePostEffect("vignette", {
                         projectile.onUpdate(() => {if(!isPaused){projectile.move(projectile.dir.scale(projectile.speed))}})
                         projectile.onCollide("player", (player) => {
                             if(player.momentum.len() < 3000){
-                                player.hurt(20)
+                                player.hurt(15)
                                 healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
                                 shake(20)
                                 destroy(projectile)
@@ -733,7 +768,7 @@ usePostEffect("vignette", {
     })
     onKeyPress(controlBindings.dash, () => {
         if(player.cooldown <= 0){
-            player.momentum = player.momentum.add(toWorld(mousePos()).sub(player.pos).unit().scale(55000))
+            player.momentum = player.momentum.add(toWorld(mousePos()).sub(player.pos).unit().scale(80*player.speed))
             player.cooldown = 1.5
         }
     })
