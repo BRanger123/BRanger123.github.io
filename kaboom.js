@@ -23,6 +23,15 @@ loadFont("", "customFont.ttf", {
 
 loadRoot("sprites/")
 
+loadSprite("piskel", "piskel.png", {
+    sliceX : 2,
+    sliceY : 3,
+    anims: {
+        idle: { from: 0, to: 1, speed: 3, loop: true },
+        run: { from: 2, to: 3, speed: 4, loop: true },
+        slide: { from: 4, to: 4, speed: 1, loop: true },
+    }
+})
 loadSprite("ghosty", "ghosty.png")
 loadSprite("boss", "gigagantrum.png")
 loadSprite("coin", "coin.png")
@@ -296,6 +305,10 @@ usePostEffect("vignette", {
                             beam.destroy()
                         }
                     }
+                    enemy.use(color(rgb(255, 0, 0)))
+                    wait(0.2, () => {
+                        enemy.use(color(enemy.colorRGB))
+                    })
                 })
             }
             this.ammoInMag--    // Decrease charge count in magazine
@@ -374,7 +387,9 @@ usePostEffect("vignette", {
 
     // Player code
     const player = add([
-        sprite(`${playerSprite}`),
+        //sprite(`${playerSprite}`),
+        sprite("piskel"),
+        scale(1.2),
         pos(maxX/2, maxY/2),
         area(),
         anchor("center"),   // So beams spawn at center
@@ -383,8 +398,11 @@ usePostEffect("vignette", {
         health(100),
         "player",   // For collision detection
         "object",
-        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0, redness: 0 }, // Recoil 2d vector for fluid recoil
+        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0 }, // Recoil 2d vector for fluid recoil
     ])
+    let playerAnimation = "idle"
+    let facingLeft = false
+    player.play(playerAnimation)
     
     player.onCollide("coin", (coin) => {
         destroy(coin)
@@ -542,6 +560,7 @@ usePostEffect("vignette", {
         let enemyHealth = (Math.random() * 30 + 10) * difficulty
         let enemySpeed = ((Math.random() * 200) + 50) * difficulty
         let enemyType = "chaser"
+        let randColor = rgb(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100)
 
         if(makeBoss){
             enemySprite = "boss"
@@ -564,14 +583,14 @@ usePostEffect("vignette", {
         const enemy = add([
             sprite(`${enemySprite}`),
             pos(x, y),
-            area({ collisionIgnore: ["rock"]}),
+            area({ collisionIgnore: ["dash"]}),
             anchor("center"),
             body(),
             health(enemyHealth),
-            color(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100),
+            color(randColor),
             "enemy",    // For collision detection
             "object",
-            { speed: enemySpeed, isBoss: boss, enemyType, attackCooldown: 0.5, chargeDirection: null, chargeTimer: 0 },
+            { speed: enemySpeed, isBoss: boss, enemyType, attackCooldown: 0.5, chargeDirection: null, chargeTimer: 0, colorRGB: randColor},
         ])
 
         enemy.on("death", () => {
@@ -733,6 +752,20 @@ usePostEffect("vignette", {
         if (isKeyDown(controlBindings.down)){dir.y = 1}
         const unitVec = dir.unit()  // Vector normalisation (fixes diagonals)
         player.move(unitVec.scale(player.speed))    // Moves in dir by speed every frame
+        if (dir.x !== 0 && !player.is("dash")) {
+            facingLeft = dir.x < 0
+            player.flipX = facingLeft
+        }
+        let nextAnimation
+        if(player.is("dash")){
+            nextAnimation = "slide"
+        }
+        else if(unitVec.len() > 0){nextAnimation = "run"}
+        else{nextAnimation = "idle"}
+        if (nextAnimation !== playerAnimation) {
+            player.play(nextAnimation)
+            playerAnimation = nextAnimation
+        }
         player.pos.x = Math.max(0, Math.min(player.pos.x, maxX - 32))
         player.pos.y = Math.max(0, Math.min(player.pos.y, maxY - 32))
 
@@ -790,12 +823,19 @@ usePostEffect("vignette", {
         }
     })
     onKeyPress(controlBindings.dash, () => {
-        if(player.cooldown <= 0){
-            player.momentum = player.momentum.add(toWorld(mousePos()).sub(player.pos).unit().scale(80*player.speed))
+        if(!isPaused && player.cooldown <= 0){
+            const dashDirection = toWorld(mousePos()).sub(player.pos).unit()
+            player.momentum = player.momentum.add(dashDirection.scale(80*player.speed))
+            if (dashDirection.x !== 0) {
+                facingLeft = dashDirection.x < 0
+                player.flipX = facingLeft
+            }
             player.cooldown = 1.5
-            player.use("rock")
+            player.play("slide")
+            playerAnimation = "slide"
+            player.use("dash")
             wait(0.3, () => {
-                player.unuse("rock")
+                player.unuse("dash")
             })
         }
     })

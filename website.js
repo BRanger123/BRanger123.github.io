@@ -47,7 +47,7 @@ function blabber(){
 }
 
 let gadgetGlobal
-let playerSprite = "bean"
+let playerSprite = "piskel"
 let spritesOwned = ["bean"]
 let upgradeValue = 0
 let upgradeQuality = 1
