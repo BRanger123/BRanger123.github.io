@@ -177,6 +177,7 @@ usePostEffect("vignette", {
     const enemies = []
     const spawnDist = 500
     let enemiesLeft
+    let roundComplete = false
     let enemiesDied = 0
     let enemiesDiedCounter = 0
     upgradeValue = 0
@@ -588,7 +589,10 @@ usePostEffect("vignette", {
             destroy(enemy)
             enemiesDied++
             if(enemiesDied > highestEnemiesDied){highestEnemiesDied = enemiesDied}
-            if(enemiesLeft <= 0){
+            if(enemiesLeft <= 0 && !roundComplete &&
+                get("enemy").filter((otherEnemy) => otherEnemy !== enemy).length === 0 &&
+                get("spawnMarker").length === 0){
+                roundComplete = true
                 {
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
@@ -663,6 +667,7 @@ usePostEffect("vignette", {
         })
     }
     function startRound(){
+        roundComplete = false
         const enemyNum = Math.floor(2 + round * 1.5)
         const waves = Math.min(5, 1 + Math.floor(round / 3))
         const difficulty = 0.5 + round * 0.12
