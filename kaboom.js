@@ -540,8 +540,8 @@ usePostEffect("vignette", {
     function createEnemy(x, y, difficulty, makeBoss){
         let boss = false
         let enemySprite = "ghosty"
-        let enemyHealth = (Math.random() * 30 + 10) * difficulty
-        let enemySpeed = ((Math.random() * 200) + 50) * difficulty
+        let enemyHealth = (Math.random() * 50 + 10) * difficulty
+        let enemySpeed = ((Math.random() * 150) + 50) * difficulty
         let enemyType = "chaser"
         let randColor = rgb(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100)
 
@@ -554,8 +554,8 @@ usePostEffect("vignette", {
         else if(Math.random() < 0.25){
             enemySprite = "bag"
             enemyType = "charger"
-            enemySpeed *= 1.4
-            enemyHealth *= 1.25
+            enemySpeed *= 1.6
+            enemyHealth *= 1.3
         }
         else if(Math.random() < 0.25){
             enemySprite = "dino"
@@ -673,9 +673,9 @@ usePostEffect("vignette", {
         roundComplete = false
         const enemyNum = Math.floor(2 + round * 1.5)
         const waves = Math.min(5, 1 + Math.floor(round / 3))
-        const difficulty = 0.5 + round * 0.12
+        const difficulty = 0.5 + round * 0.2
         const bosses = Math.floor(round/5)
-        if(round % 5 == 0){roundLabel.color = rgb(255, 20, 20)}
+        if(round % 5 == 0){roundLabel.color = rgb(255, 0, 0)}
         roundLabel.text = `Round: ${round}`
         enemiesLeft = (waves * enemyNum) + bosses
         spawnWave(round*0.75, waves, enemyNum, difficulty, bosses)
