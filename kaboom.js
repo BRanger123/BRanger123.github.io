@@ -243,7 +243,6 @@ usePostEffect("vignette", {
         }
         fireWeapon(){
             if(!this.canFire()){
-                reloadLabel.text = `Reload! (${controlBindings.reload})`
                 return  // Cannot fire if no charge in gadget
             }
             if(this.isFullAuto){
@@ -312,7 +311,6 @@ usePostEffect("vignette", {
                 })
             }
             this.ammoInMag--    // Decrease charge count in magazine
-            reloadLabel.text = ``   // Remove mag full message
         }
     }
     
@@ -487,11 +485,11 @@ usePostEffect("vignette", {
         color(textColor),
     ])
     const ammoLabel = add([
-        text(`Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`, { 
+        text(`${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`, { 
             font: "",
             size: 32 
         }),
-        anchor("left"),
+        anchor("top"),
         pos(0, 0),
         color(textColor),
     ])
@@ -500,7 +498,7 @@ usePostEffect("vignette", {
                 font: "",
                 size: 32
             }),
-        anchor("right"),
+        anchor("left"),
         pos(0, 0),
         color(textColor),
     ])
@@ -513,30 +511,12 @@ usePostEffect("vignette", {
         pos(0, 0),
         color(textColor),
     ])
-    const reloadLabel = add([
-        text("", { 
-            font: "",
-            size: 32 
-        }),
-        anchor("center"),
-        pos(0, 0),
-        color(textColor),
-    ])
-    const nextWaveTimeLabel = add([
-        text("", { 
-            font: "",
-            size: 32 
-        }),
-        anchor("center"),
-        pos(0, 0),
-        color(textColor),
-    ])
     const roundLabel = add([
-        text("Round: 1", { 
+        text("", { 
             font: "",
-            size: 32 
+            size: 40 
         }),
-        anchor("left"),
+        anchor("center"),
         pos(0, 0),
         color(textColor),
     ])
@@ -611,8 +591,7 @@ usePostEffect("vignette", {
             if(enemiesLeft <= 0 && !roundComplete &&
                 get("enemy").filter((otherEnemy) => otherEnemy !== enemy).length === 0 &&
                 get("spawnMarker").length === 0){
-                roundComplete = true
-                {
+                    roundComplete = true
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
@@ -620,12 +599,13 @@ usePostEffect("vignette", {
                     isPaused = true
                     destroyAll("beam")
                     destroyAll("enemyBeam")
+                    player.play("idle")
+                    playerAnimation = "idle"
                     hintLabel.text = `Click to continue with upgrade`
                     gameQuestions = true
                     if(questionsInGame){startQuestion()}
                     else{websiteGoTo('upgrade')}
                     onClick(() => upgrade())
-                }
             }
         })
         return enemy
@@ -636,7 +616,7 @@ usePostEffect("vignette", {
             isPaused = false
             hintLabel.text = ``
             if(upgradeValue==1){gadgetGlobal.beamDamage += Math.floor(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
-            if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
+            if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
             if(upgradeValue==3){player.speed += Math.floor(0.3*upgradeQuality*player.speed)}
             if(upgradeValue==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
             if(upgradeValue==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
@@ -656,11 +636,11 @@ usePostEffect("vignette", {
             const clock = add([timer()])
             clock.loop(1, () => {
                 if(!isPaused){
-                    nextWaveTimeLabel.text = `Time untill next wave: ${nextWaveTime}`
+                    roundLabel.text = `Time untill next wave: ${nextWaveTime}`
                     waiting = true
                     nextWaveTime = nextWaveTime - 1
                     if(nextWaveTime <= -1){
-                        nextWaveTimeLabel.text = ``
+                        roundLabel.text = ``
                         waiting = false
                         startRound()
                         destroy(clock)
@@ -719,7 +699,7 @@ usePostEffect("vignette", {
                     else if(distance < 240) enemy.move(direction.scale(-enemy.speed))
                     if(enemy.attackCooldown <= 0){
                         const projectile = add([
-                            pos(enemy.pos), circle(16), area(), color(255, 20, 20),
+                            pos(enemy.pos), circle(16), outline(4), area(), color(255, 20, 20),
                             "enemyBeam", "object",
                             { speed: 500 , dir: direction },
                             offscreen({ destroy: true }),
@@ -793,12 +773,12 @@ usePostEffect("vignette", {
     })
 
     onClick(() => {
-        coinsLabel.text = `Coins: ${coins}`
+        //coinsLabel.text = `Coins: ${coins}`   idk why this was here, waste of processing
         if (isPaused || gadgetGlobal.isFullAuto) {
             return
         }
         gadgetGlobal.fireWeapon()    // Zap once per click for semi-auto gadgets
-        ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
+        ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
         controlsLabel.text = `` // Click to zap hint hidden
         hintLabel.text = ``
         upgrade()
@@ -818,7 +798,7 @@ usePostEffect("vignette", {
     onUpdate(() => {
         if (mouseDown && gadgetGlobal.isFullAuto && !isPaused) {
             gadgetGlobal.fireWeapon()    // Automatic zapping while held down
-            ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
+            ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
             controlsLabel.text = ``
         }
     })
@@ -834,6 +814,7 @@ usePostEffect("vignette", {
             player.play("slide")
             playerAnimation = "slide"
             player.use("dash")
+            spawnText(player.pos, "Dash")
             wait(0.3, () => {
                 player.unuse("dash")
             })
@@ -844,25 +825,23 @@ usePostEffect("vignette", {
         if (gadgetGlobal && gadgetGlobal.updateReload) {
             gadgetGlobal.updateReload(dt())
             if(gadgetGlobal.isReloading){
-                reloadLabel.text = `Reloading... ${gadgetGlobal.reloadTimer.toFixed(1)}s`
+                ammoLabel.text = `${gadgetGlobal.reloadTimer.toFixed(1)}s`
             }
-            else if(reloadLabel.text.startsWith("Reloading")){
-                reloadLabel.text = ``
+            else if(ammoLabel.text.endsWith("s")){
+                ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
             }
         }
     })
     onKeyPress(controlBindings.reload, () => {
         if(gadgetGlobal.reload()){ // If successful
-            reloadLabel.text = `Reloading... ${gadgetGlobal.reloadTimer.toFixed(1)}s`
+            ammoLabel.text = `${gadgetGlobal.reloadTimer.toFixed(1)}s`
         }
         else if(gadgetGlobal.isReloading){
-            reloadLabel.text = ``
+            ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
             gadgetGlobal.isReloading = false
         }
-        else{
-            reloadLabel.text = `Magazine full`
-        }
-        ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
+        //else{ammoLabel.text = `Magazine full`}
+        ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
     })
 
     onKeyPress("b", () => {
@@ -892,27 +871,23 @@ usePostEffect("vignette", {
     camScale(1)
     camRot(0)
     player.onUpdate(() => {
-        if(!isPaused){
-            // Camera follows point between player and mouse cursor
-            const mouseWorldPos = toWorld(mousePos())
-            const targetPos = player.pos.add(mouseWorldPos).scale(0.5)
-            camPos(targetPos)
+        // Camera follows point between player and mouse cursor
+        const mouseWorldPos = toWorld(mousePos())
+        const targetPos = player.pos.add(mouseWorldPos).scale(0.5)
+        camPos(targetPos)
 
-            // Make labels stay relative to camera
-            toWorld(camPos())   // Set world origin to camPos()
-            coinsLabel.pos = camPos().add(vec2(width()/2 - 20, -height()/2 + 24))
-            ammoLabel.pos = camPos().add(vec2(-width()/2 + 20, height()/2 - 24))
-            healthLabel.pos = camPos().add(vec2(width()/2 - 20, height()/2 - 24))
-            hintLabel.pos = camPos().add(vec2(0, -height()/2 + 90))
-            controlsLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
-            reloadLabel.pos = camPos().add(vec2(0, -height()/2 + 150))
-            nextWaveTimeLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
-            roundLabel.pos = camPos().add(vec2(-width()/2 + 20, -height()/2 + 24))
-            const diff = mouseWorldPos.sub(player.pos)
-            let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)
-            blasterSprite.angle = angle
-            blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
-        }
+        // Make labels stay relative to camera
+        toWorld(camPos())   // Set world origin to camPos()
+        coinsLabel.pos = camPos().add(vec2(width()/2 - 20, height()/2 - 24))
+        ammoLabel.pos = toWorld(mousePos().add(vec2(0, 30)))
+        healthLabel.pos = camPos().add(vec2(-width()/2 + 20, height()/2 - 24))
+        hintLabel.pos = camPos().add(vec2(0, -height()/2 + 90))
+        controlsLabel.pos = camPos().add(vec2(0, -height()/2 + 200))
+        roundLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
+        const diff = mouseWorldPos.sub(player.pos)
+        let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)
+        blasterSprite.angle = angle
+        blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
     })
 
     onDestroy("player", () => go("deathScreen", { score: enemiesDied*coins, round: Math.max(1, round - 1) })) // If off screen
