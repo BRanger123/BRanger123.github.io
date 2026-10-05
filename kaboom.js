@@ -242,12 +242,15 @@ usePostEffect("vignette", {
         }
         fireWeapon(){
             if(!this.canFire()){
-                return  // Cannot fire if no charge in gadget
+                if(this.ammoInMag <= 0){
+                    ammoLabel.text = `Reload (${controlBindings.reload})`
+                }
+                return false  // Cannot fire if no charge in gadget
             }
             if(this.isFullAuto){
                 const now = Date.now()
                 if(now - this.lastFireTime < this.fireRate){    // If enough time has passed: fire
-                    return
+                    return false
                 }
                 this.lastFireTime = now
             }
@@ -310,6 +313,7 @@ usePostEffect("vignette", {
                 })
             }
             this.ammoInMag--    // Decrease charge count in magazine
+            return true
         }
     }
     
@@ -782,8 +786,9 @@ usePostEffect("vignette", {
         if (isPaused || gadgetGlobal.isFullAuto) {
             return
         }
-        gadgetGlobal.fireWeapon()    // Zap once per click for semi-auto gadgets
-        ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
+        if(gadgetGlobal.fireWeapon()){    // Zap once per click for semi-auto gadgets
+            ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
+        }
         controlsLabel.text = `` // Click to zap hint hidden
         hintLabel.text = ``
         upgrade()
@@ -803,8 +808,9 @@ usePostEffect("vignette", {
 
     onUpdate(() => {
         if (mouseDown && gadgetGlobal.isFullAuto && !isPaused) {
-            gadgetGlobal.fireWeapon()    // Automatic zapping while held down
-            ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
+            if(gadgetGlobal.fireWeapon()){    // Automatic zapping while held down
+                ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
+            }
             controlsLabel.text = ``
         }
     })
@@ -898,10 +904,63 @@ usePostEffect("vignette", {
         blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
     })
 
-    onDestroy("player", () => go("deathScreen", { score: enemiesDied*coins, round: Math.max(1, round - 1) })) // If off screen
+    let deathScreenShown = false
+    function showDeathScreen(result){
+        if(deathScreenShown){
+            return
+        }
+        deathScreenShown = true
+        isPaused = true
+        gameQuestions = false
+
+        add([
+            rect(width(), height()),
+            pos(camPos()),
+            anchor("center"),
+            color(rgb(0, 0, 0)),
+            opacity(0.8),
+        ])
+        add([
+            text(`Round: ${round}`, { 
+                font: "jerseyo",
+                size: 65 
+            }),
+            anchor("center"),
+            pos(camPos().add(vec2(0, -height()/2 + 60))),
+            color(textColor),
+        ]),
+        add([
+            text("Press M to return to menu", {
+                font: "jersey",
+                size: 32,
+            }),
+            pos(camPos()),
+            anchor("center"),
+            color(255, 0, 0),
+        ])
+        add([
+            text("Press k to reset", {
+                font: "jersey",
+                size: 32,
+            }),
+            pos(camPos().x, camPos().y - 50),
+            anchor("center"),
+            color(255, 0, 0),
+        ])
+        add([
+            text("You died...", {
+                font: "jersey",
+                size: 50,
+            }),
+            pos(camPos().x, camPos().y - 100),
+            anchor("center"),
+            color(255, 0, 0),
+        ])
+    }
+
     player.on("death", () => {
         destroy(player)
-        go("deathScreen", { score: enemiesDied*coins, round: Math.max(1, round - 1) })
+        showDeathScreen({ score: enemiesDied*coins, round: Math.max(1, round - 1) })
     })
 })
 
