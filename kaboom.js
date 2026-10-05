@@ -433,7 +433,7 @@ usePostEffect("vignette", {
 
     // amazing gadget class can be used for all gadget archetypes
     // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto = false, fireRate = 100, penetration = 0, critChance
-    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 3, 1000, 1, false, 200, 0, 0.3)
+    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 3, 1000, 1, false, 200, 0, 0.5)
     sparkBlasterGlobal = sparkBlaster
     let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 4000, 1.5, false, 100, 1, 0.15)
     blastBlasterGlobal = blastBlaster
@@ -635,9 +635,9 @@ usePostEffect("vignette", {
         if(upgradeValue!=0){
             isPaused = false
             hintLabel.text = ``
-            if(upgradeValue==1){gadgetGlobal.beamDamage += Math.floor(2*upgradeQuality)}
-            if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(2*upgradeQuality); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
-            if(upgradeValue==3){player.speed += Math.floor(100*upgradeQuality)}
+            if(upgradeValue==1){gadgetGlobal.beamDamage += Math.floor(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
+            if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `Charge: ${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
+            if(upgradeValue==3){player.speed += Math.floor(0.3*upgradeQuality*player.speed)}
             if(upgradeValue==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
             if(upgradeValue==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
             if(upgradeValue==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
@@ -870,12 +870,12 @@ usePostEffect("vignette", {
         burp()
     })
 
+    /*
     onKeyPress("p", () => {
         if(isPaused){isPaused = false; spawnText(player.pos, "Unpaused", false)}
         else{isPaused = true; spawnText(player.pos, "Paused", false)}
-        
-
     })
+    */
 
     // Collision with enemy
     onCollideUpdate("player", "enemy", (player, enemy) => {
