@@ -15,11 +15,10 @@ kaboom({
     letterBox: true,
 })
 
-/*
-loadFont("", "customFont.ttf", { 
+loadFont("jersey", "customFont.ttf", {})
+loadFont("jerseyo", "customFont.ttf", { 
     outline: 4
 })
-*/
 
 loadRoot("sprites/")
 
@@ -27,8 +26,8 @@ loadSprite("piskel", "piskel.png", {
     sliceX : 2,
     sliceY : 3,
     anims: {
-        idle: { from: 0, to: 1, speed: 3, loop: true },
-        run: { from: 2, to: 3, speed: 4, loop: true },
+        idle: { from: 0, to: 1, speed: 4, loop: true },
+        run: { from: 2, to: 3, speed: 5, loop: true },
         slide: { from: 4, to: 4, speed: 1, loop: true },
     }
 })
@@ -63,8 +62,8 @@ scene("startButton", () => {
     ])
     btn.add([
         text(`Start`, { 
-            font: "arial",
-            size: 32 
+            font: "jersey",
+            size: 50 
         }),
         anchor("center"),
         color(0, 0, 0),
@@ -82,8 +81,8 @@ scene("startButton", () => {
     btn.onClick(() => go(levelGlobal))
     add([
         text("Press M to return to menu", { 
-            font: "arial",
-            size: 32 
+            font: "jersey",
+            size: 40 
         }),
         pos(center().x, center().y+100),
         anchor("center"),
@@ -319,7 +318,7 @@ usePostEffect("vignette", {
         const textObject = add([
             anchor("center"),
             text(textContent, { 
-                font: "",
+                font: "jerseyo",
                 size: 32 
             }),
             pos(position.x+Math.random()*20, position.y+Math.random()*20),  // Rand so numbers do not overlap (shotgun)
@@ -362,6 +361,10 @@ usePostEffect("vignette", {
                 player.use(color(rgb(255, 255, 255)))
             })
         }
+    }
+
+    function healPlayer(healValue){
+
     }
 
 
@@ -435,7 +438,7 @@ usePostEffect("vignette", {
     sparkBlasterGlobal = sparkBlaster
     let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 4000, 1.5, false, 100, 1, 0.15)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 1000, 2.5, true, 40, 3, 0.05)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 1000, 2.5, true, 100, 3, 0.05)
     cyclerBlasterGlobal = cyclerBlaster
     let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 3, false, 200, 99, 0.2)
     beamBlasterGlobal = beamBlaster
@@ -468,8 +471,8 @@ usePostEffect("vignette", {
     // Initialize labels
     const coinsLabel = add([
         text(`Coins: ${coins}`, { 
-            font: "",
-            size: 32 
+            font: "jerseyo",
+            size: 40 
         }),
         anchor("right"),
         pos(0, 0),
@@ -477,7 +480,7 @@ usePostEffect("vignette", {
     ])
     const hintLabel = add([
         text("", { 
-            font: "",
+            font: "jerseyo",
             size: 32 
         }),
         anchor("center"),
@@ -486,7 +489,7 @@ usePostEffect("vignette", {
     ])
     const ammoLabel = add([
         text(`${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`, { 
-            font: "",
+            font: "jerseyo",
             size: 32 
         }),
         anchor("top"),
@@ -495,8 +498,8 @@ usePostEffect("vignette", {
     ])
     const healthLabel = add([
         text(`Health: ${player.hp()}`, { 
-                font: "",
-                size: 32
+                font: "jerseyo",
+                size: 40
             }),
         anchor("left"),
         pos(0, 0),
@@ -504,7 +507,7 @@ usePostEffect("vignette", {
     ])
     const controlsLabel = add([
         text("Click to fire", { 
-            font: "",
+            font: "jerseyo",
             size: 32 
         }),
         anchor("center"),
@@ -513,8 +516,8 @@ usePostEffect("vignette", {
     ])
     const roundLabel = add([
         text("", { 
-            font: "",
-            size: 40 
+            font: "jerseyo",
+            size: 65 
         }),
         anchor("center"),
         pos(0, 0),
@@ -601,7 +604,7 @@ usePostEffect("vignette", {
                     destroyAll("enemyBeam")
                     player.play("idle")
                     playerAnimation = "idle"
-                    hintLabel.text = `Click to continue with upgrade`
+                    controlsLabel.text = `Click to continue with upgrade`
                     gameQuestions = true
                     if(questionsInGame){startQuestion()}
                     else{websiteGoTo('upgrade')}
@@ -614,7 +617,7 @@ usePostEffect("vignette", {
     function upgrade(){
         if(upgradeValue!=0){
             isPaused = false
-            hintLabel.text = ``
+            controlsLabel.text = ``
             if(upgradeValue==1){gadgetGlobal.beamDamage += Math.floor(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
             if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
             if(upgradeValue==3){player.speed += Math.floor(0.3*upgradeQuality*player.speed)}
@@ -632,6 +635,7 @@ usePostEffect("vignette", {
             healthLabel.text = `Health: ${player.hp()}`
 
             //enemiesLeft = 0
+            roundLabel.color = rgb(255, 255, 255)
             let nextWaveTime = 5
             const clock = add([timer()])
             clock.loop(1, () => {
@@ -671,6 +675,7 @@ usePostEffect("vignette", {
         const waves = Math.min(5, 1 + Math.floor(round / 3))
         const difficulty = 0.5 + round * 0.12
         const bosses = Math.floor(round/5)
+        if(round % 5 == 0){roundLabel.color = rgb(255, 20, 20)}
         roundLabel.text = `Round: ${round}`
         enemiesLeft = (waves * enemyNum) + bosses
         spawnWave(round*0.75, waves, enemyNum, difficulty, bosses)
@@ -699,7 +704,7 @@ usePostEffect("vignette", {
                     else if(distance < 240) enemy.move(direction.scale(-enemy.speed))
                     if(enemy.attackCooldown <= 0){
                         const projectile = add([
-                            pos(enemy.pos), circle(16), outline(4), area(), color(255, 20, 20),
+                            pos(enemy.pos), circle(16), outline(4, rgb(0, 0, 0)), area(), color(255, 20, 20),
                             "enemyBeam", "object",
                             { speed: 500 , dir: direction },
                             offscreen({ destroy: true }),
@@ -789,6 +794,7 @@ usePostEffect("vignette", {
             return
         }
         mouseDown = true
+        //if(gadgetGlobal.isReloading){ammoLabel.text = "Reloading!"}
     })
 
     onMouseRelease(() => {
@@ -835,10 +841,12 @@ usePostEffect("vignette", {
     onKeyPress(controlBindings.reload, () => {
         if(gadgetGlobal.reload()){ // If successful
             ammoLabel.text = `${gadgetGlobal.reloadTimer.toFixed(1)}s`
+            spawnText(player.pos, "Reload")
         }
         else if(gadgetGlobal.isReloading){
             ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
             gadgetGlobal.isReloading = false
+            spawnText(player.pos, "Nevermind")
         }
         //else{ammoLabel.text = `Magazine full`}
         ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
@@ -878,9 +886,9 @@ usePostEffect("vignette", {
 
         // Make labels stay relative to camera
         toWorld(camPos())   // Set world origin to camPos()
-        coinsLabel.pos = camPos().add(vec2(width()/2 - 20, height()/2 - 24))
+        coinsLabel.pos = camPos().add(vec2(width()/2 - 20, height()/2 - 30))
         ammoLabel.pos = toWorld(mousePos().add(vec2(0, 30)))
-        healthLabel.pos = camPos().add(vec2(-width()/2 + 20, height()/2 - 24))
+        healthLabel.pos = camPos().add(vec2(-width()/2 + 20, height()/2 - 30))
         hintLabel.pos = camPos().add(vec2(0, -height()/2 + 90))
         controlsLabel.pos = camPos().add(vec2(0, -height()/2 + 200))
         roundLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
@@ -907,7 +915,7 @@ scene("deathScreen", (result) => {
     setBackground(rgb(red, green, blue))
     add([
         text("Press M to return to menu", { 
-            font: "arial",
+            font: "jersey",
             size: 32 
         }),
         pos(center()),
@@ -916,7 +924,7 @@ scene("deathScreen", (result) => {
     ])
     add([
         text("Press k to reset", { 
-            font: "arial",
+            font: "jersey",
             size: 32 
         }),
         pos(center().x, center().y-50),
@@ -924,14 +932,17 @@ scene("deathScreen", (result) => {
         color(255, 0, 0),
     ])
     add([
-        text("You died..."),
+        text("You died...", { 
+            font: "jersey",
+            size: 50 
+        }),
         pos(center().x, center().y-100),
         anchor("center"),
         color(255, 0, 0),
     ])
     const scoreLabel = add([
         text(`Score: ${result?.score || 0}`, { 
-            font: "arial",
+            font: "jersey",
             size: 32 
         }),
         pos(24, 24),
@@ -939,7 +950,7 @@ scene("deathScreen", (result) => {
     ])
     add([
         text(`Round reached: ${result?.round || 1}`, { 
-            font: "arial",
+            font: "jersey",
             size: 32 
         }),
         pos(24, 58),
