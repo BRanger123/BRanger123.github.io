@@ -67,10 +67,10 @@
             <h2 id="currentGear">Gear: Not chosen</h2>
             <p id="weaponInfo">Select a gadget to see its stats.</p>
             <div class="weaponGrid">
-                <button onclick="selectGadget('Blast')">Blast<small>Buckshot | Close Range</small></button>
-                <button onclick="selectGadget('Cycler')">Cycler<small>Automatic | Big Magazine</small></button>
-                <button onclick="selectGadget('Beam')">Beam<small>High Damage | Piercing</small></button>
-                <button onclick="selectGadget('Spark')">Spark<small>Critical Hits | Fast Reload</small></button>
+                <button onclick="selectGadget('Blast')">Blast</button>
+                <button onclick="selectGadget('Cycler')">Cycler</button>
+                <button onclick="selectGadget('Beam')">Beam</button>
+                <button onclick="selectGadget('Spark')">Spark</button>
             </div>
             <button id="weaponSelectContinue" onclick="playLevel(1); this.style.display = 'none'" style="display: none;">Continue</button><br><br>
             <!--<button onclick="websiteGoTo('shop'); document.getElementById('coinsCount').textContent = `Coins: ${coins}`">Skins</button><br><br>-->
@@ -112,15 +112,15 @@
 
         <div id="settings" style="display: none;">
             <h1>Settings</h1>
-            <h3>Questions in-game:</h3>
+            <h2>Questions in-game:</h3>
             <input type="radio" name="questionsInGame" onclick="questionsInGame=false" checked>No
             <input type="radio" name="questionsInGame" onclick="questionsInGame = true">Yes
             <br>
-            <h3>Dark Mode:</h3>
-            <input type="radio" name="darkMode" onclick="document.getElementById('body').style.backgroundColor = 'white'; document.getElementById('body').style.color = 'black'; red = 255; green = 255; blue = 255" checked>Off
+            <h2>Dark Mode:</h3>
+            <input type="radio" name="darkMode" onclick="document.getElementById('body').style.backgroundColor = rgb(232, 232, 232); document.getElementById('body').style.color = rgb(80, 80, 80); red = 232; green = 232; blue = 232" checked>Off
             <input type="radio" name="darkMode" onclick="document.getElementById('body').style.backgroundColor = 'black'; document.getElementById('body').style.color = 'white'; red = 0; green = 0; blue = 0">On
             <br>
-            <h3>Controls</h3>
+            <h2>Controls</h3>
             <p id="controlStatus">Select a control, then press a key.</p>
             <div id="controlsMenu" class="controlsGrid">
                 <button onclick="beginControlBind('up')">Move up: <span id="control-up">W</span></button>
@@ -131,7 +131,7 @@
                 <button onclick="beginControlBind('reload')">Reload: <span id="control-reload">E</span></button>
             </div>
             <br>
-            <h3>Change questions:</h3>
+            <h2>Change questions:</h3>
             <textarea id="customQuestions" placeholder="<Format:> 
 Question1,CorrectAnswer,Answer,Answer,Answer
 Question2,CorrectAnswer,Answer,Answer,Answer" rows="18" cols="45"></textarea><br>

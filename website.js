@@ -69,9 +69,9 @@ let darkMode = false
 let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }
 let bindingTarget = null
 
-    let red = 255
-    let green = 255
-    let blue = 255
+    let red = 232
+    let green = 232
+    let blue = 232
 
 
 function getQuestions() {
@@ -202,6 +202,7 @@ function resetAnswerButtons(){
         button.disabled = false
         button.style.backgroundColor = ''
         button.style.color = ''
+        button.style.cursor = 'default'
     }
 }
 
@@ -240,6 +241,7 @@ function checkAnswer(answerNum){
     if (!selectedAnswer) return
     for (let i = 1; i <= 4; i++) {
         document.getElementById(`answer${i}`).disabled = true
+        document.getElementById(`answer${i}`).style.cursor = 'not-allowed'
     }
     if (selectedAnswer.isCorrect) {
         document.getElementById(`answer${answerNum + 1}`).style.backgroundColor = 'lightgreen'

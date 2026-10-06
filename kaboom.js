@@ -58,15 +58,15 @@ scene("startButton", () => {
         scale(1),
         anchor("center"),
         outline(4),
-        color(220, 220, 220),
+        color(232, 232, 232),
     ])
     btn.add([
         text(`Start`, { 
-            font: "jerseyo",
+            font: "jersey",
             size: 50 
         }),
         anchor("center"),
-        color(255, 255, 255),
+        color(80, 80, 80),
     ])
     btn.onHoverUpdate(() => {
         btn.color = rgb(200, 200, 200)
@@ -75,18 +75,18 @@ scene("startButton", () => {
     })
     btn.onHoverEnd(() => {
         btn.use(scale(1))
-        btn.color = rgb(220, 220, 220)
+        btn.color = rgb(232, 232, 232)
         setCursor("default")
     })
     btn.onClick(() => go(levelGlobal))
     add([
-        text("Press M to return to menu", { 
-            font: "jerseyo",
-            size: 40 
+        text(`Press ${controlBindings.dash} to dash`,{
+            font: "jersey",
+            size: 40
         }),
-        pos(center().x, center().y+100),
+        pos(center().x, center().y + 100),
         anchor("center"),
-        color(255, 255, 255),
+        color(100, 100, 100)
     ])
 })
 
@@ -899,7 +899,7 @@ usePostEffect("vignette", {
         controlsLabel.pos = camPos().add(vec2(0, -height()/2 + 200))
         roundLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
         const diff = mouseWorldPos.sub(player.pos)
-        let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)
+        let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)    //Convert to degrees
         blasterSprite.angle = angle
         blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
     })
@@ -928,25 +928,67 @@ usePostEffect("vignette", {
             anchor("center"),
             pos(camPos().add(vec2(0, -height()/2 + 60))),
             color(textColor),
-        ]),
-        add([
-            text("Press M to return to menu", {
-                font: "jersey",
-                size: 32,
-            }),
+        ])
+        const backBtn = add([
+            rect(240, 80, { radius: 8 }),
             pos(camPos()),
+            area(),
+            scale(1),
             anchor("center"),
-            color(255, 0, 0),
+            outline(4),
+            color(220, 220, 220),
         ])
-        add([
-            text("Press k to reset", {
-                font: "jersey",
-                size: 32,
+        backBtn.add([
+            text(`Menu`, { 
+                font: "jerseyo",
+                size: 50 
             }),
-            pos(camPos().x, camPos().y - 50),
             anchor("center"),
-            color(255, 0, 0),
+            color(255, 255, 255),
         ])
+        backBtn.onHoverUpdate(() => {
+            backBtn.color = rgb(200, 200, 200)
+            backBtn.use(scale(1.1))
+            setCursor("pointer")
+        })
+        backBtn.onHoverEnd(() => {
+            backBtn.use(scale(1))
+            backBtn.color = rgb(220, 220, 220)
+            setCursor("default")
+        })
+        backBtn.onClick(() => {
+            websiteGoTo("menu")
+        })
+        const resetBtn = add([
+            rect(160, 55, { radius: 8 }),
+            pos(camPos().x, camPos().y - 50),
+            area(),
+            scale(1),
+            anchor("center"),
+            outline(4),
+            color(220, 220, 220),
+        ])
+        resetBtn.add([
+            text(`Restart?`, { 
+                font: "jerseyo",
+                size: 40 
+            }),
+            anchor("center"),
+            color(255, 255, 255),
+        ])
+        resetBtn.onHoverUpdate(() => {
+            backBtn.color = rgb(200, 200, 200)
+            backBtn.use(scale(1.1))
+            setCursor("pointer")
+        })
+        resetBtn.onHoverEnd(() => {
+            resetBtn.use(scale(1))
+            resetBtn.color = rgb(220, 220, 220)
+            setCursor("default")
+        })
+        resetBtn.onClick(() => {
+            websiteGoTo("menu")
+        })
         add([
             text("You died...", {
                 font: "jersey",

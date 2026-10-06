@@ -1,16 +1,16 @@
-/*@font-face{
+@font-face{
     font-family: "Jersey 25";
     src: url("customFont.ttf") format("truetype");
     font-style: normal;
-    font-weight: 0;
+    font-weight: bold;
     font-display: swap;
-}*/
+}
 
 body{
     text-align: center;
     font-family: "Jersey 25", sans-serif;
-    background-color:rgb(255, 255, 255);
-    color: rgb(0, 0, 0)
+    background-color:rgb(232, 232, 232);
+    color: rgb(80, 80, 80)
 }
 button, input, textarea{
     font-family: inherit;
@@ -25,17 +25,23 @@ h1{
         -4px 4px 0 #000,
         4px 4px 0 #000;*/
 }
+h2{
+    font-size: 30px;
+}
+p{
+    font-size: 25px;
+}
 textarea{
     border-radius:5px;
     padding: 10px 20px;
     background-color: rgb(233, 233, 233);
+    font-size: 2opx;
 }
 button{
-    font-size: 20px;
+    font-size: 30px;
     color: rgb(0, 0, 0);
     border-color: black;
     border-width: 2px;
-    border-radius: 6px;
     font-weight: 1000;
     background-color: rgb(231, 231, 231);
     cursor: pointer;
@@ -72,7 +78,7 @@ button:active{
 .buttonContainer button{
     flex: 1;
     padding: 10px;
-    font-size: 20px;
+    font-size: 25px;
     cursor: pointer;
     text-align: center;
 }
@@ -106,7 +112,7 @@ button:active{
 .answerButtonContainer button{
     flex: 1;
     padding: 10px;
-    font-size: 20px;
+    font-size: 25px;
     cursor: pointer;
     text-align: center;
     margin-left: 20px;
@@ -118,11 +124,11 @@ button:active{
     transform: scale(1.3)
 }
 
-#startButton{background-color: #ff5454;}
+#startButton{background-color: #ff6363;}
 #questionButton{background-color: #4fb3ff;}
 #statsButton{background-color: #9db4c0;}
-#settingsButton{background-color: #5c6b73; color: rgb(255, 255, 255);}
-#extrasButton{background-color: #372534; color: white;}
+#settingsButton{background-color: #ffffff;}
+#extrasButton{background-color: #f684e3;}
 
 #customQuestions{
     border: 1px solid #818181;
