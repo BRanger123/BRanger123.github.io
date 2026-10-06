@@ -62,11 +62,11 @@ scene("startButton", () => {
     ])
     btn.add([
         text(`Start`, { 
-            font: "jersey",
+            font: "jerseyo",
             size: 50 
         }),
         anchor("center"),
-        color(0, 0, 0),
+        color(255, 255, 255),
     ])
     btn.onHoverUpdate(() => {
         btn.color = rgb(200, 200, 200)
@@ -81,12 +81,12 @@ scene("startButton", () => {
     btn.onClick(() => go(levelGlobal))
     add([
         text("Press M to return to menu", { 
-            font: "jersey",
+            font: "jerseyo",
             size: 40 
         }),
         pos(center().x, center().y+100),
         anchor("center"),
-        color(0, 0, 0),
+        color(255, 255, 255),
     ])
 })
 
@@ -442,9 +442,9 @@ usePostEffect("vignette", {
     sparkBlasterGlobal = sparkBlaster
     let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 4000, 1.5, false, 100, 1, 0.15)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 1000, 2.5, true, 100, 3, 0.05)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 1000, 2.5, true, 100, 2, 0.05)
     cyclerBlasterGlobal = cyclerBlaster
-    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 3, false, 200, 99, 0.2)
+    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 3, false, 200, 3, 0.2)
     beamBlasterGlobal = beamBlaster
 
     const selectedGadgetName = selectedGadget || "Spark"
@@ -463,7 +463,7 @@ usePostEffect("vignette", {
     if(selectedGadgetName=="Beam"){
         gadgetGlobal = beamBlasterGlobal
         blasterSprite.use(sprite("beam"))
-        blasterSprite.use(scale(1.8))
+        blasterSprite.use(scale(1.6))
         blasterSprite.use(anchor("center"))
     }
     if(selectedGadgetName=="Spark"){gadgetGlobal = sparkBlasterGlobal}
@@ -558,7 +558,7 @@ usePostEffect("vignette", {
         else if(Math.random() < 0.25){
             enemySprite = "bag"
             enemyType = "charger"
-            enemySpeed *= 1.6
+            enemySpeed *= 1.3
             enemyHealth *= 1.3
         }
         else if(Math.random() < 0.25){
