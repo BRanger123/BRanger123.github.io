@@ -45,6 +45,7 @@ loadSprite("bag", "bag.png")
 loadSprite("grass", "spike.png")
 loadSprite("rock", "rock.png")
 loadSprite("mushroom", "mushroom.png")
+loadSprite("spawnMarker", "spawnMarker.png")
 //loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
@@ -349,7 +350,7 @@ usePostEffect("vignette", {
             player.hurt(damage)
             healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
             shake(damage)
-            spawnText(player.pos, `-${damage}`)
+            spawnText(player.pos, `-${damage}`, rgb(255, 0, 0))
             player.use(color(rgb(255, 0, 0)))
             //player.redness = 1
             /*
@@ -368,7 +369,16 @@ usePostEffect("vignette", {
     }
 
     function healPlayer(healValue){
-
+        player.heal(healValue)
+        if(player.hp() > player.maxHealth){
+            player.hurt(player.maxHealth - player.hp())
+        }
+        healthLabel.text = `Health: ${player.hp()}`
+        spawnText(player.pos, `+${healValue}`, rgb(0, 255, 0))
+        player.use(color(rgb(0, 255, 0)))
+        wait(0.2, () => {
+            player.use(color(rgb(255, 255, 255)))
+        })
     }
 
 
@@ -532,8 +542,8 @@ usePostEffect("vignette", {
         const x = rand(minX + 40, maxX - 40)
         const y = rand(minY + 40, maxY - 40)
         const marker = add([
-            pos(x, y), circle(24),outline(4), color(255, 0, 0), opacity(0.75),
-            outline(4, textColor), "spawnMarker",
+            pos(x, y), sprite("spawnMarker"), opacity(0.75),
+            "spawnMarker",
         ])
         wait(1.25, () => {
             if (marker.exists()) destroy(marker)
@@ -551,7 +561,7 @@ usePostEffect("vignette", {
 
         if(makeBoss){
             enemySprite = "boss"
-            enemyHealth = (Math.random() * 120 + 100) * difficulty
+            enemyHealth = (Math.random() * 150 + 50) * difficulty
             enemySpeed = ((Math.random() * 350) + 100) * difficulty
             boss = true
         }
@@ -577,6 +587,7 @@ usePostEffect("vignette", {
             color(randColor),
             "enemy",    // For collision detection
             "object",
+            "dash",
             { speed: enemySpeed, isBoss: boss, enemyType, attackCooldown: 0.5, chargeDirection: null, chargeTimer: 0, colorRGB: randColor},
         ])
 
@@ -599,6 +610,7 @@ usePostEffect("vignette", {
                 get("enemy").filter((otherEnemy) => otherEnemy !== enemy).length === 0 &&
                 get("spawnMarker").length === 0){
                     roundComplete = true
+                    document.getElementById("coinsCount").textContent = `Coins: ${coins}`
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
@@ -619,26 +631,22 @@ usePostEffect("vignette", {
     }
 
     function upgrade(){
-        if(upgradeValue!=0){
+        if(isPaused){
             isPaused = false
             controlsLabel.text = ``
-            if(upgradeValue==1){gadgetGlobal.beamDamage += Math.floor(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
-            if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
-            if(upgradeValue==3){player.speed += Math.floor(0.3*upgradeQuality*player.speed)}
-            if(upgradeValue==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
-            if(upgradeValue==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
-            if(upgradeValue==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
-            if(upgradeValue==7){player.dodge += 5*upgradeQuality; if(player.dodge > 55){player.dodge = 60; document.getElementById("dodgeUpgrade").style.display = "none"}}
-            if(upgradeValue==8){player.maxHealth += Math.floor(25*upgradeQuality)}
-            upgradeValue=0  // Reset upgrade so does not reapply on click
-            upgradeQuality = 1
-            
-            if(player.hp() < player.maxHealth){
-                player.heal(player.maxHealth - player.hp())
+            if(upgradeValue!=0){
+                if(upgradeValue==1){gadgetGlobal.beamDamage += Math.floor(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
+                if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
+                if(upgradeValue==3){player.speed += Math.floor(0.3*upgradeQuality*player.speed)}
+                if(upgradeValue==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
+                if(upgradeValue==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
+                if(upgradeValue==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
+                if(upgradeValue==7){player.dodge += 5*upgradeQuality; if(player.dodge > 55){player.dodge = 60; document.getElementById("dodgeUpgrade").style.display = "none"}}
+                if(upgradeValue==8){player.maxHealth += Math.floor(25*upgradeQuality)}
+                upgradeValue=0  // Reset upgrade so does not reapply on click
+                upgradeQuality = 1
             }
-            healthLabel.text = `Health: ${player.hp()}`
-
-            //enemiesLeft = 0
+            if(player.hp() != player.maxHealth){healPlayer(player.maxHealth - player.hp())}
             roundLabel.color = rgb(255, 255, 255)
             let nextWaveTime = 5
             const clock = add([timer()])
@@ -777,6 +785,8 @@ usePostEffect("vignette", {
                 player.momentum = vec2(0, 0)
             }
         }
+        if((round-1) % 5 == 0){shake(1)}
+
         player.cooldown -= dt()
 
     })
@@ -884,7 +894,7 @@ usePostEffect("vignette", {
 
     camScale(1)
     camRot(0)
-    player.onUpdate(() => {
+    player.onUpdate(() => { 
         // Camera follows point between player and mouse cursor
         const mouseWorldPos = toWorld(mousePos())
         const targetPos = player.pos.add(mouseWorldPos).scale(0.5)
@@ -921,7 +931,7 @@ usePostEffect("vignette", {
             opacity(0.8),
         ])
         add([
-            text(`Round: ${round}`, { 
+            text(`Round: ${round-1}`, { 
                 font: "jerseyo",
                 size: 65 
             }),
@@ -930,7 +940,7 @@ usePostEffect("vignette", {
             color(textColor),
         ])
         const backBtn = add([
-            rect(240, 80, { radius: 8 }),
+            rect(240, 70, { radius: 8 }),
             pos(camPos()),
             area(),
             scale(1),
@@ -960,8 +970,8 @@ usePostEffect("vignette", {
             websiteGoTo("menu")
         })
         const resetBtn = add([
-            rect(160, 55, { radius: 8 }),
-            pos(camPos().x, camPos().y - 50),
+            rect(240, 80, { radius: 8 }),
+            pos(camPos().x, camPos().y + 100),
             area(),
             scale(1),
             anchor("center"),
@@ -977,8 +987,8 @@ usePostEffect("vignette", {
             color(255, 255, 255),
         ])
         resetBtn.onHoverUpdate(() => {
-            backBtn.color = rgb(200, 200, 200)
-            backBtn.use(scale(1.1))
+            resetBtn.color = rgb(200, 200, 200)
+            resetBtn.use(scale(1.1))
             setCursor("pointer")
         })
         resetBtn.onHoverEnd(() => {
@@ -987,7 +997,16 @@ usePostEffect("vignette", {
             setCursor("default")
         })
         resetBtn.onClick(() => {
-            websiteGoTo("menu")
+            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
+            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
+            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
+            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
+            if(levelGlobal == 1){
+                websiteGoTo('weaponSelect')
+            }
+            else{
+                go(levelGlobal)
+            }
         })
         add([
             text("You died...", {
@@ -1020,15 +1039,6 @@ scene("deathScreen", (result) => {
             size: 32 
         }),
         pos(center()),
-        anchor("center"),
-        color(255, 0, 0),
-    ])
-    add([
-        text("Press k to reset", { 
-            font: "jersey",
-            size: 32 
-        }),
-        pos(center().x, center().y-50),
         anchor("center"),
         color(255, 0, 0),
     ])

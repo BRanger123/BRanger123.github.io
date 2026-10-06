@@ -125,23 +125,6 @@ input.addEventListener("keypress", function(event){
         websiteGoTo('menu')
     }
 })
-input.addEventListener("keypress", function(event) {
-    const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
-    if (event.key === "k" && gameIsVisible && levelGlobal != 4){
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
-        if(levelGlobal == 1){
-            event.preventDefault()
-            websiteGoTo('weaponSelect')
-        }
-        else{
-            event.preventDefault()
-            go(levelGlobal)
-        }
-    }
-})
 
 const originalTitle = document.title
     document.addEventListener("visibilitychange", () => {

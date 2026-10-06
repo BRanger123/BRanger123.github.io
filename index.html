@@ -47,6 +47,7 @@
 
         <div id="upgrade" style="display: none;">
             <h1>Upgrade</h1>
+            <h2 id="coinsCount">coins not found</h2>
             <p id="upgradeHint">Upgrades with + scale exponentially.</p>
             <div class="upgradeGrid">
                 <button onclick="upgradeValue=1; selectUpgrade('Damage +')"><strong>Damage +</strong><small>More power per hit</small></button>
@@ -59,7 +60,7 @@
                 <button onclick="upgradeValue=8; selectUpgrade('Health')"><strong>Health</strong><small>Bigger health pool</small></button>
             </div>
             <h2 id="chosenUpgrade">Choose an upgrade</h2>
-            <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); this.style.display = 'none'; document.getElementById('chosenUpgrade').textContent = 'Choose an upgrade'" style="display: none;">Continue</button>
+            <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); document.getElementById('chosenUpgrade').textContent = 'Choose an upgrade'">Continue</button>
         </div>
 
         <div id="weaponSelect" style="display: none;">
@@ -72,7 +73,7 @@
                 <button onclick="selectGadget('Beam')">Beam</button>
                 <button onclick="selectGadget('Spark')">Spark</button>
             </div>
-            <button id="weaponSelectContinue" onclick="playLevel(1); this.style.display = 'none'" style="display: none;">Continue</button><br><br>
+            <button id="weaponSelectContinue" onclick="playLevel(1)" style="display: none;">Continue</button><br><br>
             <!--<button onclick="websiteGoTo('shop'); document.getElementById('coinsCount').textContent = `Coins: ${coins}`">Skins</button><br><br>-->
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button><br>
         </div>
