@@ -46,6 +46,7 @@ loadSprite("grass", "spike.png")
 loadSprite("rock", "rock.png")
 loadSprite("mushroom", "mushroom.png")
 loadSprite("spawnMarker", "spawnMarker.png")
+loadSprite("bullet", "bullet.png")
 //loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
@@ -267,9 +268,9 @@ usePostEffect("vignette", {
                 const direction = Vec2.fromAngle(angle)
                 const beam = add([
                     pos(player.pos),
-                    rect(8,8),
+                    sprite("bullet"),
+                    rotate(angle),
                     area(),
-                    color(0,0,0),
                     "beam",   // For collision detection
                     "object",
                     { speed: this.beamSpeed, dir: direction, penetration: this.penetration },
@@ -785,7 +786,7 @@ usePostEffect("vignette", {
                 player.momentum = vec2(0, 0)
             }
         }
-        if((round-1) % 5 == 0){shake(1)}
+        if((round-1) % 5 == 0 && roundComplete == false){shake(1)}
 
         player.cooldown -= dt()
 
