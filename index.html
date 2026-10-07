@@ -48,18 +48,19 @@
         <div id="upgrade" style="display: none;">
             <h1>Upgrade</h1>
             <h2 id="coinsCount">coins not found</h2>
-            <p id="upgradeHint">Upgrades with + scale exponentially.</p>
+            <p id="upgradePrice">Upgrade will cost 0 coins</p>
             <div class="upgradeGrid">
-                <button onclick="upgradeValue=1; selectUpgrade('Damage +')"><strong>Damage +</strong><small>More power per hit</small></button>
-                <button onclick="upgradeValue=2; selectUpgrade('Capacity +')"><strong>Capacity +</strong><small>More shots per magazine</small></button>
-                <button onclick="upgradeValue=3; selectUpgrade('Speed +')"><strong>Speed +</strong><small>Move faster and dash futher</small></button>
-                <button onclick="upgradeValue=4; selectUpgrade('Penetration')"><strong>Penetration</strong><small>Beams pierce more enemies</small></button>
-                <button onclick="upgradeValue=5; selectUpgrade('Life Steal')"><strong>Life Steal</strong><small>Heal more on hits</small></button>
-                <button onclick="upgradeValue=6; selectUpgrade('Crit %')"><strong>Crit %</strong><small>Critical hit chance</small></button>
-                <button onclick="upgradeValue=7; selectUpgrade('Dodge %')" id="dodgeUpgrade"><strong>Dodge %</strong><br><small>Dodge enemy attacks</small></button>
-                <button onclick="upgradeValue=8; selectUpgrade('Health')"><strong>Health</strong><small>Bigger health pool</small></button>
+                <button onclick="selectUpgrade('Damage', 1)"><strong>Damage</strong><small>More power per hit</small></button>
+                <button onclick="selectUpgrade('Capacity', 2)"><strong>Capacity</strong><small>More shots per magazine</small></button>
+                <button onclick="selectUpgrade('Speed', 3)"><strong>Speed</strong><small>Move faster and dash futher</small></button>
+                <button onclick="selectUpgrade('Penetration', 4)"><strong>Penetration</strong><small>Beams pierce more enemies</small></button>
+                <button onclick="selectUpgrade('Life Steal', 5)"><strong>Life Steal</strong><small>Heal more on hits</small></button>
+                <button onclick="selectUpgrade('Crit %', 6)"><strong>Crit %</strong><small>Critical hit chance</small></button>
+                <button onclick="selectUpgrade('Dodge %', 7)" id="dodgeUpgrade"><strong>Dodge %</strong><br><small>Dodge enemy attacks</small></button>
+                <button onclick="selectUpgrade('Health', 8)"><strong>Health</strong><small>Bigger health pool</small></button>
             </div>
             <h2 id="chosenUpgrade">No upgrade chosen</h2>
+            <button id="upgradePurchase" onclick="purchaseUpgrade(selectedUpgradeString, selectedUpgradeNum); this.style.display = 'none'" style="display: none">Purchase</button><br><br>
             <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); document.getElementById('chosenUpgrade').textContent = 'No upgrade chosen'">Continue</button>
         </div>
 

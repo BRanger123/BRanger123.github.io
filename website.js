@@ -49,7 +49,7 @@ function blabber(){
 let gadgetGlobal
 let playerSprite = "piskel"
 let spritesOwned = ["bean"]
-let upgradeValue = 0
+let upgradesToApply = []
 let upgradeQuality = 1
 let levelGlobal = -1        // Globals so Kaboom objects can be seen in entire src
 let currentDivId = "menu"
@@ -68,6 +68,9 @@ let gameQuestions = false
 let darkMode = false
 let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }
 let bindingTarget = null
+let upgradesPurchased = 0
+let selectedUpgradeString
+let selectedUpgradeNum
 
     let red = 232
     let green = 232
@@ -127,7 +130,7 @@ input.addEventListener("keypress", function(event){
 })
 
 const originalTitle = document.title
-    document.addEventListener("visibilitychange", () => {
+document.addEventListener("visibilitychange", () => {
     document.title = document.hidden ? "Come back :(" : originalTitle
 })
 
@@ -145,9 +148,25 @@ function playLevel(level){
     go("startButton")
 }
 
-function selectUpgrade(upgradeString){
-    document.getElementById('chosenUpgrade').textContent = upgradeString || ''
-    document.getElementById('upgradeContinue').style.display = "inline-block"
+function selectUpgrade(upgradeString, upgradeNum){
+    selectedUpgradeString = upgradeString; selectedUpgradeNum = upgradeNum
+    document.getElementById('upgradePurchase').style.display = "inline-block"
+    document.getElementById('upgradePurchase').textContent = `Purchase ${upgradeString}`
+}
+
+function purchaseUpgrade(upgradeString, upgradeNum){
+    let price = upgradesPurchased*5
+    if(price<=coins){
+        coins = coins-price
+        playerSprite = sprite
+        upgradesToApply.push(upgradeNum)
+        upgradesPurchased++
+        if(upgradesPurchased == 1){document.getElementById('chosenUpgrade').textContent = `${upgradeString}`}
+        else{document.getElementById('chosenUpgrade').textContent = `${document.getElementById('chosenUpgrade').textContent}, ${upgradeString}`}
+        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
+        document.getElementById('coinsCount').textContent = `Coins: ${coins}`
+    }
+    else{document.getElementById('upgradePrice').textContent = `You cannot afford the ${upgradeString} upgrade.`}
 }
 
 function purchaseSkin(sprite, price, button){

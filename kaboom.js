@@ -190,13 +190,16 @@ usePostEffect("vignette", {
     let roundComplete = false
     let enemiesDied = 0
     let enemiesDiedCounter = 0
-    upgradeValue = 0
+    upgradesToApply = []
     upgradeQuality = 1
     let isPaused = false
     let mouseDown = false
     let waiting = false
+    coins = 0
     let coinMagForce = 35000
     document.getElementById("coinsCount").textContent = `Coins: ${coins}`
+    document.getElementById('chosenUpgrade').textContent = 'No upgrade chosen'
+    upgradesPurchased = 0
     
     // Code for beam gadget class
     class BeamGadget{
@@ -262,12 +265,14 @@ usePostEffect("vignette", {
             // Apply recoil
             const recoilDir = baseDir.scale(-this.recoilForce)  // Opposite to beam fire direction
             player.recoil = player.recoil.add(recoilDir)
-            
+        
             for(let i = 0; i < this.beamsFired; i++){
-                const angle = baseDir.angle() + rand(-this.spread, this.spread) // Use spread as max possible random angle deviation
+                let angle
+                if(this.beamsFired != 1){angle = baseDir.angle() + (i*(this.spread/this.beamsFired))-(this.spread/2)}
+                else{angle = baseDir.angle() + rand(-this.spread, this.spread)} // Use spread as max possible random angle deviation
                 const direction = Vec2.fromAngle(angle)
                 const beam = add([
-                    pos(player.pos),
+                    pos(player.pos.add(direction.scale(blasterSprite.width))),
                     sprite("bullet"),
                     rotate(angle),
                     area(),
@@ -562,8 +567,8 @@ usePostEffect("vignette", {
 
         if(makeBoss){
             enemySprite = "boss"
-            enemyHealth = (Math.random() * 150 + 50) * difficulty
-            enemySpeed = ((Math.random() * 350) + 100) * difficulty
+            enemyHealth = (Math.random() * 250 + 50) * difficulty
+            enemySpeed = ((Math.random() * 250) + 100) * difficulty
             boss = true
         }
         else if(Math.random() < 0.25){
@@ -611,6 +616,8 @@ usePostEffect("vignette", {
                 get("enemy").filter((otherEnemy) => otherEnemy !== enemy).length === 0 &&
                 get("spawnMarker").length === 0){
                     roundComplete = true
+                    destroyAll("coin")
+                    document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
                     document.getElementById("coinsCount").textContent = `Coins: ${coins}`
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
                     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
@@ -635,18 +642,20 @@ usePostEffect("vignette", {
         if(isPaused){
             isPaused = false
             controlsLabel.text = ``
-            if(upgradeValue!=0){
-                if(upgradeValue==1){gadgetGlobal.beamDamage += Math.floor(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
-                if(upgradeValue==2){gadgetGlobal.magSize += Math.floor(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
-                if(upgradeValue==3){player.speed += Math.floor(0.3*upgradeQuality*player.speed)}
-                if(upgradeValue==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
-                if(upgradeValue==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
-                if(upgradeValue==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
-                if(upgradeValue==7){player.dodge += 5*upgradeQuality; if(player.dodge > 55){player.dodge = 60; document.getElementById("dodgeUpgrade").style.display = "none"}}
-                if(upgradeValue==8){player.maxHealth += Math.floor(25*upgradeQuality)}
-                upgradeValue=0  // Reset upgrade so does not reapply on click
-                upgradeQuality = 1
+            let arrayLength = upgradesToApply.length
+            for(let i = 0; i<arrayLength; i++){
+                let nextUpgrade = upgradesToApply.pop()
+                if(nextUpgrade==1){gadgetGlobal.beamDamage += Math.floor(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
+                if(nextUpgrade==2){gadgetGlobal.magSize += Math.floor(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
+                if(nextUpgrade==3){player.speed += Math.floor(0.3*upgradeQuality*player.speed)}
+                if(nextUpgrade==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
+                if(nextUpgrade==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
+                if(nextUpgrade==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
+                if(nextUpgrade==7){player.dodge += 5*upgradeQuality; if(player.dodge > 55){player.dodge = 60; document.getElementById("dodgeUpgrade").style.display = "none"}}
+                if(nextUpgrade==8){player.maxHealth += Math.floor(25*upgradeQuality)}
             }
+            upgradeQuality = 1
+            upgradesToApply = []
             if(player.hp() != player.maxHealth){healPlayer(player.maxHealth - player.hp())}
             roundLabel.color = rgb(255, 255, 255)
             let nextWaveTime = 5
@@ -792,7 +801,7 @@ usePostEffect("vignette", {
 
     })
 
-    onClick(() => {
+    onMousePress("left", () => {
         //coinsLabel.text = `Coins: ${coins}`   idk why this was here, waste of processing
         if (isPaused || gadgetGlobal.isFullAuto) {
             return
@@ -805,7 +814,7 @@ usePostEffect("vignette", {
         upgrade()
     })
 
-    onMouseDown(() => {
+    onMouseDown("left", () => {
         if (isPaused || !gadgetGlobal.isFullAuto) {
             return
         }
@@ -815,6 +824,21 @@ usePostEffect("vignette", {
 
     onMouseRelease(() => {
         mouseDown = false
+    })
+
+    onMousePress("right", () => {
+        const aimMarker = add([
+            pos(toWorld(mousePos())),
+            circle(20),
+            color(250,250,250),
+            opacity(0.5)
+        ])
+        aimMarker.onUpdate(() => {
+            aimMarker.pos = toWorld(mousePos())
+        })
+        onMouseRelease("right", () => {
+            destroy(aimMarker)
+        })
     })
 
     onUpdate(() => {
