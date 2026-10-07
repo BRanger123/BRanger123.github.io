@@ -161,7 +161,7 @@ function purchaseUpgrade(upgradeString, upgradeNum){
         playerSprite = sprite
         upgradesToApply.push(upgradeNum)
         upgradesPurchased++
-        if(upgradesPurchased == 1){document.getElementById('chosenUpgrade').textContent = `${upgradeString}`}
+        if(document.getElementById('chosenUpgrade').textContent == "No upgrade chosen"){document.getElementById('chosenUpgrade').textContent = `${upgradeString}`}
         else{document.getElementById('chosenUpgrade').textContent = `${document.getElementById('chosenUpgrade').textContent}, ${upgradeString}`}
         document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
         document.getElementById('coinsCount').textContent = `Coins: ${coins}`
