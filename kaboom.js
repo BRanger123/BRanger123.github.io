@@ -182,7 +182,7 @@ usePostEffect("vignette", {
     }
 
     //spawnWave(1, 3, 5, 2) // spawns 5 enemies 2x as strong for 3 waves every 1 second
-    let round = 1
+    let round = 0
 
     const enemies = []
     const spawnDist = 500
@@ -615,27 +615,33 @@ usePostEffect("vignette", {
             if(enemiesLeft <= 0 && !roundComplete &&
                 get("enemy").filter((otherEnemy) => otherEnemy !== enemy).length === 0 &&
                 get("spawnMarker").length === 0){
-                    roundComplete = true
-                    destroyAll("coin")
-                    document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
-                    document.getElementById("coinsCount").textContent = `Coins: ${coins}`
-                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
-                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
-                    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
-                    isPaused = true
-                    destroyAll("beam")
-                    destroyAll("enemyBeam")
-                    player.play("idle")
-                    playerAnimation = "idle"
-                    controlsLabel.text = `Click to continue with upgrade`
-                    gameQuestions = true
-                    if(questionsInGame){startQuestion()}
-                    else{websiteGoTo('upgrade')}
-                    onClick(() => upgrade())
+                    startUpgrade()
             }
         })
         return enemy
+    }
+
+    function startUpgrade(){
+        roundComplete = true
+        isPaused = true
+        destroyAll("beam")
+        destroyAll("enemyBeam")
+        destroyAll("coin")
+        destroyAll("enemy")
+        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
+        document.getElementById("coinsCount").textContent = `Coins: ${coins}`
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
+        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
+        player.play("idle")
+        playerAnimation = "idle"
+        roundLabel.text = ``
+        controlsLabel.text = `Click to continue with upgrade`
+        gameQuestions = true
+        if(questionsInGame){startQuestion()}
+        else{websiteGoTo('upgrade')}
+        onClick(() => upgrade())
     }
 
     function upgrade(){
@@ -666,7 +672,6 @@ usePostEffect("vignette", {
                     waiting = true
                     nextWaveTime = nextWaveTime - 1
                     if(nextWaveTime <= -1){
-                        roundLabel.text = ``
                         waiting = false
                         startRound()
                         destroy(clock)
@@ -692,16 +697,30 @@ usePostEffect("vignette", {
         })
     }
     function startRound(){
+        round++
         roundComplete = false
         const enemyNum = Math.floor(2 + round * 1.5)
         const waves = Math.min(5, 1 + Math.floor(round / 3))
         const difficulty = 0.5 + round * 0.2
         const bosses = Math.floor(round/5)
         if(round % 5 == 0){roundLabel.color = rgb(255, 0, 0)}
-        roundLabel.text = `Round: ${round}`
         enemiesLeft = (waves * enemyNum) + bosses
         spawnWave(round*0.75, waves, enemyNum, difficulty, bosses)
-        round++
+        let roundTimer = round*4+6
+        const roundClock = add([timer()])
+        roundClock.loop(1, () => {
+            if(!isPaused){
+                if(roundComplete){destroy(roundClock)}
+                else{
+                    roundLabel.text = `Round ${round}: ${roundTimer}s`
+                    roundTimer--
+                    if(roundTimer <= -1){
+                        destroy(roundClock)
+                        startUpgrade()
+                    }
+                }
+            }
+        })
     }
     startRound()
 
@@ -795,7 +814,7 @@ usePostEffect("vignette", {
                 player.momentum = vec2(0, 0)
             }
         }
-        if((round-1) % 5 == 0 && roundComplete == false){shake(1)}
+        if((round) % 5 == 0 && roundComplete == false){shake(1)}
 
         player.cooldown -= dt()
 
