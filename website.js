@@ -71,10 +71,9 @@ let bindingTarget = null
 let upgradesPurchased = 0
 let selectedUpgradeString
 let selectedUpgradeNum
-
-    let red = 232
-    let green = 232
-    let blue = 232
+let red = 232
+let green = 232
+let blue = 232
 
 
 function getQuestions() {

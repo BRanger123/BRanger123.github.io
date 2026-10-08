@@ -79,6 +79,21 @@
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button><br>
         </div>
 
+        <div id="abilitySelect" style="display: none;">
+            <h1>Choose Ability</h1>
+            <h2 id="currentGear">Ability: Not chosen</h2>
+            <p id="weaponInfo">Select an ability to see what it does.</p>
+            <div class="buttonContainer">
+                <button onclick="purchaseSkin('piskel', 0, this)">bean</button><br>
+                <button onclick="purchaseSkin('dino', 20, this)">dino (20)</button><br>
+                <button onclick="purchaseSkin('bag', 35, this)">bag (35)</button><br>
+                <button onclick="purchaseSkin('ghosty', 50, this)">ghosty (50)</button><br>
+                <!--<button onclick="purchaseSkin('mark', 200, this)">mark (200)</button><br>-->
+                <button onclick="purchaseSkin('gigagantrum', 500, this)">gigagantrum (500)</button><br>
+            </div>
+            <button onclick="websiteGoTo('weaponSelect')">Continue</button>
+        </div>
+
         <div id="shop" style="display: none;">
             <h1>Shop</h1>
             <h2 id="coinsCount">coins not found</h2>

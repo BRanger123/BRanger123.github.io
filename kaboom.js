@@ -50,6 +50,7 @@ loadSprite("beamBullet", "beamBullet.png")
 loadSprite("sparkBullet", "sparkBullet.png")
 loadSprite("blastBullet", "blastBullet.png")
 loadSprite("cyclerBullet", "cyclerBullet.png")
+loadSprite("enemyBullet", "enemyBullet.png")
 //loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
@@ -186,6 +187,7 @@ usePostEffect("vignette", {
 
     //spawnWave(1, 3, 5, 2) // spawns 5 enemies 2x as strong for 3 waves every 1 second
     let round = 0
+    let isRoundSpecial = false
 
     const enemies = []
     const spawnDist = 500
@@ -289,22 +291,13 @@ usePostEffect("vignette", {
                 beam.onUpdate(() => {if(!isPaused){beam.move(beam.dir.scale(this.beamSpeed))}})    // Moves in dir by speed every frame
                 beam.onCollide("enemy", (enemy) => {
                     if(Math.random() <= this.critChance){
-                        player.heal(this.lifeSteal*3)
-                        if(player.hp() > player.maxHealth){
-                            player.hurt(player.hp() - player.maxHealth)
-                        }
-                        healthLabel.text = `Health: ${player.hp()}`
-                        spawnText(enemy.pos, "Critical Hit!")
+                        if(this.lifeSteal > 0){healPlayer(this.lifeSteal*3)}
                         enemy.hurt(this.beamDamage*3)
                         if(beam.penetration > 0){beam.penetration--}
                         else{beam.destroy()}
                     }
                     else{
-                        player.heal(this.lifeSteal)
-                        if(player.hp() > player.maxHealth){
-                            player.hurt(player.hp() - player.maxHealth)
-                        }
-                        healthLabel.text = `Health: ${player.hp()}`
+                        if(this.lifeSteal > 0){healPlayer(this.lifeSteal)}
                         spawnText(enemy.pos, this.beamDamage)
                         enemy.hurt(this.beamDamage)
                         if(beam.penetration > 0){beam.penetration--}
@@ -372,12 +365,16 @@ usePostEffect("vignette", {
     }
 
     function healPlayer(healValue){
-        player.heal(healValue)
-        if(player.hp() > player.maxHealth){
-            player.hurt(player.maxHealth - player.hp())
+        if(player.hp() == player.maxHealth){return}
+        if(player.maxHealth - player.hp() < healValue){
+            spawnText(player.pos, `+${player.maxHealth - player.hp()}`, rgb(0, 255, 0))
+            player.heal(player.maxHealth - player.hp())
+        }
+        else{
+            spawnText(player.pos, `+${healValue}`, rgb(0, 255, 0))
+            player.heal(healValue)
         }
         healthLabel.text = `Health: ${player.hp()}`
-        spawnText(player.pos, `+${healValue}`, rgb(0, 255, 0))
         player.use(color(rgb(0, 255, 0)))
         wait(0.2, () => {
             player.use(color(rgb(255, 255, 255)))
@@ -550,7 +547,7 @@ usePostEffect("vignette", {
         ])
         wait(1.25, () => {
             if (marker.exists()) destroy(marker)
-            if (!isPaused && player.exists()) createEnemy(x, y, difficulty, makeBoss)
+            if (!isPaused && player.exists() && !roundComplete) createEnemy(x, y, difficulty, makeBoss)
         })
     }
 
@@ -558,9 +555,10 @@ usePostEffect("vignette", {
         let boss = false
         let enemySprite = "ghosty"
         let enemyHealth = (Math.random() * 50 + 10) * difficulty
-        let enemySpeed = ((Math.random() * 150) + 50) * difficulty
+        let enemySpeed = ((Math.random() * 150) + 50) * difficulty * 0.9
         let enemyType = "chaser"
         let randColor = rgb(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100)
+        let maxAttackCooldown = 2
 
         if(makeBoss){
             enemySprite = "boss"
@@ -573,11 +571,13 @@ usePostEffect("vignette", {
             enemyType = "charger"
             enemySpeed *= 1.3
             enemyHealth *= 1.3
+            maxAttackCooldown = 1.5
         }
         else if(Math.random() < 0.25){
             enemySprite = "dino"
             enemyType = "shooter"
             enemySpeed *= 0.7
+            maxAttackCooldown = 3
         }
 
         const enemy = add([
@@ -591,7 +591,7 @@ usePostEffect("vignette", {
             "enemy",    // For collision detection
             "object",
             "dash",
-            { speed: enemySpeed, isBoss: boss, enemyType, attackCooldown: 0.5, chargeDirection: null, chargeTimer: 0, colorRGB: randColor},
+            { speed: enemySpeed, isBoss: boss, enemyType, attackCooldown: 0.5, maxAttackCooldown, chargeDirection: null, chargeTimer: 0, colorRGB: randColor},
         ])
 
         enemy.on("death", () => {
@@ -609,11 +609,11 @@ usePostEffect("vignette", {
             destroy(enemy)
             enemiesDied++
             if(enemiesDied > highestEnemiesDied){highestEnemiesDied = enemiesDied}
-            if(enemiesLeft <= 0 && !roundComplete &&
+            /*if(enemiesLeft <= 0 && !roundComplete &&
                 get("enemy").filter((otherEnemy) => otherEnemy !== enemy).length === 0 &&
                 get("spawnMarker").length === 0){
                     startUpgrade()
-            }
+            }*/
         })
         return enemy
     }
@@ -625,6 +625,7 @@ usePostEffect("vignette", {
         destroyAll("enemyBeam")
         destroyAll("coin")
         destroyAll("enemy")
+        destroyAll("spawnMarker")
         document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
         document.getElementById("coinsCount").textContent = `Coins: ${coins}`
         resetInputs()
@@ -679,28 +680,30 @@ usePostEffect("vignette", {
         for(let i=0; i<bosses; i++){
             spawnEnemy(difficulty, true)
         }
-        let clockLoopCycle = 0
         const clock = add([timer()])
         clock.loop(time, () => {
-            if(!isPaused && clockLoopCycle < waves){
-                for(let i=0; i<enemyNum; i++){
-                    spawnEnemy(difficulty, false)
-                }
-                clockLoopCycle ++
+            if(roundComplete){destroy(clock)}
+            for(let i=0; i<enemyNum; i++){
+                spawnEnemy(difficulty, false)
             }
         })
     }
+
     function startRound(){
         round++
         roundComplete = false
-        const enemyNum = Math.floor(2 + round * 1.5)
-        const waves = Math.min(5, 1 + Math.floor(round / 3))
-        const difficulty = 0.5 + round * 0.2
-        const bosses = Math.floor(round/5)
-        if(round % 5 == 0){roundLabel.color = rgb(255, 0, 0)}
+        let enemyNum = Math.floor(2 + round * 1.5)
+        let waves = Math.min(5, 1 + Math.floor(round / 3))
+        let difficulty = 0.5 + round * 0.4
+        let bosses = Math.floor(round/5)
+        /*if(Math.random() < (0.05*(round-1))){
+            isRoundSpecial = true
+            roundLabel.color = rgb(255, 0, 0)
+            difficulty *= 2
+        }*/
         enemiesLeft = (waves * enemyNum) + bosses
-        spawnWave(round*0.75, waves, enemyNum, difficulty, bosses)
-        let roundTimer = round*4+6
+        spawnWave((round*2.5)+1, waves, enemyNum, difficulty, bosses)
+        let roundTimer = round*5+5
         const roundClock = add([timer()])
         roundClock.loop(1, () => {
             if(!isPaused){
@@ -739,9 +742,9 @@ usePostEffect("vignette", {
                     else if(distance < 240) enemy.move(direction.scale(-enemy.speed))
                     if(enemy.attackCooldown <= 0){
                         const projectile = add([
-                            pos(enemy.pos), circle(16), outline(4, rgb(0, 0, 0)), area(), color(255, 20, 20),
+                            pos(enemy.pos), sprite("enemyBullet"), area(), color(255, 20, 20),
                             "enemyBeam", "object",
-                            { speed: 500 , dir: direction },
+                            { speed: 300 , dir: direction },
                             offscreen({ destroy: true }),
                         ])
                         projectile.onUpdate(() => {if(!isPaused){projectile.move(projectile.dir.scale(projectile.speed))}})
@@ -751,7 +754,7 @@ usePostEffect("vignette", {
                                 destroy(projectile)
                             }
                         })
-                        enemy.attackCooldown = 1
+                        enemy.attackCooldown = enemy.maxAttackCooldown
                     }
                 }
                 else enemy.move(direction.scale(enemy.speed))
@@ -808,7 +811,7 @@ usePostEffect("vignette", {
                 player.momentum = vec2(0, 0)
             }
         }
-        if((round) % 5 == 0 && roundComplete == false){shake(1)}
+        if(isRoundSpecial && roundComplete == false){shake(1)}
 
         player.cooldown -= dt()
 
@@ -921,7 +924,7 @@ usePostEffect("vignette", {
     // Collision with enemy
     onCollideUpdate("player", "enemy", (player, enemy) => {
         if(!isPaused && player.momentum.len() < 3000){
-            if(enemy.attackCooldown > 0){
+            if(enemy.attackCooldown > 0 || enemy.enemyType == "shooter"){
                 return
             }
             if(enemy.enemyType == "charger"){attackPlayer(10)}
