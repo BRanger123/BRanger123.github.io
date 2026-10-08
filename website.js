@@ -13,7 +13,7 @@ const sentences = [
 ]
 
 const colors = [
-    "2191fb","b9faf8","dc6acf","d84727","f3c969",
+    "2191fb","b9faf8","dc6acf","f3c969",
     "c56b59","6eb83d","f194b4","c5ebc3","6fbcec",
     "aafac8","c7ffed","ffa770","d3c1d2","cb769e",
     "ff6b35","f7c59f","6fd08c","b47eb3","17b2b5",

@@ -452,9 +452,9 @@ usePostEffect("vignette", {
     sparkBlasterGlobal = sparkBlaster
     let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 4000, 1.5, false, 100, 1, 0.15)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 1000, 2.5, true, 100, 2, 0.05)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 1000, 2, true, 100, 2, 0.05)
     cyclerBlasterGlobal = cyclerBlaster
-    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 3, false, 200, 3, 0.2)
+    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 2.5, false, 200, 3, 0.2)
     beamBlasterGlobal = beamBlaster
 
     const selectedGadgetName = selectedGadget || "Spark"
@@ -683,8 +683,10 @@ usePostEffect("vignette", {
         const clock = add([timer()])
         clock.loop(time, () => {
             if(roundComplete){destroy(clock)}
-            for(let i=0; i<enemyNum; i++){
-                spawnEnemy(difficulty, false)
+            else{
+                for(let i=0; i<enemyNum; i++){
+                    spawnEnemy(difficulty, false)
+                }
             }
         })
     }
