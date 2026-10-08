@@ -46,7 +46,10 @@ loadSprite("grass", "spike.png")
 loadSprite("rock", "rock.png")
 loadSprite("mushroom", "mushroom.png")
 loadSprite("spawnMarker", "spawnMarker.png")
-loadSprite("bullet", "bullet.png")
+loadSprite("beamBullet", "beamBullet.png")
+loadSprite("sparkBullet", "sparkBullet.png")
+loadSprite("blastBullet", "blastBullet.png")
+loadSprite("cyclerBullet", "cyclerBullet.png")
 //loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
@@ -200,6 +203,7 @@ usePostEffect("vignette", {
     document.getElementById("coinsCount").textContent = `Coins: ${coins}`
     document.getElementById('chosenUpgrade').textContent = 'No upgrade chosen'
     upgradesPurchased = 0
+    const beamSprite = `${selectedGadget.toLowerCase()}Bullet`
     
     // Code for beam gadget class
     class BeamGadget{
@@ -273,7 +277,8 @@ usePostEffect("vignette", {
                 const direction = Vec2.fromAngle(angle)
                 const beam = add([
                     pos(player.pos.add(direction.scale(blasterSprite.width))),
-                    sprite("bullet"),
+                    sprite(beamSprite),
+                    scale(0.6),
                     rotate(angle),
                     area(),
                     "beam",   // For collision detection
