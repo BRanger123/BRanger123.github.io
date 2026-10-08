@@ -296,12 +296,8 @@ usePostEffect("vignette", {
                         healthLabel.text = `Health: ${player.hp()}`
                         spawnText(enemy.pos, "Critical Hit!")
                         enemy.hurt(this.beamDamage*3)
-                        if(beam.penetration > 0){
-                            beam.penetration--
-                        }
-                        else{
-                            beam.destroy()
-                        }
+                        if(beam.penetration > 0){beam.penetration--}
+                        else{beam.destroy()}
                     }
                     else{
                         player.heal(this.lifeSteal)
@@ -311,12 +307,8 @@ usePostEffect("vignette", {
                         healthLabel.text = `Health: ${player.hp()}`
                         spawnText(enemy.pos, this.beamDamage)
                         enemy.hurt(this.beamDamage)
-                        if(beam.penetration > 0){
-                            beam.penetration--
-                        }
-                        else{
-                            beam.destroy()
-                        }
+                        if(beam.penetration > 0){beam.penetration--}
+                        else{beam.destroy()}
                     }
                     enemy.use(color(rgb(255, 0, 0)))
                     wait(0.2, () => {
@@ -635,10 +627,7 @@ usePostEffect("vignette", {
         destroyAll("enemy")
         document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
         document.getElementById("coinsCount").textContent = `Coins: ${coins}`
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
+        resetInputs()
         player.play("idle")
         playerAnimation = "idle"
         roundLabel.text = ``
@@ -656,9 +645,9 @@ usePostEffect("vignette", {
             let arrayLength = upgradesToApply.length
             for(let i = 0; i<arrayLength; i++){
                 let nextUpgrade = upgradesToApply.pop()
-                if(nextUpgrade==1){gadgetGlobal.beamDamage += Math.floor(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
-                if(nextUpgrade==2){gadgetGlobal.magSize += Math.floor(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
-                if(nextUpgrade==3){player.speed += Math.floor(0.3*upgradeQuality*player.speed)}
+                if(nextUpgrade==1){gadgetGlobal.beamDamage += Math.ceil(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
+                if(nextUpgrade==2){gadgetGlobal.magSize += Math.ceil(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
+                if(nextUpgrade==3){player.speed += Math.ceil(0.3*upgradeQuality*player.speed)}
                 if(nextUpgrade==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
                 if(nextUpgrade==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
                 if(nextUpgrade==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
@@ -1046,10 +1035,7 @@ usePostEffect("vignette", {
             setCursor("default")
         })
         resetBtn.onClick(() => {
-            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
-            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
-            canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
+            resetInputs()
             if(levelGlobal == 1){
                 websiteGoTo('weaponSelect')
             }

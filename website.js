@@ -120,10 +120,7 @@ input.addEventListener("keypress", function(event){
         event.preventDefault()
         gameQuestions = false
         playLevel(levelGlobal)
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }))  // Reset inputs
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 's' }))
-        canvas.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }))
+        resetInputs()
         document.getElementById('gameWindow').style.display = 'none'
         websiteGoTo('menu')
     }
@@ -298,6 +295,13 @@ function selectGadget(gearName) {
 function beginControlBind(control) {
     bindingTarget = control
     document.getElementById('controlStatus').textContent = `Press a key for ${control}.`
+}
+
+function resetInputs(){
+    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: `${controlBindings.up}` }))
+    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: `${controlBindings.left}` }))  // Reset inputs
+    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: `${controlBindings.down}` }))
+    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: `${controlBindings.right}` }))
 }
 
 //window.addEventListener('beforeunload', (event) => {
