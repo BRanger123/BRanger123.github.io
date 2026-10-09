@@ -176,13 +176,7 @@ usePostEffect("vignette", {
         ])
     }
     for(let i = 0; i<5; i++){
-        const mushroom = add([
-            pos(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100)),
-            sprite("mushroom"),
-            area({ collisionIgnore: ["object"],}),
-            body({ isStatic: true }),
-            "object", "rock", "mushroom"
-        ])
+        spawnMushroom(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100))
     }
 
     //spawnWave(1, 3, 5, 2) // spawns 5 enemies 2x as strong for 3 waves every 1 second
@@ -400,6 +394,18 @@ usePostEffect("vignette", {
         })
     }
 
+    function spawnMushroom(x, y){ // Argument cannot be "pos"
+        const mushroom = add([
+            sprite("mushroom"),
+            anchor("center"),
+            pos(x, y),
+            area({ collisionIgnore: ["enemy","ammo"]}),    // Enemies dont get stuck on coins
+            body(),
+            "mushroom", // For collision detection with player
+            "object",
+        ])
+    }
+
     // Player code
     const player = add([
         //sprite(`${playerSprite}`),
@@ -424,6 +430,11 @@ usePostEffect("vignette", {
         coins=coins+1
         coinsLabel.text = `Coins: ${coins}`
         document.getElementById("coinsCount").textContent = coins   // Update coins in HTML
+    })
+
+    player.onCollide("mushroom", (mushroom) => {
+        destroy(mushroom)
+        healPlayer(20)
     })
 
     /*
@@ -612,13 +623,13 @@ usePostEffect("vignette", {
             /*if(enemiesLeft <= 0 && !roundComplete &&
                 get("enemy").filter((otherEnemy) => otherEnemy !== enemy).length === 0 &&
                 get("spawnMarker").length === 0){
-                    startUpgrade()
+                    endRound()
             }*/
         })
         return enemy
     }
 
-    function startUpgrade(){
+    function endRound(){
         roundComplete = true
         isPaused = true
         destroyAll("beam")
@@ -626,6 +637,7 @@ usePostEffect("vignette", {
         destroyAll("coin")
         destroyAll("enemy")
         destroyAll("spawnMarker")
+        destroyAll("mushroom")
         document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
         document.getElementById("coinsCount").textContent = `Coins: ${coins}`
         resetInputs()
@@ -633,6 +645,9 @@ usePostEffect("vignette", {
         playerAnimation = "idle"
         roundLabel.text = ``
         controlsLabel.text = `Click to continue with upgrade`
+        for(let i = 0; i<5; i++){
+            spawnMushroom(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100))
+        }
         gameQuestions = true
         if(questionsInGame){startQuestion()}
         else{websiteGoTo('upgrade')}
@@ -715,7 +730,7 @@ usePostEffect("vignette", {
                     roundTimer--
                     if(roundTimer <= -1){
                         destroy(roundClock)
-                        startUpgrade()
+                        endRound()
                     }
                 }
             }
