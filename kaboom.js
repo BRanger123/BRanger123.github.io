@@ -359,6 +359,7 @@ usePostEffect("vignette", {
     }
 
     function healPlayer(healValue){
+        if(doubleHeal){healValue *= 2}
         if(player.hp() == player.maxHealth){return}
         if(player.maxHealth - player.hp() < healValue){
             spawnText(player.pos, `+${player.maxHealth - player.hp()}`, rgb(0, 255, 0))
@@ -394,7 +395,7 @@ usePostEffect("vignette", {
         })
     }
 
-    function spawnMushroom(x, y){ // Argument cannot be "pos"
+   function spawnMushroom(x, y, difficulty){ // Argument cannot be "pos"
         const mushroom = add([
             sprite("mushroom"),
             anchor("center"),
@@ -403,6 +404,7 @@ usePostEffect("vignette", {
             body(),
             "mushroom", // For collision detection with player
             "object",
+            { healValue: 20*difficulty }
         ])
     }
 
@@ -427,24 +429,23 @@ usePostEffect("vignette", {
     
     player.onCollide("coin", (coin) => {
         destroy(coin)
-        coins=coins+1
+        if(doubleCoins){coins++}
+        coins++
         coinsLabel.text = `Coins: ${coins}`
         document.getElementById("coinsCount").textContent = coins   // Update coins in HTML
     })
 
     player.onCollide("mushroom", (mushroom) => {
+        if(player.hp() >= player.maxHealth){
+            spawnText(player.pos, "+0", rgb(0, 255, 0))
+            player.use(color(rgb(0, 255, 0)))
+            wait(0.2, () => {
+                player.use(color(rgb(255, 255, 255)))
+            })
+        }
+        healPlayer(Math.floor(mushroom.healValue))
         destroy(mushroom)
-        healPlayer(20)
     })
-
-    /*
-    player.onCollide("mushroom", (player, mushroom) => {
-        destroy(mushroom)
-        player.heal(20)
-        player.heal(player.maxHealth - player.hp())
-        healthLabel.text = `Health: ${player.hp()}`
-    })
-        */
 
     const blasterSprite = add([
         sprite("blaster"),
@@ -548,6 +549,15 @@ usePostEffect("vignette", {
         pos(0, 0),
         color(textColor),
     ])
+    const specialRoundLabel = add([
+        text("", { 
+            font: "jerseyo",
+            size: 40 
+        }),
+        anchor("center"),
+        pos(0, 0),
+        color(textColor),
+    ])
 
     function spawnEnemy(difficulty, makeBoss){
         const x = rand(minX + 40, maxX - 40)
@@ -570,11 +580,13 @@ usePostEffect("vignette", {
         let enemyType = "chaser"
         let randColor = rgb(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100)
         let maxAttackCooldown = 2
+        let enemyDamage = Math.floor(5 * difficulty)
 
         if(makeBoss){
             enemySprite = "boss"
-            enemyHealth = (Math.random() * 250 + 50) * difficulty
-            enemySpeed = ((Math.random() * 250) + 100) * difficulty
+            enemyHealth = 300 * difficulty
+            enemySpeed = 200 * difficulty * 0.9
+            enemyDamage *= 4
             boss = true
         }
         else if(Math.random() < 0.25){
@@ -583,12 +595,14 @@ usePostEffect("vignette", {
             enemySpeed *= 1.3
             enemyHealth *= 1.3
             maxAttackCooldown = 1.5
+            enemyDamage *= 2
         }
         else if(Math.random() < 0.25){
             enemySprite = "dino"
             enemyType = "shooter"
             enemySpeed *= 0.7
             maxAttackCooldown = 3
+            enemyDamage *= 3
         }
 
         const enemy = add([
@@ -602,7 +616,7 @@ usePostEffect("vignette", {
             "enemy",    // For collision detection
             "object",
             "dash",
-            { speed: enemySpeed, isBoss: boss, enemyType, attackCooldown: 0.5, maxAttackCooldown, chargeDirection: null, chargeTimer: 0, colorRGB: randColor},
+            { speed: enemySpeed, isBoss: boss, enemyType, attackCooldown: 0.5, maxAttackCooldown, chargeDirection: null, chargeTimer: 0, colorRGB: randColor, enemyDamage},
         ])
 
         enemy.on("death", () => {
@@ -643,11 +657,16 @@ usePostEffect("vignette", {
         resetInputs()
         player.play("idle")
         playerAnimation = "idle"
+        isRoundSpecial = false
+        doubleCoins = false
+        doubleHeal = false
+        extraSpeed = false
+        doubleEnemies = false
+        doubleDifficulty = false
         roundLabel.text = ``
+        roundLabel.color = rgb(255, 255, 255)
+        specialRoundLabel.text = ``
         controlsLabel.text = `Click to continue with upgrade`
-        for(let i = 0; i<5; i++){
-            spawnMushroom(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100))
-        }
         gameQuestions = true
         if(questionsInGame){startQuestion()}
         else{websiteGoTo('upgrade')}
@@ -673,7 +692,6 @@ usePostEffect("vignette", {
             upgradeQuality = 1
             upgradesToApply = []
             if(player.hp() != player.maxHealth){healPlayer(player.maxHealth - player.hp())}
-            roundLabel.color = rgb(255, 255, 255)
             let nextWaveTime = 5
             const clock = add([timer()])
             clock.loop(1, () => {
@@ -706,6 +724,36 @@ usePostEffect("vignette", {
         })
     }
 
+        /*function spawnStorm(length, damage){
+        const storm = add([
+            rect(width(), height()),
+            pos(camPos()),
+            anchor("center"),
+            color(rgb(0, 0, 0)),
+            opacity(0.8),
+        ])
+    }*/
+
+    let doubleCoins = false
+    let doubleHeal = false
+    let extraSpeed = false
+    let doubleEnemies = false
+    let doubleDifficulty = false
+
+    function doubleCoinsRound(){roundLabel.color = rgb(255, 191, 0); specialRoundLabel.text = `Double Coins!`; doubleCoins = true}
+    function doubleHealRound(){roundLabel.color = rgb(89, 255, 0); specialRoundLabel.text = `Double Healing!`; doubleHeal = true}
+    function extraSpeedRound(){roundLabel.color = rgb(0, 234, 255); specialRoundLabel.text = `Extra Speed!`; extraSpeed = true}
+    function doubleEnemiesRound(){roundLabel.color = rgb(255, 111, 0); specialRoundLabel.text = `Double Enemies!`; doubleEnemies = true}
+    function doubleDifficultyRound(){roundLabel.color = rgb(255, 0, 0); specialRoundLabel.text = `Double Difficulty!`; doubleDifficulty = true}
+    
+    const specialRounds = [
+        doubleCoinsRound,
+        doubleHealRound,
+        extraSpeedRound,
+        doubleEnemiesRound,
+        doubleDifficultyRound,
+    ]
+
     function startRound(){
         round++
         roundComplete = false
@@ -713,13 +761,18 @@ usePostEffect("vignette", {
         let waves = Math.min(5, 1 + Math.floor(round / 3))
         let difficulty = 0.5 + round * 0.4
         let bosses = Math.floor(round/5)
-        /*if(Math.random() < (0.05*(round-1))){
+        //if(true){     //for testing special rounds
+        if(Math.random() < 0.05){
             isRoundSpecial = true
-            roundLabel.color = rgb(255, 0, 0)
-            difficulty *= 2
-        }*/
+            choose(specialRounds)()
+        }
+        if(doubleDifficulty){difficulty *= 2}
+        if(doubleEnemies){enemyNum *= 2}
         enemiesLeft = (waves * enemyNum) + bosses
         spawnWave((round*2.5)+1, waves, enemyNum, difficulty, bosses)
+        for(let i = 0; i<5; i++){
+            spawnMushroom(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100), difficulty)
+        }
         let roundTimer = round*5+5
         const roundClock = add([timer()])
         roundClock.loop(1, () => {
@@ -766,10 +819,8 @@ usePostEffect("vignette", {
                         ])
                         projectile.onUpdate(() => {if(!isPaused){projectile.move(projectile.dir.scale(projectile.speed))}})
                         projectile.onCollide("player", (player) => {
-                            if(player.momentum.len() < 3000){
-                                attackPlayer(15)
-                                destroy(projectile)
-                            }
+                            attackPlayer(enemy.enemyDamage)
+                            destroy(projectile)
                         })
                         enemy.attackCooldown = enemy.maxAttackCooldown
                     }
@@ -791,6 +842,7 @@ usePostEffect("vignette", {
         if (isKeyDown(controlBindings.up)){dir.y = -1}
         if (isKeyDown(controlBindings.down)){dir.y = 1}
         const unitVec = dir.unit()  // Vector normalisation (fixes diagonals)
+        if(extraSpeed){player.move(unitVec.scale(player.speed*1.3))}
         player.move(unitVec.scale(player.speed))    // Moves in dir by speed every frame
         if (dir.x !== 0 && !player.is("dash")) {
             facingLeft = dir.x < 0
@@ -940,14 +992,11 @@ usePostEffect("vignette", {
 
     // Collision with enemy
     onCollideUpdate("player", "enemy", (player, enemy) => {
-        if(!isPaused && player.momentum.len() < 3000){
-            if(enemy.attackCooldown > 0 || enemy.enemyType == "shooter"){
-                return
-            }
-            if(enemy.enemyType == "charger"){attackPlayer(10)}
-            else{attackPlayer(5)}
-            enemy.attackCooldown = 0.5
+        if(enemy.attackCooldown > 0 || enemy.enemyType == "shooter"){
+            return
         }
+        attackPlayer(enemy.enemyDamage)
+        enemy.attackCooldown = 0.5
     })
 
     camScale(1)
@@ -966,6 +1015,7 @@ usePostEffect("vignette", {
         hintLabel.pos = camPos().add(vec2(0, -height()/2 + 90))
         controlsLabel.pos = camPos().add(vec2(0, -height()/2 + 200))
         roundLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
+        specialRoundLabel.pos = camPos().add(vec2(0, -height()/2 + 120))
         const diff = mouseWorldPos.sub(player.pos)
         let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)    //Convert to degrees
         blasterSprite.angle = angle
