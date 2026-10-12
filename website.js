@@ -1,17 +1,3 @@
-const words = [
-    "blabber", "blabble", "blab", "blah", "donk", "jarp", "raggle", "abbles", "plonk"
-]
-
-const sentences = [
-    [5, "get","out","of","my","farm"],
-    ["","","","","","",""],
-    ["","","","","","",""],
-    ["","","","","","",""],
-    ["","","","","","",""],
-    ["","","","","","",""],
-    ["","","","","","",""],
-]
-
 const colors = [
     "2191fb","b9faf8","dc6acf","f3c969",
     "c56b59","6eb83d","f194b4","c5ebc3","6fbcec",
@@ -37,7 +23,7 @@ function blabber(){
     let word = ""
     for(let i = 0; i < wordLength; i++){
         if(i % 2 === 0){
-            word += consonants[Math.floor(Math.random() * consonants.length)]
+            word += consonants[Math.floor(Math.random() * consonants.length)]   // Alternates consonants and vowels for realistic words
         }
         else{
             word += vowels[Math.floor(Math.random() * vowels.length)]
@@ -66,7 +52,7 @@ let questions
 let questionsInGame = false 
 let gameQuestions = false
 let darkMode = false
-let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }
+let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }     // Easier to change bindings this way
 let bindingTarget = null
 let upgradesPurchased = 0
 let selectedUpgradeString
@@ -81,7 +67,7 @@ function getQuestions() {
     xhr.open('GET', 'questions.txt', false)
     xhr.send()
     if (xhr.status === 200) {
-        return xhr.responseText.trim().split('\n').map(line => {
+        return xhr.responseText.trim().split('\n').map(line => {        // Maps string of each line by commas
             const parts = line.split(',')
             return {
                 question: parts[0].trim(),
@@ -99,7 +85,7 @@ function changeQuestions(){
         const parts = line.split(',')
         return {
             question: parts[0].trim(),
-            answers: parts.slice(1).map(a => a.trim()),
+            answers: parts.slice(1).map(a => a.trim()),     // Use same trick even when no file is being used
         }
     })
 }
@@ -109,7 +95,7 @@ input.addEventListener("keydown", function(event){
     if(!bindingTarget || event.key.length !== 1) return
     event.preventDefault()
     controlBindings[bindingTarget] = event.key.toLowerCase()
-    document.getElementById(`control-${bindingTarget}`).textContent = event.key.toUpperCase()
+    document.getElementById(`control-${bindingTarget}`).textContent = event.key.toUpperCase()   // Detect key presses and bind to selected input
     document.getElementById('controlStatus').textContent = 'Control updated.'
     bindingTarget = null
 })
@@ -138,14 +124,14 @@ function websiteGoTo(divId){
 
 function playLevel(level){
     levelGlobal = level
-    document.getElementById(currentDivId).style.display = 'none'
+    document.getElementById(currentDivId).style.display = 'none'            // Same as go() but swaps div and updates globals
     document.getElementById('gameWindow').style.display = 'inline-block'
     currentDivId = "gameWindow"
     go("startButton")
 }
 
 function selectUpgrade(upgradeString, upgradeNum){
-    selectedUpgradeString = upgradeString; selectedUpgradeNum = upgradeNum
+    selectedUpgradeString = upgradeString; selectedUpgradeNum = upgradeNum      // Can be used later when purchasing upgrade
     document.getElementById('upgradePurchase').style.display = "inline-block"
     document.getElementById('upgradePurchase').textContent = `Purchase ${upgradeString}`
 }
@@ -155,7 +141,7 @@ function purchaseUpgrade(upgradeString, upgradeNum){
     if(price<=coins){
         coins = coins-price
         playerSprite = sprite
-        upgradesToApply.push(upgradeNum)
+        upgradesToApply.push(upgradeNum)    // Array of upgrades that will be looped through in game
         upgradesPurchased++
         if(document.getElementById('chosenUpgrade').textContent == "No upgrade chosen"){document.getElementById('chosenUpgrade').textContent = `${upgradeString}`}
         else{document.getElementById('chosenUpgrade').textContent = `${document.getElementById('chosenUpgrade').textContent}, ${upgradeString}`}
@@ -165,7 +151,7 @@ function purchaseUpgrade(upgradeString, upgradeNum){
     else{document.getElementById('upgradePrice').textContent = `You cannot afford the ${upgradeString} upgrade.`}
 }
 
-function purchaseSkin(sprite, price, button){
+/*function purchaseSkin(sprite, price, button){
     if(spritesOwned.includes(sprite)){
         document.getElementById('currentSkin').textContent = `Skin: ${sprite}` || ''
         playerSprite = sprite
@@ -182,11 +168,11 @@ function purchaseSkin(sprite, price, button){
     else{
         alert(`You cannot afford ${sprite} skin.`)
     }
-}
+}*/
 
 function shuffleArray(array){
     for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
+        const j = Math.floor(Math.random() * (i + 1))   // Randomly swaps each indexed item in array
         const temp = array[i]
         array[i] = array[j]
         array[j] = temp
@@ -206,7 +192,7 @@ function resetAnswerButtons(){
 
 function startQuestion(){
     websiteGoTo('questions')
-    if(gameQuestions){
+    if(gameQuestions){  // If game caused quiz
         document.getElementById('questionBackButton').style.display = 'none'
         document.getElementById('answerStreak').textContent = `Upgrade Multiplier: x${upgradeQuality}`
     }
@@ -216,9 +202,9 @@ function startQuestion(){
     document.getElementById('continueButton').style.display = 'none'
     document.getElementById('continueGameButton').style.display = 'none'
     const sourceQuestion = questions[Math.floor(Math.random() * questions.length)]
-    const shuffledAnswers = shuffleArray(sourceQuestion.answers.map((text, idx) => ({
+    const shuffledAnswers = shuffleArray(sourceQuestion.answers.map((text, idx) => ({   // Shuffle answer strings 
         text,
-        isCorrect: idx === 0,
+        isCorrect: idx === 0,   // Default correct answer is first in array part of question
     })))
     currentQuestion = {
         question: sourceQuestion.question,
@@ -238,31 +224,31 @@ function checkAnswer(answerNum){
     const selectedAnswer = currentQuestion.answers[answerNum]
     if (!selectedAnswer) return
     for (let i = 1; i <= 4; i++) {
-        document.getElementById(`answer${i}`).disabled = true
+        document.getElementById(`answer${i}`).disabled = true   // Lock buttons
         document.getElementById(`answer${i}`).style.cursor = 'not-allowed'
     }
     if (selectedAnswer.isCorrect) {
         document.getElementById(`answer${answerNum + 1}`).style.backgroundColor = 'lightgreen'
         answerStreak = answerStreak + 1
-        if(answerStreak > highestAnswerStreak){highestAnswerStreak = answerStreak}
+        if(answerStreak > highestAnswerStreak){highestAnswerStreak = answerStreak}  // Update stats
         if(gameQuestions){
             upgradeQuality += 0.2
             upgradeQuality = parseFloat(upgradeQuality.toFixed(1))  // Floating point error
             document.getElementById('answerStreak').textContent = `Upgrade Multiplier: x${upgradeQuality}`
             document.getElementById('continueButton').style.display = 'inline-block'
         }
-        // alert('Correct answer!')
+        // Correct answer
     }
     else {
         document.getElementById(`answer${answerNum + 1}`).style.backgroundColor = 'salmon'
-        const correctAnswerNum = currentQuestion.answers.findIndex(ans => ans.isCorrect)
+        const correctAnswerNum = currentQuestion.answers.findIndex(ans => ans.isCorrect)    // Select correct answer and set to green
         document.getElementById(`answer${correctAnswerNum + 1}`).style.backgroundColor = 'lightgreen'   // Sets correct answer to green
         if(!gameQuestions){answerStreak = 0}
         else{
             document.getElementById('answerStreak').textContent = `Final Upgrade Multiplier: x${upgradeQuality}`
-            document.getElementById('continueGameButton').style.display = 'inline-block'
+            document.getElementById('continueGameButton').style.display = 'inline-block'    // Return to game button
         }
-        // alert('Incorrect answer.')
+        // Incorrect answer
     }
     if(gameQuestions){
         document.getElementById('answerStreak').textContent = `Upgrade Multiplier: x${upgradeQuality}`
@@ -287,7 +273,7 @@ function selectGadget(gearName) {
         Beam: 'Long range piercing projectile cannon.',
         Spark: '6-shot sidearm with fast reload and critical hits.',
     }
-    document.getElementById('weaponInfo').textContent = info[gearName] || ''
+    document.getElementById('weaponInfo').textContent = info[gearName] || ''    // Display information
     document.getElementById('weaponSelectContinue').style.display = "inline-block"        
 }
 
@@ -303,8 +289,20 @@ function resetInputs(){
     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: `${controlBindings.right}` }))
 }
 
-//window.addEventListener('beforeunload', (event) => {
-//    event.preventDefault()
-//})
+const diffNames = [
+    "Lemon Squeezer",
+    "Tourist",
+    "Rookie",
+    "Kaboom Sensei",
+    "Give me God of Kabooms"
+]
+
+let slider = document.getElementById("difficultySlider")
+
+slider.oninput = function() {
+    document.getElementById("difficultyOutput").textContent = `${diffNames[slider.value-slider.step]}`  // uPDATE DIFFICULTY OUTPUT
+    //document.getElementById("difficultyOutput").textContent = `${diffNames[slider.value/slider.step-0.5]}`
+}
 
 websiteGoTo('menu')
+document.getElementById("difficultyOutput").textContent = `${diffNames[slider.value-slider.step]}`

@@ -1,43 +1,42 @@
 //Import kaboom.js
 import kaboom from "https://unpkg.com/kaboom@3000.0.1/dist/kaboom.mjs"
  
-
 //Get the canvas element
 const canvas = document.getElementById('gameCanvas')
-
 
 //Initialize kaboom with canvas element
 kaboom({
     canvas: canvas,
     width: window.innerWidth,
     height: window.innerHeight,
-    background: [red, green, blue],              //////////////////////redgreenblue/////////////////////////////////////////////////////////////
-    letterBox: true,
+    background: [red, green, blue],
+    letterBox: true,    // Prevent resize abuse
 })
 
-loadFont("jersey", "customFont.ttf", {})
+loadFont("jersey", "customFont.ttf", {})    // Custom font, o means outlined
 loadFont("jerseyo", "customFont.ttf", { 
     outline: 4
 })
 
-loadRoot("sprites/")
+loadRoot("sprites/")    // Find folder
 
 loadSprite("piskel", "piskel.png", {
+    // Define cols and rows
     sliceX : 2,
     sliceY : 3,
     anims: {
         idle: { from: 0, to: 1, speed: 4, loop: true },
-        run: { from: 2, to: 3, speed: 5, loop: true },
+        run: { from: 2, to: 3, speed: 5, loop: true },      // Identify animation frames
         slide: { from: 4, to: 4, speed: 1, loop: true },
     }
 })
+
+// Load sprite textures
 loadSprite("ghosty", "ghosty.png")
 loadSprite("boss", "gigagantrum.png")
 loadSprite("coin", "coin.png")
 loadSprite("blaster", "gun.png")
-//loadSprite("mark", "https://kaboomjs.com/sprites/mark.png")
 loadSprite("dino", "dino.png")
-//loadSprite("steel", "https://kaboomjs.com/sprites/steel.png")
 loadSprite("blast", "blast.png")
 loadSprite("beam", "beam.png")
 loadSprite("cycler", "cycler.png")
@@ -51,7 +50,6 @@ loadSprite("sparkBullet", "sparkBullet.png")
 loadSprite("blastBullet", "blastBullet.png")
 loadSprite("cyclerBullet", "cyclerBullet.png")
 loadSprite("enemyBullet", "enemyBullet.png")
-//loadSprite("dc", "https://th.bing.com/th/id/OIP.eVtUFzKJT3W0Txa6P05x1wHaLH?w=203&h=304&c=7&r=0&o=7&pid=1.7&rm=3")
 loadBean()
 
 scene("startButton", () => {
@@ -110,46 +108,37 @@ scene(1, () => {
 
 /*
 loadShader("vignette", null, `
-    uniform vec2 u_resolution;
-    uniform float u_intensity; // Controls overall darkness
-    uniform float u_roundness; // Higher values make it more circular
+    uniform vec2 u_resolution
+    uniform float u_intensity
+    uniform float u_roundness
 
     vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
-        // Fetch the base game rendering color
-        vec4 baseColor = texture2D(tex, pos);
-        
-        // Calculate distance of current UV coordinate from the center (0.5, 0.5)
-        vec2 uvCenter = uv - vec2(0.5,0.5);
-        
-        // Compute vignette mask strength based on distance from center
-        float dist = length(uvCenter);
-        float vignette = smoothstep(0.8, u_roundness, dist * u_intensity);
-        
-        // Multiply original colors by the vignette calculation
-        return baseColor * vec4(vec3(vignette), 1.0) * color;
+        vec4 baseColor = texture2D(tex, pos)
+        vec2 uvCenter = uv - vec2(0.5,0.5)
+        float dist = length(uvCenter)
+        float vignette = smoothstep(0.8, u_roundness, dist * u_intensity)
+        return baseColor * vec4(vec3(vignette), 1.0) * color
     }
-`);
+`)
 usePostEffect("vignette", {
     "u_resolution": vec2(width(), height()),
-    "u_intensity": 1.5,   // Tweak this to increase/decrease edge shadow spread
-    "u_roundness": 0.4,   // Tweak this to sharpen or soften the vignette falloff
+    "u_intensity": 1.5,   // Edge shadow spread
+    "u_roundness": 0.4,   // Vignette falloff
 });
 */
 
+    // Define map size
     const minX = 0
     const minY = 0
     const maxX = 2400
     const maxY = 1800
 
-    //let mapRed = rand(100, 255)
-    //let mapGreen = rand(100, 255)
-    //let mapBlue = rand(100, 255)
     let mapRGB = choose(colors)
 
     add([
         pos(minX, minY),
         rect(maxX, maxY),
-        area({ collisionIgnore: ["object"],}),
+        area({ collisionIgnore: ["object"],}),  // Map colour object
         body({ isStatic: true }),
         color(mapRGB),
         opacity(0.5)
@@ -172,18 +161,17 @@ usePostEffect("vignette", {
             area({ collisionIgnore: ["object"],}),
             body({ isStatic: true }),
             color(mapRGB),
-            //"object", "rock"
         ])
     }
-    for(let i = 0; i<5; i++){
-        spawnMushroom(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100))
-    }
 
-    //spawnWave(1, 3, 5, 2) // spawns 5 enemies 2x as strong for 3 waves every 1 second
     let round = 0
     let isRoundSpecial = false
+    // Calculate added difficulty level
+    let diffLevel = Number(document.getElementById('difficultySlider').value)
+    diffLevel *= diffLevel  // Make values fall at a greater range
+    diffLevel /= 9
 
-    const enemies = []
+    const enemies = []      // Used for movement and attack logic
     const spawnDist = 500
     let enemiesLeft
     let roundComplete = false
@@ -199,7 +187,7 @@ usePostEffect("vignette", {
     document.getElementById("coinsCount").textContent = `Coins: ${coins}`
     document.getElementById('chosenUpgrade').textContent = 'No upgrade chosen'
     upgradesPurchased = 0
-    const beamSprite = `${selectedGadget.toLowerCase()}Bullet`
+    const beamSprite = `${selectedGadget.toLowerCase()}Bullet`  // Choose what sprite to use
     
     // Code for beam gadget class
     class BeamGadget{
@@ -238,7 +226,7 @@ usePostEffect("vignette", {
             if (!this.isReloading) {
                 return
             }
-            this.reloadTimer -= dt
+            this.reloadTimer -= dt  // Decrease reload timer by time passed
             if (this.reloadTimer <= 0) {
                 this.isReloading = false
                 this.reloadTimer = 0
@@ -573,6 +561,7 @@ usePostEffect("vignette", {
     }
 
     function createEnemy(x, y, difficulty, makeBoss){
+        difficulty *= diffLevel
         let boss = false
         let enemySprite = "ghosty"
         let enemyHealth = (Math.random() * 50 + 10) * difficulty
@@ -724,15 +713,19 @@ usePostEffect("vignette", {
         })
     }
 
-        /*function spawnStorm(length, damage){
+    function spawnStorm(length, damageValue){
         const storm = add([
-            rect(width(), height()),
-            pos(camPos()),
+            rect(),
+            pos(),
             anchor("center"),
             color(rgb(0, 0, 0)),
             opacity(0.8),
+            "hazard",
+            { damage: damageValue }
         ])
-    }*/
+
+        player.onCollide("hazard")
+    }
 
     let doubleCoins = false
     let doubleHeal = false
@@ -762,7 +755,7 @@ usePostEffect("vignette", {
         let difficulty = 0.5 + round * 0.4
         let bosses = Math.floor(round/5)
         //if(true){     //for testing special rounds
-        if(Math.random() < 0.05){
+        if(Math.random() < 0.075){
             isRoundSpecial = true
             choose(specialRounds)()
         }
@@ -812,7 +805,7 @@ usePostEffect("vignette", {
                     else if(distance < 240) enemy.move(direction.scale(-enemy.speed))
                     if(enemy.attackCooldown <= 0){
                         const projectile = add([
-                            pos(enemy.pos), sprite("enemyBullet"), area(), color(255, 20, 20),
+                            pos(enemy.pos), sprite("enemyBullet"), area({ collisionIgnore: ["dash"]}), color(255, 20, 20),
                             "enemyBeam", "object",
                             { speed: 300 , dir: direction },
                             offscreen({ destroy: true }),
