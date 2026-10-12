@@ -96,6 +96,7 @@ scene("startButton", () => {
 
 scene(1, () => {
     document.getElementById("dodgeUpgrade").style.display = "inline-block"
+    document.getElementById("armorUpgrade").style.display = "inline-block"
 
     let red = 255
     let green = 255
@@ -325,6 +326,8 @@ usePostEffect("vignette", {
             spawnText(player.pos, "Dodge!")
         }
         else{
+            damage *= (1-(player.armor/100))
+            damage = Math.floor(damage)
             player.hurt(damage)
             healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
             shake(damage)
@@ -409,7 +412,7 @@ usePostEffect("vignette", {
         health(100),
         "player",   // For collision detection
         "object",
-        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0 }, // Recoil 2d vector for fluid recoil
+        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0, regenValue: 2, armor: 0 }, // Recoil 2d vector for fluid recoil
     ])
     let playerAnimation = "idle"
     let facingLeft = false
@@ -581,7 +584,7 @@ usePostEffect("vignette", {
         else if(Math.random() < 0.25){
             enemySprite = "bag"
             enemyType = "charger"
-            enemySpeed *= 1.3
+            enemySpeed *= 1.2
             enemyHealth *= 1.3
             maxAttackCooldown = 1.5
             enemyDamage *= 2
@@ -590,6 +593,7 @@ usePostEffect("vignette", {
             enemySprite = "dino"
             enemyType = "shooter"
             enemySpeed *= 0.7
+            enemyHealth *= 0.7
             maxAttackCooldown = 3
             enemyDamage *= 3
         }
@@ -657,6 +661,11 @@ usePostEffect("vignette", {
         specialRoundLabel.text = ``
         controlsLabel.text = `Click to continue with upgrade`
         gameQuestions = true
+        /*let upgradeStrings = ["damage","capacity","speed","penetration","lifeSteal","crit","dodge","health","regen","armor"]
+        for(let ){
+            
+        }
+        document.getElementById(`${upgradeStrings[+1]}Upgrade`)*/
         if(questionsInGame){startQuestion()}
         else{websiteGoTo('upgrade')}
         onClick(() => upgrade())
@@ -677,6 +686,8 @@ usePostEffect("vignette", {
                 if(nextUpgrade==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
                 if(nextUpgrade==7){player.dodge += 5*upgradeQuality; if(player.dodge > 55){player.dodge = 60; document.getElementById("dodgeUpgrade").style.display = "none"}}
                 if(nextUpgrade==8){player.maxHealth += Math.floor(25*upgradeQuality)}
+                if(nextUpgrade==9){player.regenValue += Math.floor(2*upgradeQuality)}
+                if(nextUpgrade==10){player.armor += Math.floor(10*upgradeQuality); if(player.armor > 55){player.armor = 60; document.getElementById("armorUpgrade").style.display = "none"}}
             }
             upgradeQuality = 1
             upgradesToApply = []
@@ -766,13 +777,14 @@ usePostEffect("vignette", {
         for(let i = 0; i<5; i++){
             spawnMushroom(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100), difficulty)
         }
-        let roundTimer = round*5+5
+        let roundTimer = (round*5+5) + Math.ceil(1/(diffLevel))
         const roundClock = add([timer()])
         roundClock.loop(1, () => {
             if(!isPaused){
                 if(roundComplete){destroy(roundClock)}
                 else{
                     roundLabel.text = `Round ${round}: ${roundTimer}s`
+                    if(player.hp() < player.maxHealth && roundTimer % 2 == 0){healPlayer(player.regenValue)}
                     roundTimer--
                     if(roundTimer <= -1){
                         destroy(roundClock)
@@ -992,8 +1004,6 @@ usePostEffect("vignette", {
         enemy.attackCooldown = 0.5
     })
 
-    camScale(1)
-    camRot(0)
     player.onUpdate(() => { 
         // Camera follows point between player and mouse cursor
         const mouseWorldPos = toWorld(mousePos())
@@ -1155,14 +1165,6 @@ scene("deathScreen", (result) => {
             size: 32 
         }),
         pos(24, 24),
-        color(0, 0, 0),
-    ])
-    add([
-        text(`Round reached: ${result?.round || 1}`, { 
-            font: "jersey",
-            size: 32 
-        }),
-        pos(24, 58),
         color(0, 0, 0),
     ])
 })
