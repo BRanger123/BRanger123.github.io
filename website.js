@@ -293,8 +293,8 @@ const diffNames = [
     "Lemon Squeezer",
     "Tourist",
     "Rookie",
-    "Kaboom Sensei",
-    "Give me God of Kabooms"
+    "Sensei",
+    "Give me God of Bananas"
 ]
 
 let slider = document.getElementById("difficultySlider")
