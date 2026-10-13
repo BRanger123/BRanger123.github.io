@@ -95,9 +95,6 @@ scene("startButton", () => {
 })
 
 scene(1, () => {
-    document.getElementById("dodgeUpgrade").style.display = "flex"
-    document.getElementById("armorUpgrade").style.display = "flex"
-
     let red = 255
     let green = 255
     let blue = 255
@@ -125,7 +122,7 @@ usePostEffect("vignette", {
     "u_resolution": vec2(width(), height()),
     "u_intensity": 1.5,   // Edge shadow spread
     "u_roundness": 0.4,   // Vignette falloff
-});
+})
 */
 
     // Define map size
@@ -322,27 +319,17 @@ usePostEffect("vignette", {
     }
 
     function attackPlayer(damage){
-        if(Math.random()*100 < player.dodge){
+        if(Math.random()*100 < (player.dodge/(player.dodge+50))){
             spawnText(player.pos, "Dodge!")
         }
         else{
-            damage *= (1-(player.armor/100))
+            damage *= (1-(player.armor/(player.armor+50)))
             damage = Math.floor(damage)
             player.hurt(damage)
             healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
             shake(damage)
             spawnText(player.pos, `-${damage}`, rgb(255, 0, 0))
             player.use(color(rgb(255, 0, 0)))
-            //player.redness = 1
-            /*
-            player.onUpdate(() => {
-                if(player.redness <= 0){
-                    player.redness -= dt()
-                    player.use(color(rgb(255, 255*(1-player.redness), 255*(1-player.redness))))
-                }
-                else{player.redness = 0}
-            })
-            */
             wait(0.2, () => {
                 player.use(color(rgb(255, 255, 255)))
             })
@@ -412,7 +399,7 @@ usePostEffect("vignette", {
         health(100),
         "player",   // For collision detection
         "object",
-        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0, regenValue: 0, armor: 0 }, // Recoil 2d vector for fluid recoil
+        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0, regenValue: 0, armor: 0, passiveCoin: 0 }, // Recoil 2d vector for fluid recoil
     ])
     let playerAnimation = "idle"
     let facingLeft = false
@@ -455,7 +442,7 @@ usePostEffect("vignette", {
     sparkBlasterGlobal = sparkBlaster
     let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 4000, 1.5, false, 100, 1, 0.15)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 5, 30, 1, 6, 1000, 2, true, 100, 2, 0.05)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 6, 30, 1, 6, 1000, 2, true, 100, 2, 0.05)
     cyclerBlasterGlobal = cyclerBlaster
     let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 2.5, false, 200, 3, 0.2)
     beamBlasterGlobal = beamBlaster
@@ -564,21 +551,22 @@ usePostEffect("vignette", {
     }
 
     function createEnemy(x, y, difficulty, makeBoss){
-        difficulty *= diffLevel
         let boss = false
         let enemySprite = "ghosty"
         let enemyHealth = (Math.random() * 50 + 10) * difficulty
-        let enemySpeed = ((Math.random() * 150) + 50) * difficulty * 0.9
+        let enemySpeed = Math.max(150, ((Math.random() * 150) + 50) * difficulty * 0.5)
         let enemyType = "chaser"
         let randColor = rgb(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100)
         let maxAttackCooldown = 2
-        let enemyDamage = Math.floor(5 * difficulty)
+        let enemyDamage = Math.floor(2 * difficulty)
+        let coinsDropped = Math.ceil(0.5*difficulty)
 
         if(makeBoss){
             enemySprite = "boss"
             enemyHealth = 300 * difficulty
             enemySpeed = 200 * difficulty * 0.9
             enemyDamage *= 4
+            coinsDropped *= 5
             boss = true
         }
         else if(Math.random() < 0.25){
@@ -596,6 +584,7 @@ usePostEffect("vignette", {
             enemyHealth *= 0.7
             maxAttackCooldown = 3
             enemyDamage *= 3
+            coinsDropped *= 2
         }
 
         const enemy = add([
@@ -609,7 +598,7 @@ usePostEffect("vignette", {
             "enemy",    // For collision detection
             "object",
             "dash",
-            { speed: enemySpeed, isBoss: boss, enemyType, attackCooldown: 0.5, maxAttackCooldown, chargeDirection: null, chargeTimer: 0, colorRGB: randColor, enemyDamage},
+            { speed: enemySpeed, isBoss: boss, enemyType, attackCooldown: 0.5, maxAttackCooldown, chargeDirection: null, chargeTimer: 0, colorRGB: randColor, enemyDamage, coinsDropped },
         ])
 
         enemy.on("death", () => {
@@ -621,8 +610,9 @@ usePostEffect("vignette", {
                 //    player.hurt(20)
                 //}
             //}
-            
-            spawnCoin(enemy.pos)
+            for(let i=0; i<enemy.coinsDropped; i++){
+                spawnCoin(enemy.pos)
+            }
             enemiesDiedCounter++
             destroy(enemy)
             enemiesDied++
@@ -662,14 +652,17 @@ usePostEffect("vignette", {
         controlsLabel.text = `Click to continue with upgrade`
         gameQuestions = true
 
-        let upgradeStrings = ["damage","capacity","speed","penetration","lifeSteal","crit","dodge","health","regen","armor"]
-        for(let i=0; i<10; i++){
+        let upgradeStrings = [
+            "damage","capacity","speed","penetration","lifeSteal","crit",
+            "dodge","health","regen","armor","passiveCoin","coinMagnet"
+        ]
+        for(let i=0; i<upgradeStrings.length; i++){
             document.getElementById(`${upgradeStrings[i]}Upgrade`).style.display = "none"
         }
         let randomUpgrades = []
         let randomUpgradeNum = -1
         while(randomUpgrades.length != 4){
-            randomUpgradeNum = Math.floor((Math.random()*10))
+            randomUpgradeNum = Math.floor((Math.random()*upgradeStrings.length))
             if(!randomUpgrades.includes(randomUpgradeNum)){randomUpgrades.push(randomUpgradeNum)}
         }
         for(let i=0; i<randomUpgrades.length; i++){
@@ -684,6 +677,7 @@ usePostEffect("vignette", {
     function upgrade(){
         if(isPaused){
             isPaused = false
+            coinsLabel.text = `Coins: ${coins}`
             controlsLabel.text = ``
             let arrayLength = upgradesToApply.length
             for(let i = 0; i<arrayLength; i++){
@@ -694,10 +688,12 @@ usePostEffect("vignette", {
                 if(nextUpgrade==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
                 if(nextUpgrade==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
                 if(nextUpgrade==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
-                if(nextUpgrade==7){player.dodge += 5*upgradeQuality; if(player.dodge > 55){player.dodge = 60; document.getElementById("dodgeUpgrade").style.display = "none"}}
-                if(nextUpgrade==8){player.maxHealth += Math.floor(25*upgradeQuality)}
+                if(nextUpgrade==7){player.dodge += 10*upgradeQuality}
+                if(nextUpgrade==8){player.maxHealth += Math.floor(player.maxHealth*0.25*upgradeQuality)}
                 if(nextUpgrade==9){player.regenValue += Math.floor(2*upgradeQuality)}
-                if(nextUpgrade==10){player.armor += Math.floor(10*upgradeQuality); if(player.armor > 55){player.armor = 60; document.getElementById("armorUpgrade").style.display = "none"}}
+                if(nextUpgrade==10){player.armor += Math.floor(10*upgradeQuality)}
+                if(nextUpgrade==11){player.passiveCoin += Math.floor(5*upgradeQuality)}
+                if(upgradeValue==12){coinMagForce += Math.floor(coinMagForce*0.3*upgradeQuality)}
             }
             upgradeQuality = 1
             upgradesToApply = []
@@ -734,19 +730,29 @@ usePostEffect("vignette", {
         })
     }
 
-    function spawnStorm(length, damageValue){
+    /*function spawnStorm(length, damageValue){
         const storm = add([
-            rect(),
-            pos(),
+            rect(maxX, maxY),
+            pos(minX, minY),
+            area(),
             anchor("center"),
             color(rgb(0, 0, 0)),
-            opacity(0.8),
-            "hazard",
-            { damage: damageValue }
+            opacity(0.3),
+            "hazard","object",
+            { damage: damageValue, timeToAttack: 0, timeLeft: length }
         ])
 
-        player.onCollide("hazard")
-    }
+        storm.onUpdate(() => {
+            if(isPaused){destroy(storm); return}
+            storm.timeToAttack -= dt()
+            storm.timeLeft -= dt()
+        })
+
+        storm.onCollide("player", (player) => {
+            attackPlayer(storm.damage)
+            storm.timeToAttack = 2
+        })
+    }*/
 
     let doubleCoins = false
     let doubleHeal = false
@@ -773,7 +779,8 @@ usePostEffect("vignette", {
         roundComplete = false
         let enemyNum = Math.floor(2 + round * 1.5)
         let waves = Math.min(5, 1 + Math.floor(round / 3))
-        let difficulty = 0.5 + round * 0.4
+        let difficulty = 0.8 + round * 0.4
+        difficulty *= diffLevel
         let bosses = Math.floor(round/5)
         //if(true){     //for testing special rounds
         if(Math.random() < 0.075){
@@ -798,6 +805,7 @@ usePostEffect("vignette", {
                     roundTimer--
                     if(roundTimer <= -1){
                         destroy(roundClock)
+                        coins += (player.passiveCoin*difficulty)
                         endRound()
                     }
                 }

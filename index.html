@@ -46,20 +46,22 @@
         </div>
 
         <div id="upgrade" style="display: none;">
-            <h1>Upgrade</h1>
+            <h1>Choose an Upgrade</h1>
             <h2 id="coinsCount">coins not found</h2>
             <p id="upgradePrice">Upgrade will cost 0 coins</p>
             <div class="upgradeGrid">
                 <button onclick="selectUpgrade('Damage', 1)" id="damageUpgrade"><strong>Damage</strong><small>More power per hit</small></button>
                 <button onclick="selectUpgrade('Capacity', 2)" id="capacityUpgrade"><strong>Capacity</strong><small>More shots per magazine</small></button>
-                <button onclick="selectUpgrade('Speed', 3)" id="speedUpgrade"><strong>Speed</strong><small>Move faster and dash futher</small></button>
-                <button onclick="selectUpgrade('Penetration', 4)" id="penetrationUpgrade"><strong>Penetration</strong><small>Beams pierce more enemies</small></button>
+                <button onclick="selectUpgrade('Speed', 3)" id="speedUpgrade"><strong>Speed</strong><small>Move and dash faster</small></button>
+                <button onclick="selectUpgrade('Penetration', 4)" id="penetrationUpgrade"><strong>Penetration</strong><small>Pierce through enemies</small></button>
                 <button onclick="selectUpgrade('Life Steal', 5)" id="lifeStealUpgrade"><strong>Life Steal</strong><small>Heal more on hits</small></button>
                 <button onclick="selectUpgrade('Crit %', 6)" id="critUpgrade"><strong>Crit %</strong><small>Critical hit chance</small></button>
-                <button onclick="selectUpgrade('Dodge %', 7)" id="dodgeUpgrade"><strong>Dodge %</strong><small>Dodge enemy attacks</small></button>
+                <button onclick="selectUpgrade('Dodge %', 7)" id="dodgeUpgrade"><strong>Dodge %</strong><small>Increas dodge chance</small></button>
                 <button onclick="selectUpgrade('Health', 8)" id="healthUpgrade"><strong>Health</strong><small>Bigger health pool</small></button>
                 <button onclick="selectUpgrade('Regen', 9)" id="regenUpgrade"><strong>Regen</strong><small>Regen more health</small></button>
                 <button onclick="selectUpgrade('Armor', 10)" id="armorUpgrade"><strong>Armor</strong><small>Take less damage</small></button>
+                <button onclick="selectUpgrade('Passive Coin', 11)" id="passiveCoinUpgrade"><strong>Passive Coin</strong><small>Earn coins every round</small></button>
+                <button onclick="selectUpgrade('Coin Magnet', 12)" id="coinMagnetUpgrade"><strong>Coin Magnet</strong><small>Coins attract faster</small></button>
             </div>
             <h2 id="chosenUpgrade">No upgrade chosen</h2>
             <button id="upgradePurchase" onclick="purchaseUpgrade(selectedUpgradeString, selectedUpgradeNum); this.style.display = 'none'" style="display: none">Purchase</button><br><br>
