@@ -50,6 +50,7 @@ loadSprite("sparkBullet", "sparkBullet.png")
 loadSprite("blastBullet", "blastBullet.png")
 loadSprite("cyclerBullet", "cyclerBullet.png")
 loadSprite("enemyBullet", "enemyBullet.png")
+//loadSprite("treasure", "treasure.png")
 loadBean()
 
 scene("startButton", () => {
@@ -373,6 +374,19 @@ usePostEffect("vignette", {
         })
     }
 
+    function spawnTreasure(x, y, difficulty){ // Argument cannot be "pos"
+        const treasure = add([
+            sprite("treasure"),
+            anchor("center"),
+            pos(x+Math.random()*20, y+Math.random()*20),
+            area({ collisionIgnore: ["enemy","ammo"]}),    // Enemies dont get stuck on coins
+            body(),
+            "treasure", // For collision detection
+            "object",
+            { coinsValue: 20*difficulty}
+        ])
+    }
+
    function spawnMushroom(x, y, difficulty){ // Argument cannot be "pos"
         const mushroom = add([
             sprite("mushroom"),
@@ -413,6 +427,14 @@ usePostEffect("vignette", {
         document.getElementById("coinsCount").textContent = coins   // Update coins in HTML
     })
 
+    player.onCollide("treasure", (treasure) => {
+        destroy(treasure)
+        if(doubleCoins){coins += treasure.coinsValue}
+        coins += treasure.coinsValue
+        coinsLabel.text = `Coins: ${coins}`
+        document.getElementById("coinsCount").textContent = coins   // Update coins in HTML
+    })
+
     player.onCollide("mushroom", (mushroom) => {
         if(player.hp() >= player.maxHealth){
             spawnText(player.pos, "+0", rgb(0, 255, 0))
@@ -442,9 +464,9 @@ usePostEffect("vignette", {
     sparkBlasterGlobal = sparkBlaster
     let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 4000, 1.5, false, 100, 1, 0.15)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 6, 30, 1, 6, 1000, 2, true, 100, 2, 0.05)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 7, 30, 1, 5, 1000, 2, true, 100, 4, 0.1)
     cyclerBlasterGlobal = cyclerBlaster
-    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 2.5, false, 200, 3, 0.2)
+    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 2.5, false, 200, 2, 0.2)
     beamBlasterGlobal = beamBlaster
 
     const selectedGadgetName = selectedGadget || "Spark"
@@ -554,7 +576,7 @@ usePostEffect("vignette", {
         let boss = false
         let enemySprite = "ghosty"
         let enemyHealth = (Math.random() * 50 + 10) * difficulty
-        let enemySpeed = Math.max(150, ((Math.random() * 150) + 50) * difficulty * 0.5)
+        let enemySpeed = Math.max(150, ((Math.random() * 150) + 50) * difficulty * 0.3)
         let enemyType = "chaser"
         let randColor = rgb(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100)
         let maxAttackCooldown = 2
@@ -564,8 +586,7 @@ usePostEffect("vignette", {
         if(makeBoss){
             enemySprite = "boss"
             enemyHealth = 300 * difficulty
-            enemySpeed = 200 * difficulty * 0.9
-            enemyDamage *= 4
+            enemyDamage *= 3
             coinsDropped *= 5
             boss = true
         }
@@ -635,7 +656,7 @@ usePostEffect("vignette", {
         destroyAll("spawnMarker")
         destroyAll("mushroom")
         document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
-        document.getElementById("coinsCount").textContent = `Coins: ${coins}`
+        document.getElementById("coinsCount").textContent = `Coins: ${Math.floor(coins).toFixed(0)}`
         resetInputs()
         player.play("idle")
         playerAnimation = "idle"
@@ -670,32 +691,15 @@ usePostEffect("vignette", {
 
         if(questionsInGame){startQuestion()}
         else{websiteGoTo('upgrade')}
-        onClick(() => upgrade())
+        onClick(() => prepareStart())
     }
 
-    function upgrade(){
+    function prepareStart(){
         if(isPaused){
             isPaused = false
             coinsLabel.text = `Coins: ${coins}`
             controlsLabel.text = ``
-            let arrayLength = upgradesToApply.length
-            for(let i = 0; i<arrayLength; i++){
-                let nextUpgrade = upgradesToApply.pop()
-                if(nextUpgrade==1){gadgetGlobal.beamDamage += Math.ceil(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
-                if(nextUpgrade==2){gadgetGlobal.magSize += Math.ceil(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
-                if(nextUpgrade==3){player.speed += Math.ceil(0.3*upgradeQuality*player.speed)}
-                if(nextUpgrade==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
-                if(nextUpgrade==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
-                if(nextUpgrade==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
-                if(nextUpgrade==7){player.dodge += 10*upgradeQuality}
-                if(nextUpgrade==8){player.maxHealth += Math.floor(player.maxHealth*0.25*upgradeQuality)}
-                if(nextUpgrade==9){player.regenValue += Math.floor(2*upgradeQuality)}
-                if(nextUpgrade==10){player.armor += Math.floor(10*upgradeQuality)}
-                if(nextUpgrade==11){player.passiveCoin += Math.floor(5*upgradeQuality)}
-                if(upgradeValue==12){coinMagForce += Math.floor(coinMagForce*0.3*upgradeQuality)}
-            }
-            upgradeQuality = 1
-            upgradesToApply = []
+            upgrade()
             if(player.hp() != player.maxHealth){healPlayer(player.maxHealth - player.hp())}
             let nextWaveTime = 5
             const clock = add([timer()])
@@ -712,6 +716,28 @@ usePostEffect("vignette", {
                 }
             })
         }
+    }
+
+    function upgrade(){
+        let arrayLength = upgradesToApply.length
+        for(let i = 0; i<arrayLength; i++){
+            let nextUpgrade = upgradesToApply.pop()
+            if(nextUpgrade==1){gadgetGlobal.beamDamage += Math.ceil(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
+            if(nextUpgrade==2){gadgetGlobal.magSize += Math.ceil(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
+            if(nextUpgrade==3){player.speed += Math.ceil(0.3*upgradeQuality*player.speed)}
+            if(nextUpgrade==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
+            if(nextUpgrade==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
+            if(nextUpgrade==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
+            if(nextUpgrade==7){player.dodge += 10*upgradeQuality}
+            if(nextUpgrade==8){player.maxHealth += Math.floor(player.maxHealth*0.25*upgradeQuality)}
+            if(nextUpgrade==9){player.regenValue += Math.floor(2*upgradeQuality)}
+            if(nextUpgrade==10){player.armor += Math.floor(10*upgradeQuality)}
+            if(nextUpgrade==11){player.passiveCoin += Math.floor(5*upgradeQuality)}
+            if(upgradeValue==12){coinMagForce += Math.floor(coinMagForce*0.3*upgradeQuality)}
+
+        }
+        upgradeQuality = 1
+        upgradesToApply = []
     }
 
     function spawnWave(time, waves, enemyNum, difficulty, bosses){
@@ -793,7 +819,7 @@ usePostEffect("vignette", {
         for(let i = 0; i<5; i++){
             spawnMushroom(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100), difficulty)
         }
-        let roundTimer = (round*5+5) + Math.ceil(1/(diffLevel))
+        let roundTimer = (round*3+5) + Math.ceil(1/(diffLevel))
         const roundClock = add([timer()])
         roundClock.loop(1, () => {
             if(!isPaused){

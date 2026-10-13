@@ -48,7 +48,7 @@ button{
     padding: 10px 20px;
     text-align: center;
     box-shadow: 4px 4px black;
-    transition: box-shadow 0.2s;
+    transition: box-shadow 0.4s;
     transition: translate 0.2s;
 }
 #backButton{
