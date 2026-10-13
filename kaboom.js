@@ -359,10 +359,10 @@ usePostEffect("vignette", {
         const coin = add([
             sprite("coin"),
             anchor("center"),
-            pos(xy),
+            pos(xy.x+Math.random()*20, xy.y+Math.random()*20),
             area({ collisionIgnore: ["enemy","ammo"]}),    // Enemies dont get stuck on coins
             body(),
-            "coin", // For collision detection with player
+            "coin", // For collision detection
             "object",
         ])
         onUpdate(() => {
@@ -584,7 +584,6 @@ usePostEffect("vignette", {
             enemyHealth *= 0.7
             maxAttackCooldown = 3
             enemyDamage *= 3
-            coinsDropped *= 2
         }
 
         const enemy = add([
