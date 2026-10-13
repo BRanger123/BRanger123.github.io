@@ -95,8 +95,8 @@ scene("startButton", () => {
 })
 
 scene(1, () => {
-    document.getElementById("dodgeUpgrade").style.display = "inline-block"
-    document.getElementById("armorUpgrade").style.display = "inline-block"
+    document.getElementById("dodgeUpgrade").style.display = "flex"
+    document.getElementById("armorUpgrade").style.display = "flex"
 
     let red = 255
     let green = 255
@@ -412,7 +412,7 @@ usePostEffect("vignette", {
         health(100),
         "player",   // For collision detection
         "object",
-        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0, regenValue: 2, armor: 0 }, // Recoil 2d vector for fluid recoil
+        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0, regenValue: 0, armor: 0 }, // Recoil 2d vector for fluid recoil
     ])
     let playerAnimation = "idle"
     let facingLeft = false
@@ -661,11 +661,21 @@ usePostEffect("vignette", {
         specialRoundLabel.text = ``
         controlsLabel.text = `Click to continue with upgrade`
         gameQuestions = true
-        /*let upgradeStrings = ["damage","capacity","speed","penetration","lifeSteal","crit","dodge","health","regen","armor"]
-        for(let ){
-            
+
+        let upgradeStrings = ["damage","capacity","speed","penetration","lifeSteal","crit","dodge","health","regen","armor"]
+        for(let i=0; i<10; i++){
+            document.getElementById(`${upgradeStrings[i]}Upgrade`).style.display = "none"
         }
-        document.getElementById(`${upgradeStrings[+1]}Upgrade`)*/
+        let randomUpgrades = []
+        let randomUpgradeNum = -1
+        while(randomUpgrades.length != 4){
+            randomUpgradeNum = Math.floor((Math.random()*10))
+            if(!randomUpgrades.includes(randomUpgradeNum)){randomUpgrades.push(randomUpgradeNum)}
+        }
+        for(let i=0; i<randomUpgrades.length; i++){
+            document.getElementById(`${upgradeStrings[randomUpgrades[i]]}Upgrade`).style.display = "flex"
+        }
+
         if(questionsInGame){startQuestion()}
         else{websiteGoTo('upgrade')}
         onClick(() => upgrade())
@@ -784,7 +794,7 @@ usePostEffect("vignette", {
                 if(roundComplete){destroy(roundClock)}
                 else{
                     roundLabel.text = `Round ${round}: ${roundTimer}s`
-                    if(player.hp() < player.maxHealth && roundTimer % 2 == 0){healPlayer(player.regenValue)}
+                    if(player.hp() < player.maxHealth && roundTimer % 2 == 0 && player.regenValue > 0){healPlayer(player.regenValue)}
                     roundTimer--
                     if(roundTimer <= -1){
                         destroy(roundClock)
