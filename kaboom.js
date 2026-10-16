@@ -60,7 +60,7 @@ scene("startButton", () => {
         rect(240, 80, { radius: 8 }),
         pos(center()),
         area(),
-        scale(1),
+        scale(1),       // Must initialise scale component to be used later
         anchor("center"),
         outline(4),
         color(232, 232, 232),
@@ -85,7 +85,7 @@ scene("startButton", () => {
     })
     btn.onClick(() => go(levelGlobal))
     add([
-        text(`Press ${controlBindings.dash} to dash`,{
+        text(`Press ${controlBindings.dash} to dash`,{  // Hint controls
             font: "jersey",
             size: 40
         }),
@@ -105,34 +105,13 @@ scene(1, () => {
     setBackground(rgb(0, 0, 0))
     setGravity(0)
 
-/*
-loadShader("vignette", null, `
-    uniform vec2 u_resolution
-    uniform float u_intensity
-    uniform float u_roundness
-
-    vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
-        vec4 baseColor = texture2D(tex, pos)
-        vec2 uvCenter = uv - vec2(0.5,0.5)
-        float dist = length(uvCenter)
-        float vignette = smoothstep(0.8, u_roundness, dist * u_intensity)
-        return baseColor * vec4(vec3(vignette), 1.0) * color
-    }
-`)
-usePostEffect("vignette", {
-    "u_resolution": vec2(width(), height()),
-    "u_intensity": 1.5,   // Edge shadow spread
-    "u_roundness": 0.4,   // Vignette falloff
-})
-*/
-
     // Define map size
     const minX = 0
     const minY = 0
     const maxX = 2400
     const maxY = 1800
 
-    let mapRGB = choose(colors)
+    let mapRGB = choose(colors) // Rand color from website.js
 
     add([
         pos(minX, minY),
@@ -182,7 +161,8 @@ usePostEffect("vignette", {
     let mouseDown = false
     let waiting = false
     coins = 0
-    let coinMagForce = 35000
+    let coinMagForce = 20000
+    let coinMagDist = 300
     document.getElementById("coinsCount").textContent = `Coins: ${coins}`
     document.getElementById('chosenUpgrade').textContent = 'No upgrade chosen'
     upgradesPurchased = 0
@@ -221,7 +201,7 @@ usePostEffect("vignette", {
             this.reloadTimer = this.reloadTime
             return true
         }
-        updateReload(dt){
+        updateReload(dt){   // Update internal reload timer
             if (!this.isReloading) {
                 return
             }
@@ -237,7 +217,7 @@ usePostEffect("vignette", {
                 if(this.ammoInMag <= 0){
                     ammoLabel.text = `Reload (${controlBindings.reload})`
                 }
-                return false  // Cannot fire if no charge in gadget
+                return false  // Cannot fire if no charge in magazine
             }
             if(this.isFullAuto){
                 const now = Date.now()
@@ -246,7 +226,7 @@ usePostEffect("vignette", {
                 }
                 this.lastFireTime = now
             }
-            shake(0.002*(this.recoilForce*2))
+            shake(0.004*(this.recoilForce))
             const baseDir = toWorld(mousePos()).sub(player.pos).unit()  // toWorld() lets func work outside initial map boundaries for camera code
             
             // Apply recoil
@@ -255,11 +235,11 @@ usePostEffect("vignette", {
         
             for(let i = 0; i < this.beamsFired; i++){
                 let angle
-                if(this.beamsFired != 1){angle = baseDir.angle() + (i*(this.spread/this.beamsFired))-(this.spread/2)}
+                if(this.beamsFired != 1){angle = baseDir.angle() + (i*(this.spread/this.beamsFired))-(this.spread/2)}   // Equal spread for shotguns
                 else{angle = baseDir.angle() + rand(-this.spread, this.spread)} // Use spread as max possible random angle deviation
                 const direction = Vec2.fromAngle(angle)
                 const beam = add([
-                    pos(player.pos.add(direction.scale(blasterSprite.width))),
+                    pos(player.pos.add(direction.scale(blasterSprite.width))),  // Leave weapon barrel
                     sprite(beamSprite),
                     scale(0.6),
                     rotate(angle),
@@ -271,7 +251,7 @@ usePostEffect("vignette", {
                 ])
                 beam.onUpdate(() => {if(!isPaused){beam.move(beam.dir.scale(this.beamSpeed))}})    // Moves in dir by speed every frame
                 beam.onCollide("enemy", (enemy) => {
-                    if(Math.random() <= this.critChance){
+                    if(Math.random() <= this.critChance){       // If critical hit
                         if(this.lifeSteal > 0){healPlayer(this.lifeSteal*3)}
                         enemy.hurt(this.beamDamage*3)
                         if(beam.penetration > 0){beam.penetration--}
@@ -291,12 +271,11 @@ usePostEffect("vignette", {
                 })
             }
             this.ammoInMag--    // Decrease charge count in magazine
-            return true
+            return true // Success
         }
     }
     
     function spawnText(position, textContent, colour){
-
         const textObject = add([
             anchor("center"),
             text(textContent, { 
@@ -307,24 +286,22 @@ usePostEffect("vignette", {
             color(colour || textColor),
             { visabilityStep: 1 },
         ])
-       
         textObject.onUpdate(() => {
             textObject.pos.y -= 100 * dt()  // Float upward (backwards coordinates)
             textObject.visabilityStep -= dt()   // Use deltatime() for smooth changes
             textObject.opacity = textObject.visabilityStep
         })
-       
         wait(1, () => {
             destroy(textObject)
         })
     }
 
     function attackPlayer(damage){
-        if(Math.random()*100 < (player.dodge/(player.dodge+50))){
+        if(Math.random()*100 < (player.dodge/(player.dodge+50))){   // Diminishing returns
             spawnText(player.pos, "Dodge!")
         }
         else{
-            damage *= (1-(player.armor/(player.armor+50)))
+            damage *= (1-(player.armor/(player.armor+50)))  // Diminishing returns
             damage = Math.floor(damage)
             player.hurt(damage)
             healthLabel.text = `Health: ${Math.floor(player.hp())}` // Update health label
@@ -339,10 +316,10 @@ usePostEffect("vignette", {
 
     function healPlayer(healValue){
         if(doubleHeal){healValue *= 2}
-        if(player.hp() == player.maxHealth){return}
-        if(player.maxHealth - player.hp() < healValue){
+        if(player.hp() == player.maxHealth){return} // Return if full health
+        if(player.maxHealth - player.hp() < healValue){     // If heal > hp missing
             spawnText(player.pos, `+${player.maxHealth - player.hp()}`, rgb(0, 255, 0))
-            player.heal(player.maxHealth - player.hp())
+            player.heal(player.maxHealth - player.hp()) // Then heal missing hp, not more
         }
         else{
             spawnText(player.pos, `+${healValue}`, rgb(0, 255, 0))
@@ -360,15 +337,15 @@ usePostEffect("vignette", {
         const coin = add([
             sprite("coin"),
             anchor("center"),
-            pos(xy.x+Math.random()*20, xy.y+Math.random()*20),
-            area({ collisionIgnore: ["enemy","ammo"]}),    // Enemies dont get stuck on coins
+            pos(xy.x+Math.random()*20, xy.y+Math.random()*20),  // Random variation to avoid stacking
+            area({ collisionIgnore: ["enemy","ammo"]}),    // Enemies dont get stuck
             body(),
             "coin", // For collision detection
             "object",
         ])
         onUpdate(() => {
-            if(!isPaused){
-                const direction = player.pos.sub(coin.pos).unit()  // Dir to player found
+            if(!isPaused && player.pos.dist(coin.pos) < coinMagnetDist){
+                const direction = player.pos.sub(coin.pos).unit()  // Dir to player
                 coin.move(direction.scale(coinMagForce/player.pos.sub(coin.pos).len()))    // Moves to player
             }
         })
@@ -379,11 +356,11 @@ usePostEffect("vignette", {
             sprite("treasure"),
             anchor("center"),
             pos(x+Math.random()*20, y+Math.random()*20),
-            area({ collisionIgnore: ["enemy","ammo"]}),    // Enemies dont get stuck on coins
+            area({ collisionIgnore: ["enemy","ammo"]}),    // Enemies dont get stuck
             body(),
             "treasure", // For collision detection
             "object",
-            { coinsValue: 20*difficulty}
+            { coinsValue: 20*difficulty}    // Scales with diff
         ])
     }
 
@@ -392,7 +369,7 @@ usePostEffect("vignette", {
             sprite("mushroom"),
             anchor("center"),
             pos(x, y),
-            area({ collisionIgnore: ["enemy","ammo"]}),    // Enemies dont get stuck on coins
+            area({ collisionIgnore: ["enemy","ammo"]}),    // Enemies dont get stuck
             body(),
             "mushroom", // For collision detection with player
             "object",
@@ -413,7 +390,8 @@ usePostEffect("vignette", {
         health(100),
         "player",   // For collision detection
         "object",
-        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0, regenValue: 0, armor: 0, passiveCoin: 0 }, // Recoil 2d vector for fluid recoil
+        // For easy OOP traits/ trackers below
+        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0, regenValue: 0, armor: 0, passiveCoin: 0 },
     ])
     let playerAnimation = "idle"
     let facingLeft = false
@@ -430,13 +408,13 @@ usePostEffect("vignette", {
     player.onCollide("treasure", (treasure) => {
         destroy(treasure)
         if(doubleCoins){coins += treasure.coinsValue}
-        coins += treasure.coinsValue
+        coins += treasure.coinsValue    // Worth more coins
         coinsLabel.text = `Coins: ${coins}`
         document.getElementById("coinsCount").textContent = coins   // Update coins in HTML
     })
 
     player.onCollide("mushroom", (mushroom) => {
-        if(player.hp() >= player.maxHealth){
+        if(player.hp() >= player.maxHealth){    // If player not missing health
             spawnText(player.pos, "+0", rgb(0, 255, 0))
             player.use(color(rgb(0, 255, 0)))
             wait(0.2, () => {
@@ -458,17 +436,18 @@ usePostEffect("vignette", {
         //scale(0.2) // only for large sprites or could use .use(scale(0.2))
     ])
 
-    // amazing gadget class can be used for all gadget archetypes
+    // Constructor below
     // beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto = false, fireRate = 100, penetration = 0, critChance
     let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 3, 1000, 1, false, 200, 0, 0.5)
     sparkBlasterGlobal = sparkBlaster
     let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 4000, 1.5, false, 100, 1, 0.15)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 7, 30, 1, 5, 1000, 2, true, 100, 4, 0.1)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 8, 30, 1, 5, 1000, 2, true, 70, 4, 0.1)
     cyclerBlasterGlobal = cyclerBlaster
     let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 2.5, false, 200, 2, 0.2)
     beamBlasterGlobal = beamBlaster
 
+    // Fit sprites indivisually since they are different sizes
     const selectedGadgetName = selectedGadget || "Spark"
     if(selectedGadgetName=="Blast"){
         gadgetGlobal = blastBlasterGlobal
@@ -560,33 +539,36 @@ usePostEffect("vignette", {
     ])
 
     function spawnEnemy(difficulty, makeBoss){
-        const x = rand(minX + 40, maxX - 40)
+        const x = rand(minX + 40, maxX - 40)    // Within map, not on outer walls
         const y = rand(minY + 40, maxY - 40)
         const marker = add([
             pos(x, y), sprite("spawnMarker"), opacity(0.75),
             "spawnMarker",
         ])
         wait(1.25, () => {
-            if (marker.exists()) destroy(marker)
-            if (!isPaused && player.exists() && !roundComplete) createEnemy(x, y, difficulty, makeBoss)
+            // Check game is still in progress
+            if(marker.exists()) destroy(marker)
+            if(!isPaused && player.exists() && !roundComplete){createEnemy(x, y, difficulty, makeBoss)}
         })
     }
 
     function createEnemy(x, y, difficulty, makeBoss){
+        // Initial stats scale with diff
         let boss = false
         let enemySprite = "ghosty"
-        let enemyHealth = (Math.random() * 50 + 10) * difficulty
-        let enemySpeed = Math.max(150, ((Math.random() * 150) + 50) * difficulty * 0.3)
+        let enemyHealth = 35 * difficulty
+        let enemySpeed = Math.max(150, (150) * difficulty * 0.3)
         let enemyType = "chaser"
         let randColor = rgb(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100)
         let maxAttackCooldown = 2
         let enemyDamage = Math.floor(2 * difficulty)
         let coinsDropped = Math.ceil(0.5*difficulty)
 
+        // Override values
         if(makeBoss){
             enemySprite = "boss"
             enemyHealth = 300 * difficulty
-            enemyDamage *= 3
+            enemyDamage *= 2.5
             coinsDropped *= 5
             boss = true
         }
@@ -596,7 +578,7 @@ usePostEffect("vignette", {
             enemySpeed *= 1.2
             enemyHealth *= 1.3
             maxAttackCooldown = 1.5
-            enemyDamage *= 2
+            enemyDamage *= 1.5
         }
         else if(Math.random() < 0.25){
             enemySprite = "dino"
@@ -604,20 +586,21 @@ usePostEffect("vignette", {
             enemySpeed *= 0.7
             enemyHealth *= 0.7
             maxAttackCooldown = 3
-            enemyDamage *= 3
+            enemyDamage *= 2
         }
 
         const enemy = add([
             sprite(`${enemySprite}`),
             pos(x, y),
-            area({ collisionIgnore: ["dash"]}),
+            area({ collisionIgnore: ["dash"]}), // Cant hit player when dashing
             anchor("center"),
             body(),
             health(enemyHealth),
             color(randColor),
             "enemy",    // For collision detection
             "object",
-            "dash",
+            "dash", // Enemies dont collide using player dash tag
+            // OOP stat tracking for easy coding later
             { speed: enemySpeed, isBoss: boss, enemyType, attackCooldown: 0.5, maxAttackCooldown, chargeDirection: null, chargeTimer: 0, colorRGB: randColor, enemyDamage, coinsDropped },
         ])
 
@@ -630,18 +613,11 @@ usePostEffect("vignette", {
                 //    player.hurt(20)
                 //}
             //}
-            for(let i=0; i<enemy.coinsDropped; i++){
-                spawnCoin(enemy.pos)
-            }
+            for(let i=0; i<enemy.coinsDropped; i++){spawnCoin(enemy.pos)}
             enemiesDiedCounter++
             destroy(enemy)
             enemiesDied++
-            if(enemiesDied > highestEnemiesDied){highestEnemiesDied = enemiesDied}
-            /*if(enemiesLeft <= 0 && !roundComplete &&
-                get("enemy").filter((otherEnemy) => otherEnemy !== enemy).length === 0 &&
-                get("spawnMarker").length === 0){
-                    endRound()
-            }*/
+            if(enemiesDied > highestEnemiesDied){highestEnemiesDied = enemiesDied}  // Update stats if new highscore
         })
         return enemy
     }
@@ -649,6 +625,7 @@ usePostEffect("vignette", {
     function endRound(){
         roundComplete = true
         isPaused = true
+        // Reset conditions
         destroyAll("beam")
         destroyAll("enemyBeam")
         destroyAll("coin")
@@ -657,7 +634,7 @@ usePostEffect("vignette", {
         destroyAll("mushroom")
         document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
         document.getElementById("coinsCount").textContent = `Coins: ${Math.floor(coins).toFixed(0)}`
-        resetInputs()
+        resetInputs()   // Avoid sticky key behaviour
         player.play("idle")
         playerAnimation = "idle"
         isRoundSpecial = false
@@ -670,25 +647,26 @@ usePostEffect("vignette", {
         roundLabel.color = rgb(255, 255, 255)
         specialRoundLabel.text = ``
         controlsLabel.text = `Click to continue with upgrade`
-        gameQuestions = true
+        gameQuestions = true    // If quiz happens, tells website it was caused by game and shoudl return upgradeQuality
 
         let upgradeStrings = [
             "damage","capacity","speed","penetration","lifeSteal","crit",
             "dodge","health","regen","armor","passiveCoin","coinMagnet"
         ]
+        // Hide all upgrades
         for(let i=0; i<upgradeStrings.length; i++){
             document.getElementById(`${upgradeStrings[i]}Upgrade`).style.display = "none"
         }
         let randomUpgrades = []
         let randomUpgradeNum = -1
-        while(randomUpgrades.length != 4){
+        while(randomUpgrades.length != 4){  // Find random 4 numbers
             randomUpgradeNum = Math.floor((Math.random()*upgradeStrings.length))
-            if(!randomUpgrades.includes(randomUpgradeNum)){randomUpgrades.push(randomUpgradeNum)}
+            if(!randomUpgrades.includes(randomUpgradeNum)){randomUpgrades.push(randomUpgradeNum)}   // Only allow new numbers
         }
+        // Show the random 4 upgrades
         for(let i=0; i<randomUpgrades.length; i++){
             document.getElementById(`${upgradeStrings[randomUpgrades[i]]}Upgrade`).style.display = "flex"
         }
-
         if(questionsInGame){startQuestion()}
         else{websiteGoTo('upgrade')}
         onClick(() => prepareStart())
@@ -700,7 +678,7 @@ usePostEffect("vignette", {
             coinsLabel.text = `Coins: ${coins}`
             controlsLabel.text = ``
             upgrade()
-            if(player.hp() != player.maxHealth){healPlayer(player.maxHealth - player.hp())}
+            if(player.hp() != player.maxHealth){healPlayer(player.maxHealth - player.hp())} // Heal if missing hp
             let nextWaveTime = 5
             const clock = add([timer()])
             clock.loop(1, () => {
@@ -708,7 +686,7 @@ usePostEffect("vignette", {
                     roundLabel.text = `Time untill next wave: ${nextWaveTime}`
                     waiting = true
                     nextWaveTime = nextWaveTime - 1
-                    if(nextWaveTime <= -1){
+                    if(nextWaveTime <= -1){ // If clock cycled completely
                         waiting = false
                         startRound()
                         destroy(clock)
@@ -719,11 +697,14 @@ usePostEffect("vignette", {
     }
 
     function upgrade(){
+        // Reads array of upgrade numbers and loops for length of array
+        // Remove each upgrade when complete
         let arrayLength = upgradesToApply.length
         for(let i = 0; i<arrayLength; i++){
             let nextUpgrade = upgradesToApply.pop()
+            // Find and apply upgrade
             if(nextUpgrade==1){gadgetGlobal.beamDamage += Math.ceil(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
-            if(nextUpgrade==2){gadgetGlobal.magSize += Math.ceil(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
+            if(nextUpgrade==2){gadgetGlobal.magSize += Math.ceil(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLbel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
             if(nextUpgrade==3){player.speed += Math.ceil(0.3*upgradeQuality*player.speed)}
             if(nextUpgrade==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
             if(nextUpgrade==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
@@ -733,14 +714,16 @@ usePostEffect("vignette", {
             if(nextUpgrade==9){player.regenValue += Math.floor(2*upgradeQuality)}
             if(nextUpgrade==10){player.armor += Math.floor(10*upgradeQuality)}
             if(nextUpgrade==11){player.passiveCoin += Math.floor(5*upgradeQuality)}
-            if(upgradeValue==12){coinMagForce += Math.floor(coinMagForce*0.3*upgradeQuality)}
-
+            if(upgradeValue==12){coinMagForce += Math.floor(coinMagForce*0.3*upgradeQuality); coinsMagDist += Math.floor(coinMageDist*0.3*upgradeQuality)}
         }
         upgradeQuality = 1
         upgradesToApply = []
     }
 
     function spawnWave(time, waves, enemyNum, difficulty, bosses){
+        // Clocks loops every time argument amount of seconds
+        // Bosses spawn first before clock starts
+        // Every loop spawn enemies up to enemyNum
         for(let i=0; i<bosses; i++){
             spawnEnemy(difficulty, true)
         }
@@ -749,35 +732,11 @@ usePostEffect("vignette", {
             if(roundComplete){destroy(clock)}
             else{
                 for(let i=0; i<enemyNum; i++){
-                    spawnEnemy(difficulty, false)
+                    spawnEnemy(difficulty, false)   // False means not boss
                 }
             }
         })
     }
-
-    /*function spawnStorm(length, damageValue){
-        const storm = add([
-            rect(maxX, maxY),
-            pos(minX, minY),
-            area(),
-            anchor("center"),
-            color(rgb(0, 0, 0)),
-            opacity(0.3),
-            "hazard","object",
-            { damage: damageValue, timeToAttack: 0, timeLeft: length }
-        ])
-
-        storm.onUpdate(() => {
-            if(isPaused){destroy(storm); return}
-            storm.timeToAttack -= dt()
-            storm.timeLeft -= dt()
-        })
-
-        storm.onCollide("player", (player) => {
-            attackPlayer(storm.damage)
-            storm.timeToAttack = 2
-        })
-    }*/
 
     let doubleCoins = false
     let doubleHeal = false
@@ -785,12 +744,14 @@ usePostEffect("vignette", {
     let doubleEnemies = false
     let doubleDifficulty = false
 
+    // Make functions for each special condition
     function doubleCoinsRound(){roundLabel.color = rgb(255, 191, 0); specialRoundLabel.text = `Double Coins!`; doubleCoins = true}
     function doubleHealRound(){roundLabel.color = rgb(89, 255, 0); specialRoundLabel.text = `Double Healing!`; doubleHeal = true}
     function extraSpeedRound(){roundLabel.color = rgb(0, 234, 255); specialRoundLabel.text = `Extra Speed!`; extraSpeed = true}
     function doubleEnemiesRound(){roundLabel.color = rgb(255, 111, 0); specialRoundLabel.text = `Double Enemies!`; doubleEnemies = true}
     function doubleDifficultyRound(){roundLabel.color = rgb(255, 0, 0); specialRoundLabel.text = `Double Difficulty!`; doubleDifficulty = true}
     
+    // If special round, pick random index and run function
     const specialRounds = [
         doubleCoinsRound,
         doubleHealRound,
@@ -802,6 +763,7 @@ usePostEffect("vignette", {
     function startRound(){
         round++
         roundComplete = false
+        // Decide round stats
         let enemyNum = Math.floor(2 + round * 1.5)
         let waves = Math.min(5, 1 + Math.floor(round / 3))
         let difficulty = 0.8 + round * 0.4
@@ -810,27 +772,31 @@ usePostEffect("vignette", {
         //if(true){     //for testing special rounds
         if(Math.random() < 0.075){
             isRoundSpecial = true
-            choose(specialRounds)()
+            choose(specialRounds)() // Activate random special round function
         }
         if(doubleDifficulty){difficulty *= 2}
-        if(doubleEnemies){enemyNum *= 2}
+        if(doubleEnemies){enemyNum *= 2; bosses *= 2}
+        
         enemiesLeft = (waves * enemyNum) + bosses
-        spawnWave((round*2.5)+1, waves, enemyNum, difficulty, bosses)
+        spawnWave((round*2)+1, waves, enemyNum, difficulty, bosses)
+        // Refresh mushrooms
         for(let i = 0; i<5; i++){
             spawnMushroom(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100), difficulty)
         }
-        let roundTimer = (round*3+5) + Math.ceil(1/(diffLevel))
+        // Clock to track how long round will last
+        let roundTimer = (round*2+6) + Math.ceil(1/(diffLevel))
         const roundClock = add([timer()])
         roundClock.loop(1, () => {
             if(!isPaused){
                 if(roundComplete){destroy(roundClock)}
                 else{
                     roundLabel.text = `Round ${round}: ${roundTimer}s`
+                    // Regen health
                     if(player.hp() < player.maxHealth && roundTimer % 2 == 0 && player.regenValue > 0){healPlayer(player.regenValue)}
                     roundTimer--
-                    if(roundTimer <= -1){
+                    if(roundTimer <= -1){   // If clock done
                         destroy(roundClock)
-                        coins += (player.passiveCoin*difficulty)
+                        coins += (player.passiveCoin*difficulty)    // Earn coins from upgrade
                         endRound()
                     }
                 }
@@ -840,14 +806,15 @@ usePostEffect("vignette", {
     startRound()
 
     onUpdate(() => {
-        for (const enemy of get("enemy")) {
-            if (!enemy.exists()) {  // Check if enemy destroyed
+        for(const enemy of get("enemy")){   // For each enemy
+            if(!enemy.exists()){  // Check if enemy destroyed
                 continue
             }
             if(!isPaused){
+                // Move enemy either to player with charge, by speed or away if too close
                 const direction = player.pos.sub(enemy.pos).unit()
                 if(enemy.enemyType === "charger"){
-                    if(enemy.chargeTimer <= 0){
+                    if(enemy.chargeTimer <= 0){ // If cooldown over then start new charge
                         enemy.chargeDirection = direction
                         enemy.chargeTimer = 1.5
                     }
@@ -856,15 +823,16 @@ usePostEffect("vignette", {
                 }
                 else if(enemy.enemyType === "shooter"){
                     const distance = enemy.pos.dist(player.pos)
-                    if(distance > 360) enemy.move(direction.scale(enemy.speed))
-                    else if(distance < 240) enemy.move(direction.scale(-enemy.speed))
-                    if(enemy.attackCooldown <= 0){
+                    if(distance > 360){enemy.move(direction.scale(enemy.speed))}    // Move to player
+                    else if(distance < 240){enemy.move(direction.scale(-enemy.speed))}  // Move away from player
+                    if(enemy.attackCooldown <= 0){  // If cooldown over then shoot
                         const projectile = add([
                             pos(enemy.pos), sprite("enemyBullet"), area({ collisionIgnore: ["dash"]}), color(255, 20, 20),
                             "enemyBeam", "object",
                             { speed: 300 , dir: direction },
-                            offscreen({ destroy: true }),
+                            offscreen({ destroy: true }),   // Save memory
                         ])
+                        // Move to player by speed attribute value
                         projectile.onUpdate(() => {if(!isPaused){projectile.move(projectile.dir.scale(projectile.speed))}})
                         projectile.onCollide("player", (player) => {
                             attackPlayer(enemy.enemyDamage)
@@ -875,7 +843,7 @@ usePostEffect("vignette", {
                 }
                 else enemy.move(direction.scale(enemy.speed))
             }
-            enemy.attackCooldown -= dt()
+            enemy.attackCooldown -= dt()    // Cooldown changes by time passed
         }
     })
 
@@ -892,20 +860,26 @@ usePostEffect("vignette", {
         const unitVec = dir.unit()  // Vector normalisation (fixes diagonals)
         if(extraSpeed){player.move(unitVec.scale(player.speed*1.3))}
         player.move(unitVec.scale(player.speed))    // Moves in dir by speed every frame
-        if (dir.x !== 0 && !player.is("dash")) {
+
+        // Animation logic
+        if(dir.x !== 0 && !player.is("dash")){
+            // Change direction to way player is moving
             facingLeft = dir.x < 0
             player.flipX = facingLeft
         }
         let nextAnimation
         if(player.is("dash")){
+            // Slide while using dash
             nextAnimation = "slide"
         }
-        else if(unitVec.len() > 0){nextAnimation = "run"}
+        else if(unitVec.len() > 0){nextAnimation = "run"}   // If moving with wasd then use run
         else{nextAnimation = "idle"}
-        if (nextAnimation !== playerAnimation) {
+        if(nextAnimation !== playerAnimation){  // Update animation if new one is set
             player.play(nextAnimation)
             playerAnimation = nextAnimation
         }
+
+        // Player max coordinates (keep within the map)
         player.pos.x = Math.max(0, Math.min(player.pos.x, maxX - 32))
         player.pos.y = Math.max(0, Math.min(player.pos.y, maxY - 32))
 
@@ -919,6 +893,7 @@ usePostEffect("vignette", {
             }
         }
 
+        // Use same system for momentum
         if (player.momentum && player.momentum.len() > 0){
             const momentumDamping = 3	//lower damping for further movement
             const momentumStep = player.momentum.scale(1 - Math.exp(-momentumDamping * dt()))	//momentum code for separate attribute
@@ -959,7 +934,16 @@ usePostEffect("vignette", {
         mouseDown = false
     })
 
-    onMousePress("right", () => {
+    /*
+    function teleport(xy){player.pos = xy}
+    function healAbility(){healPlayer(99999999999999999)}
+    function explode(xy){
+        for (const enemy of get("enemy")) {
+            if(enemy.pos.dist(xy) < 100 && enemy.exists()){enemy.hurt(9999999); spawnText(enemy.pos, "Bang!")}
+        }
+    }*/
+
+    /*onMousePress("right", () => {
         const aimMarker = add([
             pos(toWorld(mousePos())),
             circle(20),
@@ -970,12 +954,13 @@ usePostEffect("vignette", {
             aimMarker.pos = toWorld(mousePos())
         })
         onMouseRelease("right", () => {
+            //explode(toWorld(mousePos()))
             destroy(aimMarker)
         })
-    })
+    })*/
 
     onUpdate(() => {
-        if (mouseDown && gadgetGlobal.isFullAuto && !isPaused) {
+        if (mouseDown && gadgetGlobal.isFullAuto && !isPaused) {    // Use full auto every frame if true
             if(gadgetGlobal.fireWeapon()){    // Automatic zapping while held down
                 ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
             }
@@ -984,9 +969,10 @@ usePostEffect("vignette", {
     })
     onKeyPress(controlBindings.dash, () => {
         if(!isPaused && player.cooldown <= 0){
-            const dashDirection = toWorld(mousePos()).sub(player.pos).unit()
-            player.momentum = player.momentum.add(dashDirection.scale(80*player.speed))
+            const dashDirection = toWorld(mousePos()).sub(player.pos).unit()    // Mouse dir from player
+            player.momentum = player.momentum.add(dashDirection.scale(80*player.speed)) // Add momentum vector scaling with speed
             if (dashDirection.x !== 0) {
+                // For flipping sprite
                 facingLeft = dashDirection.x < 0
                 player.flipX = facingLeft
             }
@@ -995,6 +981,7 @@ usePostEffect("vignette", {
             playerAnimation = "slide"
             player.use("dash")
             spawnText(player.pos, "Dash")
+            // Dash for 0.3 seconds with collision ingore tag
             wait(0.3, () => {
                 player.unuse("dash")
             })
@@ -1005,9 +992,11 @@ usePostEffect("vignette", {
         if (gadgetGlobal && gadgetGlobal.updateReload) {
             gadgetGlobal.updateReload(dt())
             if(gadgetGlobal.isReloading){
+                // Update ammo label to show reload timer
                 ammoLabel.text = `${gadgetGlobal.reloadTimer.toFixed(1)}s`
             }
             else if(ammoLabel.text.endsWith("s")){
+                // If reload done then update ammo label
                 ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
             }
         }
@@ -1018,6 +1007,7 @@ usePostEffect("vignette", {
             spawnText(player.pos, "Reload")
         }
         else if(gadgetGlobal.isReloading){
+            // Cancel reload if press button again
             ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`
             gadgetGlobal.isReloading = false
             spawnText(player.pos, "Nevermind")
@@ -1027,16 +1017,10 @@ usePostEffect("vignette", {
     })
 
     onKeyPress("b", () => {
+        // Used for testing text and sound output
         spawnText(player.pos, blabber())
         burp()
     })
-
-    /*
-    onKeyPress("p", () => {
-        if(isPaused){isPaused = false; spawnText(player.pos, "Unpaused", false)}
-        else{isPaused = true; spawnText(player.pos, "Paused", false)}
-    })
-    */
 
     // Collision with enemy
     onCollideUpdate("player", "enemy", (player, enemy) => {
