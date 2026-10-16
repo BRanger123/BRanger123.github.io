@@ -162,7 +162,7 @@ scene(1, () => {
     let waiting = false
     coins = 0
     let coinMagForce = 20000
-    let coinMagDist = 300
+    let coinMagnetDist = 300
     document.getElementById("coinsCount").textContent = `Coins: ${coins}`
     document.getElementById('chosenUpgrade').textContent = 'No upgrade chosen'
     upgradesPurchased = 0
@@ -714,7 +714,7 @@ scene(1, () => {
             if(nextUpgrade==9){player.regenValue += Math.floor(2*upgradeQuality)}
             if(nextUpgrade==10){player.armor += Math.floor(10*upgradeQuality)}
             if(nextUpgrade==11){player.passiveCoin += Math.floor(5*upgradeQuality)}
-            if(upgradeValue==12){coinMagForce += Math.floor(coinMagForce*0.3*upgradeQuality); coinsMagDist += Math.floor(coinMageDist*0.3*upgradeQuality)}
+            if(upgradeValue==12){coinMagForce += Math.floor(coinMagForce*0.6*upgradeQuality); coinsMagDist += Math.floor(coinMageDist*0.8*upgradeQuality)}
         }
         upgradeQuality = 1
         upgradesToApply = []
@@ -1047,13 +1047,13 @@ scene(1, () => {
         roundLabel.pos = camPos().add(vec2(0, -height()/2 + 60))
         specialRoundLabel.pos = camPos().add(vec2(0, -height()/2 + 120))
         const diff = mouseWorldPos.sub(player.pos)
-        let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)    //Convert to degrees
+        let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)    // Convert to degrees
         blasterSprite.angle = angle
         blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
     })
 
     let deathScreenShown = false
-    function showDeathScreen(result){
+    function showDeathScreen(result){   // Round reached
         if(deathScreenShown){
             return
         }
@@ -1107,6 +1107,7 @@ scene(1, () => {
         backBtn.onClick(() => {
             websiteGoTo("menu")
         })
+
         const resetBtn = add([
             rect(240, 80, { radius: 8 }),
             pos(camPos().x, camPos().y + 100),
@@ -1143,6 +1144,7 @@ scene(1, () => {
                 go(levelGlobal)
             }
         })
+
         add([
             text("You died...", {
                 font: "jersey",
@@ -1165,6 +1167,7 @@ scene("deathScreen", (result) => {
     let red = 255
     let green = 255
     let blue = 255
+    // Match website theme
     if(darkMode){red = 0; green = 0; blue = 0}
     else{red = 255; green = 255; blue = 255}
     setBackground(rgb(red, green, blue))
@@ -1222,6 +1225,7 @@ scene(2, () => {
     let green = 255
     let blue = 255
     let textColor = rgb(0, 0, 0)
+    // Match theme
     if(darkMode){red = 0; green = 0; blue = 0; textColor = rgb(255, 255, 255)}
     else{red = 255; green = 255; blue = 255; textColor = rgb(0, 0, 0)}
     setBackground(rgb(red, green, blue))
@@ -1249,10 +1253,10 @@ scene(2, () => {
         "   =======                                            ",
     ],
     {
-        //Define the size of tile block
+        // Define the size of tile block
         tileWidth: 32,
         tileHeight: 32,
-        //Define what each symbol means, by a function returning a component list (what will be passed to add())
+        // Define what each symbol means, by a function returning a component list (what will be passed to add())
         tiles: {
             "=": () => [
                 rect(32, 32),
@@ -1278,6 +1282,7 @@ scene(2, () => {
         score++
         scoreLabel.text = score
     })
+    // Death condition
     add([
         pos(-600, 850),
         rect(4000, 40),
@@ -1288,19 +1293,21 @@ scene(2, () => {
     ])
     loadBean()
     const player = add([
-        sprite("bean"),  //Renders as a sprite
-        pos(200, 80),    //Position in world
-        area(),          //Has a collider
-        body(),          //Responds to physics and gravity
+        sprite("bean"),  // Renders as a sprite
+        pos(200, 80),    // Position in world
+        area(),          // Has a collider
+        body(),          // Responds to physics and gravity
         "player",
         "friendly",
         {
             speed: 300,
         },
     ])
+    // Controls
     onKeyPress("space", () => {if (player.isGrounded()) {player.jump()}})
     onKeyDown("a", () => {player.move(-player.speed, 0)})
     onKeyDown("d",() => {player.move(+player.speed, 0)})
+
     player.onCollide("tile", (tile) => {
         tile.unuse("tile")  // VERY IMPORTANT!!! All tiles with "tile" tag are checked for collision, so now cracked tiles are no longer checked for collision
         tile.use(color(255, 0, 0))
@@ -1313,6 +1320,7 @@ scene(2, () => {
             tile.destroy()
         })
     })
+
     player.onCollide("death", () => {
         go("deathScreen", score)
     })
@@ -1349,10 +1357,10 @@ scene(3, () => {
         "======================================================",
     ],
     {
-        // define the size of tile block
+        // Define the size of tile block
         tileWidth: 32,
         tileHeight: 32,
-        // define what each symbol means, by a function returning a component list (what will be passed to add())
+        // Define what each symbol means, by a function returning a component list (what will be passed to add())
         tiles: {
             "=": () => [
                 rect(32, 32),
@@ -1372,10 +1380,10 @@ scene(3, () => {
     })
     loadBean()
     const player = add([
-        sprite("bean"),  //Renders as a sprite
-        pos(200, 80),    //Position in world
-        area(),          //Has a collider
-        body(),          //Responds to physics and gravity
+        sprite("bean"),  // Renders as a sprite
+        pos(200, 80),    // Position in world
+        area(),          // Has a collider
+        body(),          // Responds to physics and gravity
         "player",
         "friendly",
         {
@@ -1394,6 +1402,8 @@ scene(3, () => {
         pos(width()-450, height()-100),
         color(textColor),
     ])
+
+    // Controls
     onKeyPress("space", () => {
         if (player.isGrounded()) {
             player.jump()
@@ -1437,7 +1447,7 @@ scene(3, () => {
                 outline(4),
             ])
             blocks -= 1
-            blockLabel.text = `Blocks: ${blocks}`
+            blockLabel.text = `Blocks: ${blocks}`   // Update label
         }
     })
     onCollide("player", "goal", () => {
@@ -1455,8 +1465,10 @@ scene(4, () => {
     setBackground(rgb(red, green, blue))
     setGravity(0)
     let score = 0
+
+    // Original function for firing bullets
     function bullet() {
-        let direction = toWorld(mousePos()).sub(player.pos).unit()
+        let direction = toWorld(mousePos()).sub(player.pos).unit()  // From player
         const bullet = add([
             pos(player.pos),
             rect(8, 8),
@@ -1477,7 +1489,7 @@ scene(4, () => {
     
     // Experimental code for weapon class
     class gun{
-        constructor(fireRate, bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread) {  // ADD RECOIL
+        constructor(fireRate, bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread) {
             this.fireRate = fireRate
             this.bulletSpeed = bulletSpeed
             this.bulletColor = bulletColor
@@ -1489,6 +1501,7 @@ scene(4, () => {
         fireWeapon(){
             const baseDir = toWorld(mousePos()).sub(player.pos).unit()  // toWorld() lets func work outside initial map boundaries
             for (let i = 0; i < this.bulletsFired; i++) {
+                // Find angle and add random spread
                 const angle = baseDir.angle() + rand(-this.spread, this.spread)
                 const direction = Vec2.fromAngle(angle)
                 const bullet = add([
@@ -1496,10 +1509,11 @@ scene(4, () => {
                     rect(8, 8),
                     area(),
                     color(this.bulletColor),
-                    "bullet",
+                    "bullet",   // Collision tag
                     { speed: this.bulletSpeed, dir: direction },
                     offscreen({ destroy: true }),
                 ])
+                // Move by speed attribute every frame
                 bullet.onUpdate(() => {bullet.move(bullet.dir.scale(this.bulletSpeed))})
                 bullet.onCollide("enemy", (enemy) => {enemy.hurt(this.bulletDamage), bullet.destroy()})
             }
@@ -1517,8 +1531,9 @@ scene(4, () => {
         health(100),
         "player",
         { speed: 400 },
-        offscreen({ destroy: true }),
+        offscreen({ destroy: true }),   // Keep player in bounds
     ])
+    // fireRate, bulletSpeed, bulletColor, bulletDamage, magSize, bulletsFired, spread
     let gunTest = new gun(10, 700, rgb(41, 41, 41), 20, 5, 7, 10)
 
     const scoreLabel = add([
@@ -1546,7 +1561,9 @@ scene(4, () => {
         let x, y
         let tries = 0
 
+        // Brute force spawn until not close to player
         do {
+            // Within map
             x = Math.random() * width()
             y = Math.random() * height()
             tries++
@@ -1576,6 +1593,7 @@ scene(4, () => {
 
     onUpdate(() => {
         score++
+        // Update labels
         scoreLabel.text = `Score: ${score}`
         healthLabel.text = `Health: ${player.hp()}`
 
@@ -1583,6 +1601,7 @@ scene(4, () => {
             if (!enemy.exists()) {
                 continue
             }
+            // Enemy movement
             const direction = player.pos.sub(enemy.pos).unit()
             enemy.move(direction.scale(enemy.speed))
         }
@@ -1603,9 +1622,11 @@ scene(4, () => {
         shake(8)
     })
     onDestroy("enemy", () => {
+        // Always 7 enemies on screen
         enemies.push(spawnEnemy())
     })
 
+    // Player death code
     onDestroy("player", () => go("deathScreen", score))
     player.on("death", () => {
         destroy(player)
