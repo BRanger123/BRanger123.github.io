@@ -8,7 +8,7 @@ const colors = [
     "d4e09b","f6f4d2","cbdfbd","f19c79","f991cc"
 ]
 
-/*
+/* Random colour buttons
 document.getElementById("startButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
 document.getElementById("questionButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
 document.getElementById("statsButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
@@ -17,13 +17,14 @@ document.getElementById("extrasButton").style.backgroundColor = `#${colors[Math.
 */
 
 function blabber(){
+    //Random word function for testing text
     const consonants = "bcdfghjklmnpqrstvwxyz"
     const vowels = "aeiou"
     const wordLength = Math.floor(Math.random() * 4) + 4
     let word = ""
     for(let i = 0; i < wordLength; i++){
         if(i % 2 === 0){
-            word += consonants[Math.floor(Math.random() * consonants.length)]   // Alternates consonants and vowels for realistic words
+            word += consonants[Math.floor(Math.random() * consonants.length)]   //Alternates consonants and vowels for realistic words
         }
         else{
             word += vowels[Math.floor(Math.random() * vowels.length)]
@@ -37,7 +38,7 @@ let playerSprite = "piskel"
 let spritesOwned = ["bean"]
 let upgradesToApply = []
 let upgradeQuality = 1
-let levelGlobal = -1        // Globals so Kaboom objects can be seen in entire src
+let levelGlobal = -1        //Globals so Kaboom objects can be seen in entire src
 let currentDivId = "menu"
 let answerStreak = 0
 let highestAnswerStreak = 0
@@ -52,7 +53,7 @@ let questions
 let questionsInGame = false 
 let gameQuestions = false
 let darkMode = false
-let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }     // Easier to change bindings this way
+let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }     //Easier to change bindings this way
 let bindingTarget = null
 let upgradesPurchased = 0
 let selectedUpgradeString
@@ -67,10 +68,10 @@ function getQuestions() {
     xhr.open('GET', 'questions.txt', false)
     xhr.send()
     if (xhr.status === 200) {
-        return xhr.responseText.trim().split('\n').map(line => {        // Maps string of each line by commas
+        return xhr.responseText.trim().split('\n').map(line => {        //Maps string of each line by commas
             const parts = line.split(',')
             return {
-                question: parts[0].trim(),
+                question: parts[0].trim(),                              //Cut parts by taking first as question
                 answers: parts.slice(1).map(a => a.trim()),
             }
         })
@@ -85,7 +86,7 @@ function changeQuestions(){
         const parts = line.split(',')
         return {
             question: parts[0].trim(),
-            answers: parts.slice(1).map(a => a.trim()),     // Use same trick even when no file is being used
+            answers: parts.slice(1).map(a => a.trim()),     //Use same trick even when no file is being used
         }
     })
 }
@@ -93,15 +94,17 @@ function changeQuestions(){
 var input = document.getElementById("body")
 input.addEventListener("keydown", function(event){
     if(!bindingTarget || event.key.length !== 1) return
+    //Detect key presses and bind to selected input
     event.preventDefault()
     controlBindings[bindingTarget] = event.key.toLowerCase()
-    document.getElementById(`control-${bindingTarget}`).textContent = event.key.toUpperCase()   // Detect key presses and bind to selected input
+    document.getElementById(`control-${bindingTarget}`).textContent = event.key.toUpperCase()
     document.getElementById('controlStatus').textContent = 'Control updated.'
     bindingTarget = null
 })
 input.addEventListener("keypress", function(event){
     const gameIsVisible = document.getElementById('gameWindow').style.display !== 'none'
     if (event.key === "m"){
+        //Return to menu
         event.preventDefault()
         gameQuestions = false
         playLevel(levelGlobal)
@@ -113,25 +116,28 @@ input.addEventListener("keypress", function(event){
 
 const originalTitle = document.title
 document.addEventListener("visibilitychange", () => {
+    //Change title if user left page
     document.title = document.hidden ? "Come back :(" : originalTitle
 })
 
 function websiteGoTo(divId){
-    document.getElementById(currentDivId).style.display = "none"        // When called, must use div id in '' for function call
+    //When called, must use div id in '' for function call
+    document.getElementById(currentDivId).style.display = "none"
     document.getElementById(divId).style.display = "inline-block"
     currentDivId = divId
 }
 
 function playLevel(level){
+    //Encapsulate go() to add div swapping and global tracking
     levelGlobal = level
-    document.getElementById(currentDivId).style.display = 'none'            // Same as go() but swaps div and updates globals
+    document.getElementById(currentDivId).style.display = 'none'
     document.getElementById('gameWindow').style.display = 'inline-block'
     currentDivId = "gameWindow"
     go("startButton")
 }
 
 function selectUpgrade(upgradeString, upgradeNum){
-    selectedUpgradeString = upgradeString; selectedUpgradeNum = upgradeNum      // Can be used later when purchasing upgrade
+    selectedUpgradeString = upgradeString; selectedUpgradeNum = upgradeNum  //Can be used later when purchasing upgrade
     document.getElementById('upgradePurchase').style.display = "inline-block"
     document.getElementById('upgradePurchase').textContent = `Purchase ${upgradeString}`
 }
@@ -141,16 +147,21 @@ function purchaseUpgrade(upgradeString, upgradeNum){
     if(price<=coins){
         coins = coins-price
         playerSprite = sprite
-        upgradesToApply.push(upgradeNum)    // Array of upgrades that will be looped through in game
+        upgradesToApply.push(upgradeNum)    //Array of upgrades that will be looped through in game
         upgradesPurchased++
+        //Code below for updating chosenUpgrade element to add upgrades the player has purchased
+        //Only override text content if value is default meaning no upgrade chosen
+        //Else add the string value of the purchased upgrade
         if(document.getElementById('chosenUpgrade').textContent == "No upgrade chosen"){document.getElementById('chosenUpgrade').textContent = `${upgradeString}`}
         else{document.getElementById('chosenUpgrade').textContent = `${document.getElementById('chosenUpgrade').textContent}, ${upgradeString}`}
         document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
         document.getElementById('coinsCount').textContent = `Coins: ${coins}`
     }
+    //Cant afford
     else{document.getElementById('upgradePrice').textContent = `You cannot afford the ${upgradeString} upgrade.`}
 }
 
+//purchaseSkin func cannot be used now since there is only one sprite sheet
 /*function purchaseSkin(sprite, price, button){
     if(spritesOwned.includes(sprite)){
         document.getElementById('currentSkin').textContent = `Skin: ${sprite}` || ''
@@ -163,7 +174,7 @@ function purchaseUpgrade(upgradeString, upgradeNum){
         document.getElementById('currentSkin').textContent = `Skin: ${sprite}` || ''
         button.textContent = sprite
         spritesOwned.push(sprite)
-        //this.onclick = purchaseSkin(sprite, 0, this)  funny line of code, infinately called causing stack overflow/ maximum cell exceeded
+        //this.onclick = purchaseSkin(sprite, 0, this)  funny line of code, infinately called causing maximum cell exceeded
     }
     else{
         alert(`You cannot afford ${sprite} skin.`)
@@ -172,7 +183,7 @@ function purchaseUpgrade(upgradeString, upgradeNum){
 
 function shuffleArray(array){
     for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))   // Randomly swaps each indexed item in array
+        const j = Math.floor(Math.random() * (i + 1))   //Randomly swaps each indexed item in array
         const temp = array[i]
         array[i] = array[j]
         array[j] = temp
@@ -192,7 +203,7 @@ function resetAnswerButtons(){
 
 function startQuestion(){
     websiteGoTo('questions')
-    if(gameQuestions){  // If game caused quiz
+    if(gameQuestions){  //If game caused quiz
         document.getElementById('questionBackButton').style.display = 'none'
         document.getElementById('answerStreak').textContent = `Upgrade Multiplier: x${upgradeQuality}`
     }
@@ -202,17 +213,19 @@ function startQuestion(){
     document.getElementById('continueButton').style.display = 'none'
     document.getElementById('continueGameButton').style.display = 'none'
     const sourceQuestion = questions[Math.floor(Math.random() * questions.length)]
-    const shuffledAnswers = shuffleArray(sourceQuestion.answers.map((text, idx) => ({   // Shuffle answer strings 
+    const shuffledAnswers = shuffleArray(sourceQuestion.answers.map((text, idx) => ({   //Shuffle answer strings 
         text,
-        isCorrect: idx === 0,   // Default correct answer is first in array part of question
+        isCorrect: idx === 0,   //Default correct answer is first in array part of question
     })))
     currentQuestion = {
+        //Package data
         question: sourceQuestion.question,
         answers: shuffledAnswers,
     }
     document.getElementById('question').textContent = currentQuestion.question || ''
     resetAnswerButtons()
     currentQuestion.answers.forEach((answer, answerNum) => {
+        //Update button elements
         const button = document.getElementById(`answer${answerNum + 1}`)
         button.textContent = answer.text || ''
         button.onclick = () => checkAnswer(answerNum)
@@ -221,51 +234,55 @@ function startQuestion(){
 
 function checkAnswer(answerNum){
     if (!currentQuestion) return
+    //Find user answer
     const selectedAnswer = currentQuestion.answers[answerNum]
     if (!selectedAnswer) return
     for (let i = 1; i <= 4; i++) {
-        document.getElementById(`answer${i}`).disabled = true   // Lock buttons
+        document.getElementById(`answer${i}`).disabled = true   //Lock buttons
         document.getElementById(`answer${i}`).style.cursor = 'not-allowed'
     }
     if (selectedAnswer.isCorrect) {
         document.getElementById(`answer${answerNum + 1}`).style.backgroundColor = 'lightgreen'
         answerStreak = answerStreak + 1
-        if(answerStreak > highestAnswerStreak){highestAnswerStreak = answerStreak}  // Update stats
+        if(answerStreak > highestAnswerStreak){highestAnswerStreak = answerStreak}  //Update stats
         if(gameQuestions){
             upgradeQuality += 0.2
-            upgradeQuality = parseFloat(upgradeQuality.toFixed(1))  // Floating point error
+            upgradeQuality = parseFloat(upgradeQuality.toFixed(1))  //Floating point error
             document.getElementById('answerStreak').textContent = `Upgrade Multiplier: x${upgradeQuality}`
             document.getElementById('continueButton').style.display = 'inline-block'
         }
-        // Correct answer
+        //Correct answer
     }
     else {
         document.getElementById(`answer${answerNum + 1}`).style.backgroundColor = 'salmon'
-        const correctAnswerNum = currentQuestion.answers.findIndex(ans => ans.isCorrect)    // Select correct answer and set to green
-        document.getElementById(`answer${correctAnswerNum + 1}`).style.backgroundColor = 'lightgreen'   // Sets correct answer to green
+        const correctAnswerNum = currentQuestion.answers.findIndex(ans => ans.isCorrect)    //Select correct answer and set to green
+        document.getElementById(`answer${correctAnswerNum + 1}`).style.backgroundColor = 'lightgreen'   //Sets correct answer to green
         if(!gameQuestions){answerStreak = 0}
         else{
             document.getElementById('answerStreak').textContent = `Final Upgrade Multiplier: x${upgradeQuality}`
-            document.getElementById('continueGameButton').style.display = 'inline-block'    // Return to game button
+            document.getElementById('continueGameButton').style.display = 'inline-block'    //Return to game button
         }
-        // Incorrect answer
+        //Incorrect answer
     }
     if(gameQuestions){
         document.getElementById('answerStreak').textContent = `Upgrade Multiplier: x${upgradeQuality}`
     }
     else{
+        //End quiz and display quit/ continue button
         document.getElementById('answerStreak').textContent = `Answer Streak: ${answerStreak}`
         document.getElementById('continueButton').style.display = 'inline-block'
     }
 }
 
 function updateStats(){
+    // Update tracked stats when div is opened
     document.getElementById('answerStreakStat').textContent = `${highestAnswerStreak}` || ''
     document.getElementById('enemiesDiedStat').textContent = `${highestEnemiesDied}` || ''
 }
 
 function selectGadget(gearName) {
     selectedGadget = `${gearName}`
+    //Update div elements to display choice and info
     document.getElementById('currentGear').textContent = `Gear: ${gearName}` || ''
     const info = {
         Blast: 'High spread buckshot blaster.',
@@ -273,7 +290,8 @@ function selectGadget(gearName) {
         Beam: 'Long range piercing projectile cannon.',
         Spark: '6-shot sidearm with fast reload and critical hits.',
     }
-    document.getElementById('weaponInfo').textContent = info[gearName] || ''    // Display information
+    //Display information
+    document.getElementById('weaponInfo').textContent = info[gearName] || ''
     document.getElementById('weaponSelectContinue').style.display = "inline-block"        
 }
 
@@ -283,8 +301,9 @@ function beginControlBind(control) {
 }
 
 function resetInputs(){
+    //Force keyup events to avoid sticky key behaviour
     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: `${controlBindings.up}` }))
-    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: `${controlBindings.left}` }))  // Reset inputs
+    canvas.dispatchEvent(new KeyboardEvent('keyup', { key: `${controlBindings.left}` }))
     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: `${controlBindings.down}` }))
     canvas.dispatchEvent(new KeyboardEvent('keyup', { key: `${controlBindings.right}` }))
 }
@@ -300,7 +319,7 @@ const diffNames = [
 let slider = document.getElementById("difficultySlider")
 
 slider.oninput = function() {
-    document.getElementById("difficultyOutput").textContent = `${diffNames[slider.value-slider.step]}`  // uPDATE DIFFICULTY OUTPUT
+    document.getElementById("difficultyOutput").textContent = `${diffNames[slider.value-slider.step]}`  //uPDATE DIFFICULTY OUTPUT
     //document.getElementById("difficultyOutput").textContent = `${diffNames[slider.value/slider.step-0.5]}`
 }
 
