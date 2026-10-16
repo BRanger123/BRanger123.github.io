@@ -704,7 +704,7 @@ scene(1, () => {
             let nextUpgrade = upgradesToApply.pop()
             //Find and apply upgrade
             if(nextUpgrade==1){gadgetGlobal.beamDamage += Math.ceil(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
-            if(nextUpgrade==2){gadgetGlobal.magSize += Math.ceil(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLbel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
+            if(nextUpgrade==2){gadgetGlobal.magSize += Math.ceil(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
             if(nextUpgrade==3){player.speed += Math.ceil(0.3*upgradeQuality*player.speed)}
             if(nextUpgrade==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
             if(nextUpgrade==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
