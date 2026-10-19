@@ -58,68 +58,6 @@ let bindingTarget = null
 let upgradesPurchased = 0
 let selectedUpgradeString
 let selectedUpgradeNum
-let traitName = "None"
-let traitValue = 0
-const traitConfigurations = [
-    {
-        name: "None",
-        description: "Play without a trait.",
-    },
-    {
-        name: "Tank",
-        description: "Start with 50% more health and deal 25% less damage.",
-        maxHealthMultiplier: 1.5,
-        damageMultiplier: 0.75,
-    },
-    {
-        name: "Reckless",
-        description: "Deal 50% more damage, but start with 40% less health.",
-        maxHealthMultiplier: 0.6,
-        damageMultiplier: 1.5,
-    },
-    {
-        name: "Insatiable",
-        description: "Coins absorb incoming damage before your health does.",
-        coinsAsHealth: true,
-    },
-    {
-        name: "Lucky",
-        description: "Receive two random upgrades each round instead of choosing upgrades.",
-        automaticUpgradesPerRound: 2,
-    },
-    {
-        name: "Combonautic",
-        description: "Dodge increases damage, damage upgrades increase dodge, and armor is unavailable.",
-        damagePerDodge: 0.01,
-        dodgePerDamageUpgrade: 5,
-        noArmor: true,
-    },
-    {
-        name: "Catastrophiser",
-        description: "Fire twice as many shots, but choose from only two upgrades each round.",
-        projectileMultiplier: 2,
-        upgradeChoiceCount: 2,
-    },
-    {
-        name: "Indecisive",
-        description: "Choose from six upgrades each round. All enemies are chargers.",
-        upgradeChoiceCount: 6,
-        enemyType: "charger",
-    },
-    {
-        name: "Mercenary",
-        description: "Collect coins as soon as they drop. All enemies are shooters.",
-        autoCollectCoins: true,
-        enemyType: "shooter",
-    },
-    {
-        name: "Precise",
-        description: "Every shot is a critical hit, but enemies start at round 3 difficulty.",
-        critChance: 1,
-        startingRound: 2,
-    },
-]
-window.traitConfigurations = traitConfigurations
 let red = 232
 let green = 232
 let blue = 232
@@ -187,22 +125,6 @@ function websiteGoTo(divId){
     document.getElementById(currentDivId).style.display = "none"
     document.getElementById(divId).style.display = "inline-block"
     currentDivId = divId
-}
-
-function selectTrait(index){
-    const trait = traitConfigurations[index]
-    if(!trait){
-        console.error(`Unknown trait selection: ${index}`)
-        return
-    }
-    traitValue = index
-    traitName = trait.name
-    document.getElementById('traitName').textContent = `Trait: ${trait.name}`
-    document.getElementById('traitInfo').textContent = trait.description
-    document.getElementById('traitEntryButton').textContent = `Trait: ${trait.name}`
-    document.querySelectorAll('#traitOptions button').forEach((button) => {
-        button.setAttribute('aria-pressed', String(Number(button.dataset.traitIndex) === index))
-    })
 }
 
 function playLevel(level){
@@ -402,5 +324,4 @@ slider.oninput = function() {
 }
 
 websiteGoTo('menu')
-selectTrait(traitValue)
 document.getElementById("difficultyOutput").textContent = `${diffNames[slider.value-slider.step]}`

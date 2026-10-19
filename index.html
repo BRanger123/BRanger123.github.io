@@ -81,32 +81,27 @@
             <h2>Difficulty:</h2> 
             <input type="range" min="1" max="5" step="1" value="3" class="slider" id="difficultySlider"><br>
             <h2 id="difficultyOutput"></h2>
-            <button id="traitEntryButton" onclick="websiteGoTo('traitSelect')" style="background-color: rgb(255, 52, 52);">Trait: None</button>
             <button id="weaponSelectContinue" onclick="playLevel(1)" style="display: none;">Continue</button><br><br>
             <!--<button onclick="websiteGoTo('shop'); document.getElementById('coinsCount').textContent = `Coins: ${coins}`">Skins</button><br><br>-->
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button><br>
         </div>
 
-        <div id="traitSelect" style="display: none;">
-            <h1>Choose Trait</h1>
-            <h2 id="traitName">Trait: None</h2>
-            <p id="traitInfo">Select a trait to see what it does.</p>
-            <div id="traitOptions" class="traitGrid">
-                <button data-trait-index="0" aria-pressed="true" onclick="selectTrait(0)">None</button>
-                <button data-trait-index="1" aria-pressed="false" onclick="selectTrait(1)">Tank</button>
-                <button data-trait-index="2" aria-pressed="false" onclick="selectTrait(2)">Reckless</button>
-                <button data-trait-index="3" aria-pressed="false" onclick="selectTrait(3)">Insatiable</button>
-                <button data-trait-index="4" aria-pressed="false" onclick="selectTrait(4)">Lucky</button>
-                <button data-trait-index="5" aria-pressed="false" onclick="selectTrait(5)">Combonautic</button>
-                <button data-trait-index="6" aria-pressed="false" onclick="selectTrait(6)">Catastrophiser</button>
-                <button data-trait-index="7" aria-pressed="false" onclick="selectTrait(7)">Indecisive</button>
-                <button data-trait-index="8" aria-pressed="false" onclick="selectTrait(8)">Mercenary</button>
-                <button data-trait-index="9" aria-pressed="false" onclick="selectTrait(9)">Precise</button>
+        <div id="abilitySelect" style="display: none;">
+            <h1>Choose Ability</h1>
+            <h2 id="currentGear">Ability: Not chosen</h2>
+            <p id="weaponInfo">Select an ability to see what it does.</p>
+            <div class="buttonContainer">
+                <button onclick="purchaseSkin('piskel', 0, this)">bean</button><br>
+                <button onclick="purchaseSkin('dino', 20, this)">dino (20)</button><br>
+                <button onclick="purchaseSkin('bag', 35, this)">bag (35)</button><br>
+                <button onclick="purchaseSkin('ghosty', 50, this)">ghosty (50)</button><br>
+                <!--<button onclick="purchaseSkin('mark', 200, this)">mark (200)</button><br>-->
+                <button onclick="purchaseSkin('gigagantrum', 500, this)">gigagantrum (500)</button><br>
             </div>
             <button onclick="websiteGoTo('weaponSelect')">Continue</button>
         </div>
 
-        <!--<div id="shop" style="display: none;">
+        <div id="shop" style="display: none;">
             <h1>Shop</h1>
             <h2 id="coinsCount">coins not found</h2>
             <h2 id="currentSkin">Skin: bean</h2>
@@ -116,10 +111,11 @@
                 <button onclick="purchaseSkin('dino', 20, this)">dino (20)</button><br>
                 <button onclick="purchaseSkin('bag', 35, this)">bag (35)</button><br>
                 <button onclick="purchaseSkin('ghosty', 50, this)">ghosty (50)</button><br>
+                <!--<button onclick="purchaseSkin('mark', 200, this)">mark (200)</button><br>-->
                 <button onclick="purchaseSkin('gigagantrum', 500, this)">gigagantrum (500)</button><br>
             </div>
             <button onclick="websiteGoTo('weaponSelect')">Continue</button>
-        </div>-->
+        </div>
 
         <div id="questions" style="display: none;">
             <h1>Questionnaire</h1><br>
