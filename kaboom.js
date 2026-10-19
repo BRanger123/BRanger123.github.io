@@ -141,8 +141,8 @@ scene(1, () => {
             color(mapRGB),
         ])
     }
-
-    let round = 0
+    const trait = window.traitInfo[traitValue]
+    let round = trait.startingRound || 0
     let isRoundSpecial = false
     //Calculate added difficulty level
     let diffLevel = Number(document.getElementById('difficultySlider').value)
@@ -167,7 +167,7 @@ scene(1, () => {
     document.getElementById('chosenUpgrade').textContent = 'No upgrade chosen'
     upgradesPurchased = 0
     const beamSprite = `${selectedGadget.toLowerCase()}Bullet`  //Choose what sprite to use
-    
+
     //Code for beam gadget class
     class BeamGadget{
         constructor(beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto = false, fireRate = 100, penetration = 0, critChance){
@@ -228,6 +228,9 @@ scene(1, () => {
             }
             shake(0.004*(this.recoilForce))
             const baseDir = toWorld(mousePos()).sub(player.pos).unit()  //toWorld() lets func work outside initial map boundaries for camera code
+            const damage = this.beamDamage
+                * (trait.damageMultiplier ?? 1)
+                * (1 + player.dodge * (trait.damagePerDodge ?? 0))
             
             //Apply recoil
             const recoilDir = baseDir.scale(-this.recoilForce)  //Opposite to beam fire direction
@@ -253,14 +256,14 @@ scene(1, () => {
                 beam.onCollide("enemy", (enemy) => {
                     if(Math.random() <= this.critChance){       //If critical hit
                         if(this.lifeSteal > 0){healPlayer(this.lifeSteal*3)}
-                        enemy.hurt(this.beamDamage*3)
+                        enemy.hurt(damage*3)
                         if(beam.penetration > 0){beam.penetration--}
                         else{beam.destroy()}
                     }
                     else{
                         if(this.lifeSteal > 0){healPlayer(this.lifeSteal)}
-                        spawnText(enemy.pos, this.beamDamage)
-                        enemy.hurt(this.beamDamage)
+                        spawnText(enemy.pos, damage)
+                        enemy.hurt(damage)
                         if(beam.penetration > 0){beam.penetration--}
                         else{beam.destroy()}
                     }
@@ -303,6 +306,19 @@ scene(1, () => {
         else{
             damage *= (1-(player.armor/(player.armor+50)))  //Diminishing returns
             damage = Math.floor(damage)
+            if(trait.coinsAsHealth && coins > 0){
+                const coinsSpent = Math.min(coins, damage)
+                coins -= coinsSpent
+                damage -= coinsSpent
+                coinsLabel.text = `Coins: ${coins}`
+                document.getElementById("coinsCount").textContent = `Coins: ${coins}`
+                if(coinsSpent > 0){
+                    spawnText(player.pos, `-${coinsSpent} coins`, rgb(255, 191, 0))
+                }
+            }
+            if(damage <= 0){
+                return
+            }
             player.hurt(damage)
             healthLabel.text = `Health: ${Math.floor(player.hp())}` //Update health label
             shake(damage)
@@ -334,6 +350,12 @@ scene(1, () => {
 
 
     function spawnCoin(xy){ //Argument cannot be "pos"
+        if(trait.autoCollectCoins){
+            coins += doubleCoins ? 2 : 1
+            coinsLabel.text = `Coins: ${coins}`
+            document.getElementById("coinsCount").textContent = `Coins: ${coins}`
+            return
+        }
         const coin = add([
             sprite("coin"),
             anchor("center"),
@@ -387,11 +409,11 @@ scene(1, () => {
         anchor("center"),   //So beams spawn at center
         body(),
         color(255, 255, 255),
-        health(100),
+        health(100 * (trait.maxHealthMultiplier ?? 1)),
         "player",   //For collision detection
         "object",
         //For easy OOP traits/ trackers below
-        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0, regenValue: 0, armor: 0, passiveCoin: 0 },
+        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100 * (trait.maxHealthMultiplier ?? 1), cooldown: 0, dodge: 0, regenValue: 0, armor: 0, passiveCoin: 0 },
     ])
     let playerAnimation = "idle"
     let facingLeft = false
@@ -442,7 +464,7 @@ scene(1, () => {
     sparkBlasterGlobal = sparkBlaster
     let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 4000, 1.5, false, 100, 1, 0.15)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 8, 30, 1, 5, 1000, 2, true, 70, 4, 0.1)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 10, 30, 1, 5, 1000, 2, true, 70, 4, 0.3)
     cyclerBlasterGlobal = cyclerBlaster
     let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 2.5, false, 200, 2, 0.2)
     beamBlasterGlobal = beamBlaster
@@ -472,6 +494,8 @@ scene(1, () => {
         gadgetGlobal = sparkBlasterGlobal
         selectedGadget = "Spark"
     }
+    gadgetGlobal.beamsFired *= trait.projectileMultiplier || 1
+    gadgetGlobal.critChance = trait.critChance || gadgetGlobal.critChance
 
     //Initialize labels
     const coinsLabel = add([
@@ -561,7 +585,7 @@ scene(1, () => {
         let enemyType = "chaser"
         let randColor = rgb(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100)
         let maxAttackCooldown = 2
-        let enemyDamage = Math.floor(2 * difficulty)
+        let enemyDamage = Math.floor(2*difficulty)
         let coinsDropped = Math.ceil(0.5*difficulty)
 
         //Override values
@@ -588,6 +612,18 @@ scene(1, () => {
             maxAttackCooldown = 3
             enemyDamage *= 2
         }
+        if(trait.enemyType){
+            enemyType = trait.enemyType
+        }
+        /*All enemies become dinos? or should they just be shooters but keep their stats?
+        if(trait.enemyType){
+            enemySprite = "dino"
+            enemyType = "shooter"
+            enemySpeed *= 0.7
+            enemyHealth *= 0.7
+            maxAttackCooldown = 3
+            enemyDamage *= 2
+        }*/
 
         const enemy = add([
             sprite(`${enemySprite}`),
@@ -653,19 +689,31 @@ scene(1, () => {
             "damage","capacity","speed","penetration","lifeSteal","crit",
             "dodge","health","regen","armor","passiveCoin","coinMagnet"
         ]
+        document.getElementById('chosenUpgrade').textContent = 'No upgrade chosen'
+        document.getElementById('upgradePurchase').style.display = 'none'
         //Hide all upgrades
         for(let i=0; i<upgradeStrings.length; i++){
             document.getElementById(`${upgradeStrings[i]}Upgrade`).style.display = "none"
         }
-        let randomUpgrades = []
-        let randomUpgradeNum = -1
-        while(randomUpgrades.length != 4){  //Find random 4 numbers
-            randomUpgradeNum = Math.floor((Math.random()*upgradeStrings.length))
-            if(!randomUpgrades.includes(randomUpgradeNum)){randomUpgrades.push(randomUpgradeNum)}   //Only allow new numbers
+        const availableUpgrades = upgradeStrings
+            .map((_, index) => index)
+            .filter((index) => !(trait.noArmor && index === 9))
+        for(let i = availableUpgrades.length - 1; i > 0; i--){
+            const randomIndex = Math.floor(Math.random() * (i + 1))
+            const upgradeToSwap = availableUpgrades[i]
+            availableUpgrades[i] = availableUpgrades[randomIndex]
+            availableUpgrades[randomIndex] = upgradeToSwap
         }
-        //Show the random 4 upgrades
-        for(let i=0; i<randomUpgrades.length; i++){
-            document.getElementById(`${upgradeStrings[randomUpgrades[i]]}Upgrade`).style.display = "flex"
+        const upgradeCount = trait.automaticUpgradesPerRound ?? trait.upgradeChoiceCount ?? 4
+        const randomUpgrades = availableUpgrades.slice(0, upgradeCount)
+        if(trait.automaticUpgradesPerRound){
+            upgradesToApply.push(...randomUpgrades.map((index) => index + 1))
+            document.getElementById('chosenUpgrade').textContent = `Lucky selected ${randomUpgrades.length} upgrades for you.`
+        }
+        else{
+            for(const index of randomUpgrades){
+                document.getElementById(`${upgradeStrings[index]}Upgrade`).style.display = "flex"
+            }
         }
         if(questionsInGame){startQuestion()}
         else{websiteGoTo('upgrade')}
@@ -683,7 +731,7 @@ scene(1, () => {
             const clock = add([timer()])
             clock.loop(1, () => {
                 if(!isPaused){
-                    roundLabel.text = `Time untill next wave: ${nextWaveTime}`
+                    roundLabel.text = `Time until next wave: ${nextWaveTime}`
                     waiting = true
                     nextWaveTime = nextWaveTime - 1
                     if(nextWaveTime <= -1){ //If clock cycled completely
@@ -703,7 +751,10 @@ scene(1, () => {
         for(let i = 0; i<arrayLength; i++){
             let nextUpgrade = upgradesToApply.pop()
             //Find and apply upgrade
-            if(nextUpgrade==1){gadgetGlobal.beamDamage += Math.ceil(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
+            if(nextUpgrade==1){
+                gadgetGlobal.beamDamage += Math.ceil(0.3*upgradeQuality*gadgetGlobal.beamDamage)
+                player.dodge += (trait.dodgePerDamageUpgrade ?? 0) * upgradeQuality
+            }
             if(nextUpgrade==2){gadgetGlobal.magSize += Math.ceil(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
             if(nextUpgrade==3){player.speed += Math.ceil(0.3*upgradeQuality*player.speed)}
             if(nextUpgrade==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
@@ -711,10 +762,13 @@ scene(1, () => {
             if(nextUpgrade==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
             if(nextUpgrade==7){player.dodge += 10*upgradeQuality}
             if(nextUpgrade==8){player.maxHealth += Math.floor(player.maxHealth*0.25*upgradeQuality)}
-            if(nextUpgrade==9){player.regenValue += Math.floor(2*upgradeQuality)}
-            if(nextUpgrade==10){player.armor += Math.floor(10*upgradeQuality)}
+            if(nextUpgrade==9){player.regenValue += Math.floor(5*upgradeQuality)}
+            if(nextUpgrade==10 && !trait.noArmor){player.armor += Math.floor(10*upgradeQuality)}
             if(nextUpgrade==11){player.passiveCoin += Math.floor(5*upgradeQuality)}
-            if(upgradeValue==12){coinMagForce += Math.floor(coinMagForce*0.6*upgradeQuality); coinsMagDist += Math.floor(coinMageDist*0.8*upgradeQuality)}
+            if(nextUpgrade==12){
+                coinMagForce += Math.floor(coinMagForce*0.6*upgradeQuality)
+                coinMagnetDist += Math.floor(coinMagnetDist*0.8*upgradeQuality)
+            }
         }
         upgradeQuality = 1
         upgradesToApply = []
@@ -725,14 +779,14 @@ scene(1, () => {
         //Bosses spawn first before clock starts
         //Every loop spawn enemies up to enemyNum
         for(let i=0; i<bosses; i++){
-            spawnEnemy(difficulty, true)
+            spawnEnemy(difficulty, true)    //True means enemy is a boss
         }
         const clock = add([timer()])
         clock.loop(time, () => {
             if(roundComplete){destroy(clock)}
             else{
                 for(let i=0; i<enemyNum; i++){
-                    spawnEnemy(difficulty, false)   //False means not boss
+                    if(!isPaused && player.exists() && !roundComplete){spawnEnemy(difficulty, false)}
                 }
             }
         })
@@ -766,7 +820,7 @@ scene(1, () => {
         //Decide round stats
         let enemyNum = Math.floor(2 + round * 1.5)
         let waves = Math.min(5, 1 + Math.floor(round / 3))
-        let difficulty = 0.8 + round * 0.4
+        let difficulty = 0.4 + round * 0.6
         difficulty *= diffLevel
         let bosses = Math.floor(round/5)
         //if(true){     //For testing special rounds
@@ -778,7 +832,7 @@ scene(1, () => {
         if(doubleEnemies){enemyNum *= 2; bosses *= 2}
         
         enemiesLeft = (waves * enemyNum) + bosses
-        spawnWave((round*2)+1, waves, enemyNum, difficulty, bosses)
+        spawnWave(3, waves, enemyNum, difficulty, bosses)
         //Refresh mushrooms
         for(let i = 0; i<5; i++){
             spawnMushroom(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100), difficulty)
