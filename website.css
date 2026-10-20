@@ -88,21 +88,27 @@ button:active{
     cursor: pointer;
     text-align: center;
 }
-.upgradeGrid, .weaponGrid, .controlsGrid, .traitGrid{
+.upgradeGrid, .weaponGrid, .controlsGrid, .traitGrid, .answerGrid{
     display: grid;
     grid-template-columns: repeat(2, minmax(180px, 260px));
     gap: 14px;
     max-width: 560px;
     margin: 20px auto;
 }
-.upgradeGrid button, .weaponGrid button, .controlsGrid button, .traitGrid button{
+.upgradeGrid button, .weaponGrid button, .controlsGrid button, .traitGrid button, .answerGrid button{
     min-height: 76px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 7px;
 }
-.traitGrid button[aria-pressed="true"]{
+.traitGrid button[selectedButton="true"]{
+    background-color: #f8da46;
+}
+.weaponGrid button[selectedButton="true"]{
+    background-color: #f8da46;
+}
+.upgradeGrid button[selectedButton="true"]{
     background-color: #f8da46;
 }
 .upgradeGrid small, .weaponGrid small{
@@ -111,9 +117,6 @@ button:active{
 }
 #weaponInfo{
     min-height: 24px;
-}
-.weaponGrid button[selectedButton="true"]{
-    background-color: #f8da46;
 }
 .slidecontainer{
     width: 100%;
@@ -139,26 +142,6 @@ button:active{
 }
 .slider::-webkit-slider-thumb:active{
     cursor: grabbing;
-}
-.answerButtonContainer{
-    display: inline-flex;
-    flex-direction: row;
-    align-items: stretch;
-
-}
-.answerButtonContainer button{
-    flex: 1;
-    padding: 10px;
-    font-size: 25px;
-    cursor: pointer;
-    text-align: center;
-    margin-left: 20px;
-    margin-right: 20px;
-    width: 220px;
-    height: 80px;
-}
-.answerButtonContainer button:hover{
-    transform: scale(1.3)
 }
 
 #startButton{background-color: #f8da46;}

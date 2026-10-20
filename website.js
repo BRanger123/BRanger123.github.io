@@ -200,7 +200,7 @@ function selectTrait(traitId){
     document.getElementById('traitInfo').textContent = trait.description
     document.getElementById('traitEntryButton').textContent = `Trait: ${trait.name}`
     document.querySelectorAll('#traitOptions button').forEach((button) => {
-        button.setAttribute('aria-pressed', String(Number(button.dataset.traitIndex) === traitId))
+        button.setAttribute('selectedButton', String(Number(button.dataset.traitIndex) === traitId))
     })
 }
 
@@ -214,6 +214,9 @@ function playLevel(level){
 }
 
 function selectUpgrade(upgradeString, upgradeNum){
+    document.querySelectorAll('#upgradeOptions button').forEach((button) => {
+        button.setAttribute('selectedButton', String(Number(button.dataset.upgradeIndex) === upgradeNum))
+    })
     selectedUpgradeString = upgradeString; selectedUpgradeNum = upgradeNum  //Can be used later when purchasing upgrade
     document.getElementById('upgradePurchase').style.display = "inline-block"
     document.getElementById('upgradePurchase').textContent = `Purchase ${upgradeString}`

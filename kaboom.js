@@ -691,6 +691,9 @@ scene(1, () => {
         ]
         document.getElementById('chosenUpgrade').textContent = 'No upgrade chosen'
         document.getElementById('upgradePurchase').style.display = 'none'
+        document.querySelectorAll('#upgradeOptions button').forEach((button) => {
+            button.setAttribute('selectedButton', "false")
+        })
         //Hide all upgrades
         for(let i=0; i<upgradeStrings.length; i++){
             document.getElementById(`${upgradeStrings[i]}Upgrade`).style.display = "none"
