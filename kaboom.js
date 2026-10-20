@@ -596,7 +596,7 @@ scene(1, () => {
             coinsDropped *= 5
             boss = true
         }
-        else if(Math.random() < 0.25){
+        else if(Math.random() < 0.25 || trait.enemyType == "charger"){
             enemySprite = "bag"
             enemyType = "charger"
             enemySpeed *= 1.2
@@ -604,16 +604,13 @@ scene(1, () => {
             maxAttackCooldown = 1.5
             enemyDamage *= 1.5
         }
-        else if(Math.random() < 0.25){
+        else if(Math.random() < 0.25 || trait.enemyType == "shooter"){
             enemySprite = "dino"
             enemyType = "shooter"
             enemySpeed *= 0.7
             enemyHealth *= 0.7
             maxAttackCooldown = 3
             enemyDamage *= 2
-        }
-        if(trait.enemyType){
-            enemyType = trait.enemyType
         }
         /*All enemies become dinos? or should they just be shooters but keep their stats?
         if(trait.enemyType){
