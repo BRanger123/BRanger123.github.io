@@ -144,7 +144,7 @@ scene(1, () => {
     const trait = window.traitInfo[traitValue]
     let round = trait.startingRound || 0
     let isRoundSpecial = false
-    roundComplete = false
+    let roundComplete = false
     //Calculate added difficulty level
     let diffLevel = Number(document.getElementById('difficultySlider').value)
     diffLevel *= diffLevel  //Make values fall at a greater range
@@ -1112,6 +1112,7 @@ scene(1, () => {
         }
         deathScreenShown = true
         isPaused = true
+        roundComplete = true
         gameQuestions = false
 
         add([
@@ -1159,6 +1160,7 @@ scene(1, () => {
         })
         backBtn.onClick(() => {
             websiteGoTo("menu")
+            go("startButton")
         })
 
         const resetBtn = add([

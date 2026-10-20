@@ -60,7 +60,6 @@ let selectedUpgradeString
 let selectedUpgradeNum
 let traitName = "None"
 let traitValue = 0
-let roundComplete = false
 const traitInfo = [
     {
         name: "None",
@@ -176,6 +175,7 @@ input.addEventListener("keypress", function(event){
         resetInputs()
         document.getElementById('gameWindow').style.display = 'none'
         websiteGoTo('menu')
+        go("startButton")
     }
 })
 
