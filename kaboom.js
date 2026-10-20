@@ -144,24 +144,21 @@ scene(1, () => {
     const trait = window.traitInfo[traitValue]
     let round = trait.startingRound || 0
     let isRoundSpecial = false
+    roundComplete = false
     //Calculate added difficulty level
-
     let diffLevel = Number(document.getElementById('difficultySlider').value)
     diffLevel *= diffLevel  //Make values fall at a greater range
     diffLevel /= 9
-    diffLevel = Math.floor(diffLevel)
 
     const enemies = []      //Used for movement and attack logic
     const spawnDist = 500
     let enemiesLeft
-    let roundComplete = false
     let enemiesDied = 0
     let enemiesDiedCounter = 0
     upgradesToApply = []
     upgradeQuality = 1
     let isPaused = false
     let mouseDown = false
-    resetInputs()
     let waiting = false
     coins = 0
     let coinMagForce = 20000
@@ -231,10 +228,10 @@ scene(1, () => {
             }
             shake(0.004*(this.recoilForce))
             const baseDir = toWorld(mousePos()).sub(player.pos).unit()  //toWorld() lets func work outside initial map boundaries for camera code
-            let damage = this.beamDamage
+            const damage = this.beamDamage
                 * (trait.damageMultiplier ?? 1)
                 * (1 + player.dodge * (trait.damagePerDodge ?? 0))
-            damage = Math.round(damage)
+            
             //Apply recoil
             const recoilDir = baseDir.scale(-this.recoilForce)  //Opposite to beam fire direction
             player.recoil = player.recoil.add(recoilDir)
@@ -282,7 +279,6 @@ scene(1, () => {
     }
     
     function spawnText(position, textContent, colour){
-        //if(!textContent.isNaN()){textContent = `${Math.round(textContent)}`}
         const textObject = add([
             anchor("center"),
             text(textContent, { 
@@ -309,7 +305,7 @@ scene(1, () => {
         }
         else{
             damage *= (1-(player.armor/(player.armor+50)))  //Diminishing returns
-            damage = Math.round(damage)
+            damage = Math.floor(damage)
             if(trait.coinsAsHealth && coins > 0){
                 const coinsSpent = Math.min(coins, damage)
                 coins -= coinsSpent
@@ -620,7 +616,7 @@ scene(1, () => {
             enemyType = trait.enemyType
         }
         /*All enemies become dinos? or should they just be shooters but keep their stats?
-        if(trait.enemyType == "shooter"){
+        if(trait.enemyType){
             enemySprite = "dino"
             enemyType = "shooter"
             enemySpeed *= 0.7
@@ -730,7 +726,6 @@ scene(1, () => {
             coinsLabel.text = `Coins: ${coins}`
             controlsLabel.text = ``
             upgrade()
-            resetInputs()
             if(player.hp() != player.maxHealth){healPlayer(player.maxHealth - player.hp())} //Heal if missing hp
             let nextWaveTime = 5
             const clock = add([timer()])
@@ -1118,7 +1113,6 @@ scene(1, () => {
         deathScreenShown = true
         isPaused = true
         gameQuestions = false
-        roundComplete = true
 
         add([
             rect(width(), height()),

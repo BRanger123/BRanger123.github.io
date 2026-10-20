@@ -60,20 +60,21 @@ let selectedUpgradeString
 let selectedUpgradeNum
 let traitName = "None"
 let traitValue = 0
+let roundComplete = false
 const traitInfo = [
     {
         name: "None",
-        description: "Nothing special.",
+        description: "You are ordinary.",
     },
     {
         name: "Tank",
-        description: "Start with more health, but deal less damage.",
+        description: "Start with 50% more health and deal 25% less damage.",
         maxHealthMultiplier: 1.5,
         damageMultiplier: 0.75,
     },
     {
         name: "Reckless",
-        description: "Deal more damage, but start with less health.",
+        description: "Deal 50% more damage, but start with 40% less health.",
         maxHealthMultiplier: 0.6,
         damageMultiplier: 1.5,
     },
@@ -89,7 +90,7 @@ const traitInfo = [
     },
     {
         name: "Combonautic",
-        description: "Dodge increases damage, damage upgrades increase dodge, but cant use armor.",
+        description: "Dodge increases damage, damage upgrades increase dodge, and armor is unavailable.",
         damagePerDodge: 0.01,
         dodgePerDamageUpgrade: 5,
         noArmor: true,
@@ -118,11 +119,6 @@ const traitInfo = [
         critChance: 1,
         startingRound: 2,
     },
-    /*{
-        name: "Gatherer",
-        description: "Coins left uncollected are not removed, but enemies start at round 3 difficulty.",
-        deleteCoins: false
-    },*/
 ]
 window.traitInfo = traitInfo
 
@@ -186,7 +182,7 @@ input.addEventListener("keypress", function(event){
 const originalTitle = document.title
 document.addEventListener("visibilitychange", () => {
     //Change title if user left page
-    document.title = document.hidden ? "Come back :(" : originalTitle
+    if(document.hidden){document.title = "Come back :("}else{document.title = originalTitle}
 })
 
 function websiteGoTo(divId){
