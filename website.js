@@ -357,7 +357,10 @@ function updateStats(){
     document.getElementById('enemiesDiedStat').textContent = `${highestEnemiesDied}` || ''
 }
 
-function selectGadget(gearName) {
+function selectGadget(gearName, buttonId){
+    document.querySelectorAll('#weaponOptions button').forEach((button) => {
+        button.setAttribute('selectedButton', String(Number(button.dataset.gadgetIndex) === buttonId))
+    })
     selectedGadget = `${gearName}`
     //Update div elements to display choice and info
     document.getElementById('currentGear').textContent = `Gear: ${gearName}` || ''

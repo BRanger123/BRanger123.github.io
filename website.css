@@ -112,6 +112,9 @@ button:active{
 #weaponInfo{
     min-height: 24px;
 }
+.weaponGrid button[selectedButton="true"]{
+    background-color: #ffd342;
+}
 .slidecontainer{
     width: 100%;
 }
@@ -202,7 +205,7 @@ button:active{
 ::-webkit-scrollbar-thumb:active{
     display: none;
 }
-@media (max-width: 768px){  /*For smaller devices*/
+@media (max-width: 768px){  /*Smaller devices*/
     .upgradeGrid, .weaponGrid, .controlsGrid, .traitGrid{
         grid-template-columns: minmax(180px, 320px);
         justify-content: center;

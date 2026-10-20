@@ -12,7 +12,7 @@
             <h3>By Barnaby Ranger</h3>
             <h2>Mushrooms heal you...</h2>
         	<div class="buttonContainer">
-                <button id="startButton" onclick="upgradeValue=0; websiteGoTo('weaponSelect'); document.getElementById('currentGear').textContent = 'Gear: Not chosen'; document.getElementById('weaponSelectContinue').style.display = 'none'; document.getElementById('weaponInfo').textContent = 'Select a gadget to see its stats.'">Game</button><br>
+                <button id="startButton" onclick="upgradeValue=0; websiteGoTo('weaponSelect')">Game</button><br>
                 <button id="questionButton" onclick="answerStreak = 0; startQuestion(); document.getElementById('questionBackButton').style.display = 'inline-block'">Quiz</button><br>
                 <button id="statsButton" onclick="websiteGoTo('stats'); updateStats()">Stats</button><br>
                 <button id="settingsButton" onclick="websiteGoTo('settings')">Settings</button><br>
@@ -72,11 +72,11 @@
             <h1>Weapon Select</h1>
             <h2 id="currentGear">Gear: Not chosen</h2>
             <p id="weaponInfo">Select a gadget to see its stats.</p>
-            <div class="weaponGrid">
-                <button onclick="selectGadget('Blast')">Blast</button>
-                <button onclick="selectGadget('Cycler')">Cycler</button>
-                <button onclick="selectGadget('Beam')">Beam</button>
-                <button onclick="selectGadget('Spark')">Spark</button>
+            <div id="weaponOptions" class="weaponGrid">
+                <button data-gadget-index = "1" selectedButton = "false" onclick="selectGadget('Blast', 1)">Blast</button>
+                <button data-gadget-index = "2" selectedButton = "false" onclick="selectGadget('Cycler', 2)">Cycler</button>
+                <button data-gadget-index = "3" selectedButton = "false" onclick="selectGadget('Beam', 3)">Beam</button>
+                <button data-gadget-index = "4" selectedButton = "false" onclick="selectGadget('Spark', 4)">Spark</button>
             </div>
             <h2>Difficulty:</h2> 
             <input type="range" min="1" max="5" step="1" value="3" class="slider" id="difficultySlider"><br>
@@ -163,7 +163,7 @@
             <textarea id="customQuestions" placeholder="<Format:> 
 Question1,CorrectAnswer,Answer,Answer,Answer
 Question2,CorrectAnswer,Answer,Answer,Answer" rows="18" cols="45"></textarea><br>
-            <button onclick="if(document.getElementById('customQuestions').value != ''){questions = changeQuestions()}else{alert('Cannot use no questions!')}">Use Custom Questions</button>
+            <button onclick="if(document.getElementById('customQuestions').value != ''){questions = changeQuestions()}">Use Custom Questions</button>
             <br>
             <br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
