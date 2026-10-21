@@ -53,6 +53,7 @@ let questions
 let questionsInGame = false 
 let gameQuestions = false
 let darkMode = false
+let pixelate = false
 let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }     //Easier to change bindings this way
 let bindingTarget = null
 let upgradesPurchased = 0

@@ -80,10 +80,6 @@ loadSprite("enemyBullet", "enemyBullet.png")
 loadBean()
 
 scene("startButton", () => {
-    usePostEffect("vignette", {
-        "u_radius": 0.8,
-        "u_softness": 0.45
-    })
     let textColor = rgb(0, 0, 0)
     setBackground(rgb(red, green, blue))
     const btn = add([
@@ -140,7 +136,9 @@ usePostEffect("vignette", {
     "u_softness": 0.45
 })
 
-//usePostEffect("pixelate", { "u_resolution": vec2(width(), height()), "u_size": 2 })
+if(pixelate){
+    usePostEffect("pixelate", { "u_resolution": vec2(width(), height()), "u_size": 3 })
+}
 
     //Define map size
     const minX = 0

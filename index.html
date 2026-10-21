@@ -146,6 +146,10 @@
             <input type="radio" name="darkMode" onclick="document.getElementById('body').style.backgroundColor = rgb(232, 232, 232); document.getElementById('body').style.color = rgb(80, 80, 80); red = 232; green = 232; blue = 232" checked>Off
             <input type="radio" name="darkMode" onclick="document.getElementById('body').style.backgroundColor = 'black'; document.getElementById('body').style.color = 'white'; red = 0; green = 0; blue = 0">On
             <br>
+            <h2>Pixelate Game:</h3>
+            <input type="radio" name="pixelate" onclick="pixelate = false" checked>Off
+            <input type="radio" name="pixelate" onclick="pixelate = true">On
+            <br>
             <h2>Controls</h3>
             <p id="controlStatus">Select a control, then press a key.</p>
             <div id="controlOptions" class="controlsGrid">
