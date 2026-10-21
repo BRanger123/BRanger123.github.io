@@ -226,7 +226,7 @@ function selectUpgrade(upgradeString, upgradeNum){
 }
 
 function purchaseUpgrade(upgradeString, upgradeNum){
-    let price = upgradesPurchased*5
+    let price = upgradesPurchased*3
     if(price<=coins){
         coins = coins-price
         playerSprite = sprite
@@ -237,7 +237,7 @@ function purchaseUpgrade(upgradeString, upgradeNum){
         //Else add the string value of the purchased upgrade
         if(document.getElementById('chosenUpgrade').textContent == "No upgrade chosen"){document.getElementById('chosenUpgrade').textContent = `${upgradeString}`}
         else{document.getElementById('chosenUpgrade').textContent = `${document.getElementById('chosenUpgrade').textContent}, ${upgradeString}`}
-        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
+        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*3} coins`
         document.getElementById('coinsCount').textContent = `Coins: ${coins}`
     }
     //Cant afford

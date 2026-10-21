@@ -151,11 +151,11 @@ button:active{
     cursor: grabbing;
 }
 
-#startButton{background-color: #fc7878;}
-#questionButton{background-color: #4fb3ff;}
-#statsButton{background-color: #9db4c0;}
-#settingsButton{background-color: #5c6b73; color: rgb(255, 255, 255);}
-#extrasButton{background-color: #372534; color: white;}
+#startButton{background-color: rgb(135, 255, 249);}
+#questionButton{background-color: rgb(255, 255, 125);}
+#statsButton{background-color: white;}
+#settingsButton{background-color: rgb(121, 255, 121);}
+#extrasButton{background-color: rgb(255, 80, 80); color: white;}
 
 #customQuestions{
     border: 1px solid #818181;

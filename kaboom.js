@@ -15,6 +15,30 @@ kaboom({
     letterBox: true,    //Prevent resize abuse
 })
 
+loadShader("vignette", null, `
+    uniform float u_radius;
+    uniform float u_softness;
+    vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
+        vec4 baseColor = def_frag();
+        vec2 center = vec2(0.5, 0.5);
+        float dist = distance(uv, center);
+        float vignette = smoothstep(u_radius, u_radius - u_softness, dist);
+        return vec4(baseColor.rgb * vignette, baseColor.a);
+    }
+`)
+
+loadShader("pixelate", null, `
+    uniform float u_size;
+    uniform vec2 u_resolution;
+    vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
+        if (u_size <= 0.0) return def_frag();
+        vec2 nsize = vec2(u_size / u_resolution.x, u_size / u_resolution.y);
+        float x = floor(uv.x / nsize.x + 0.5);
+        float y = floor(uv.y / nsize.y + 0.5);
+        return texture2D(tex, vec2(x, y) * nsize) * color;
+    }
+`)
+
 loadFont("jersey", "customFont.ttf", {})    //Custom font, o means outlined
 loadFont("jerseyo", "customFont.ttf", { 
     outline: 4
@@ -56,6 +80,10 @@ loadSprite("enemyBullet", "enemyBullet.png")
 loadBean()
 
 scene("startButton", () => {
+    usePostEffect("vignette", {
+        "u_radius": 0.8,
+        "u_softness": 0.45
+    })
     let textColor = rgb(0, 0, 0)
     setBackground(rgb(red, green, blue))
     const btn = add([
@@ -106,6 +134,13 @@ scene(1, () => {
     //else{red = 255; green = 255; blue = 255; textColor = rgb(255, 255, 255)}
     setBackground(rgb(0, 0, 0))
     setGravity(0)
+
+usePostEffect("vignette", {
+    "u_radius": 0.9, 
+    "u_softness": 0.45
+})
+
+//usePostEffect("pixelate", { "u_resolution": vec2(width(), height()), "u_size": 2 })
 
     //Define map size
     const minX = 0
@@ -258,13 +293,21 @@ scene(1, () => {
                 ])
                 beam.onUpdate(() => {if(!isPaused){beam.move(beam.dir.scale(this.beamSpeed))}})    //Moves in dir by speed every frame
                 beam.onCollide("enemy", (enemy) => {
-                    if(Math.random() <= this.critChance){       //If critical hit
-                        if(this.lifeSteal > 0){healPlayer(this.lifeSteal*3)}
-                        enemy.hurt(damage*3)
+                    if(this.critChance > 1){    //Special crit
+                        if(this.lifeSteal > 0){healPlayer(this.lifeSteal*2)}
+                        else{enemy.hurt(damage*2*this.critChance)}
+                        spawnText(enemy.pos, damage*2*this.critChance, rgb(0, 255, 242))
                         if(beam.penetration > 0){beam.penetration--}
                         else{beam.destroy()}
                     }
-                    else{
+                    else if(Math.random() <= this.critChance){       //Crit
+                        if(this.lifeSteal > 0){healPlayer(this.lifeSteal*2)}
+                        enemy.hurt(damage*2)
+                        spawnText(enemy.pos, damage*2, rgb(255, 255, 0))
+                        if(beam.penetration > 0){beam.penetration--}
+                        else{beam.destroy()}
+                    }
+                    else{   //Normal hit
                         if(this.lifeSteal > 0){healPlayer(this.lifeSteal)}
                         spawnText(enemy.pos, damage)
                         enemy.hurt(damage)
@@ -287,7 +330,7 @@ scene(1, () => {
             anchor("center"),
             text(textContent, { 
                 font: "jerseyo",
-                size: 32 
+                size: 37 
             }),
             pos(position.x+Math.random()*20, position.y+Math.random()*20),  //Rand so numbers do not overlap (shotgun)
             color(colour || textColor),
@@ -410,7 +453,7 @@ scene(1, () => {
         scale(1.2),
         pos(maxX/2, maxY/2),
         area(),
-        anchor("center"),   //So beams spawn at center
+        anchor(vec2(0,0.2)),
         body(),
         color(255, 255, 255),
         health(100 * (trait.maxHealthMultiplier ?? 1)),
@@ -419,6 +462,7 @@ scene(1, () => {
         //For easy OOP traits/ trackers below
         { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100 * (trait.maxHealthMultiplier ?? 1), cooldown: 0, dodge: 0, regenValue: 0, armor: 0, passiveCoin: 0 },
     ])
+    
     let playerAnimation = "idle"
     let facingLeft = false
     player.play(playerAnimation)
@@ -485,7 +529,7 @@ scene(1, () => {
         gadgetGlobal = cyclerBlasterGlobal
         blasterSprite.use(sprite("cycler"))
         blasterSprite.use(scale(2))
-        blasterSprite.use(anchor("top"))
+        blasterSprite.use(anchor("center"))
     }
     if(selectedGadgetName=="Beam"){
         gadgetGlobal = beamBlasterGlobal
@@ -499,7 +543,7 @@ scene(1, () => {
         selectedGadget = "Spark"
     }
     gadgetGlobal.beamsFired *= trait.projectileMultiplier || 1
-    gadgetGlobal.critChance = trait.critChance || gadgetGlobal.critChance
+    gadgetGlobal.critChance = gadgetGlobal.critChance + (trait.critChance || 0)
 
     //Initialize labels
     const coinsLabel = add([
@@ -595,7 +639,7 @@ scene(1, () => {
         //Override values
         if(makeBoss){
             enemySprite = "boss"
-            enemyHealth = 300 * difficulty
+            enemyHealth = 250 * difficulty
             enemySpeed *= 1.7
             enemyDamage *= 2.5
             coinsDropped *= 5
@@ -764,7 +808,7 @@ scene(1, () => {
             if(nextUpgrade==3){player.speed += Math.ceil(0.3*upgradeQuality*player.speed)}
             if(nextUpgrade==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
             if(nextUpgrade==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
-            if(nextUpgrade==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
+            if(nextUpgrade==6){gadgetGlobal.critChance += 0.07*upgradeQuality}
             if(nextUpgrade==7){player.dodge += 10*upgradeQuality}
             if(nextUpgrade==8){player.maxHealth += Math.floor(player.maxHealth*0.25*upgradeQuality)}
             if(nextUpgrade==9){player.regenValue += Math.floor(5*upgradeQuality)}
@@ -1112,6 +1156,8 @@ scene(1, () => {
         let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)    //Convert to degrees
         blasterSprite.angle = angle
         blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
+        let facingLeft = diff.x < 0
+        blasterSprite.flipY = facingLeft
     })
 
     let deathScreenShown = false
