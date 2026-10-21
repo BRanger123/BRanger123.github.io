@@ -313,7 +313,7 @@ if(pixelate){
                         else{beam.destroy()}
                     }
                     enemy.use(color(rgb(255, 0, 0)))
-                    wait(0.2, () => {
+                    wait(0.1, () => {
                         enemy.use(color(enemy.colorRGB))
                     })
                 })
@@ -369,7 +369,7 @@ if(pixelate){
             shake(damage)
             spawnText(player.pos, `-${damage}`, rgb(255, 0, 0))
             player.use(color(rgb(255, 0, 0)))
-            wait(0.2, () => {
+            wait(0.1, () => {
                 player.use(color(rgb(255, 255, 255)))
             })
         }
@@ -388,7 +388,7 @@ if(pixelate){
         }
         healthLabel.text = `Health: ${player.hp()}`
         player.use(color(rgb(0, 255, 0)))
-        wait(0.2, () => {
+        wait(0.1, () => {
             player.use(color(rgb(255, 255, 255)))
         })
     }
