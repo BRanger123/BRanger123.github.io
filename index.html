@@ -10,9 +10,9 @@
         <div id="menu">
             <h1>Bricklet</h1>
             <h3>By Barnaby Ranger</h3>
-            <h2 style="color: rgb(0,255,242); background-color: black;">Added super crits</h2>
+            <h2>Mushrooms heal you...</h2>
         	<div class="buttonContainer">
-                <button id="startButton" onclick="upgradeValue=0; websiteGoTo('weaponSelect')">Game</button><br>
+                <button id="startButton" onclick="upgradeValue=0; websiteGoTo('weaponSelect'); document.getElementById('currentGear').textContent = 'Gear: Not chosen'; document.getElementById('weaponSelectContinue').style.display = 'none'; document.getElementById('weaponInfo').textContent = 'Select a gadget to see its stats.'">Game</button><br>
                 <button id="questionButton" onclick="answerStreak = 0; startQuestion(); document.getElementById('questionBackButton').style.display = 'inline-block'">Quiz</button><br>
                 <button id="statsButton" onclick="websiteGoTo('stats'); updateStats()">Stats</button><br>
                 <button id="settingsButton" onclick="websiteGoTo('settings')">Settings</button><br>
@@ -49,19 +49,19 @@
             <h1>Choose an Upgrade</h1>
             <h2 id="coinsCount">coins not found</h2>
             <p id="upgradePrice">Upgrade will cost 0 coins</p>
-            <div id="upgradeOptions" class="upgradeGrid">
-                <button data-upgrade-index = "1" selectedButton = "false" onclick="selectUpgrade('Damage', 1)" id="damageUpgrade"><strong>Damage</strong><small>More power per hit</small></button>
-                <button data-upgrade-index = "2" selectedButton = "false" onclick="selectUpgrade('Capacity', 2)" id="capacityUpgrade"><strong>Capacity</strong><small>More shots per magazine</small></button>
-                <button data-upgrade-index = "3" selectedButton = "false" onclick="selectUpgrade('Speed', 3)" id="speedUpgrade"><strong>Speed</strong><small>Move and dash faster</small></button>
-                <button data-upgrade-index = "4" selectedButton = "false" onclick="selectUpgrade('Penetration', 4)" id="penetrationUpgrade"><strong>Penetration</strong><small>Pierce through enemies</small></button>
-                <button data-upgrade-index = "5" selectedButton = "false" onclick="selectUpgrade('Life Steal', 5)" id="lifeStealUpgrade"><strong>Life Steal</strong><small>Heal more on hits</small></button>
-                <button data-upgrade-index = "6" selectedButton = "false" onclick="selectUpgrade('Crit %', 6)" id="critUpgrade"><strong>Crit %</strong><small>Critical hit chance</small></button>
-                <button data-upgrade-index = "7" selectedButton = "false" onclick="selectUpgrade('Dodge %', 7)" id="dodgeUpgrade"><strong>Dodge %</strong><small>Increas dodge chance</small></button>
-                <button data-upgrade-index = "8" selectedButton = "false" onclick="selectUpgrade('Health', 8)" id="healthUpgrade"><strong>Health</strong><small>Bigger health pool</small></button>
-                <button data-upgrade-index = "9" selectedButton = "false" onclick="selectUpgrade('Regen', 9)" id="regenUpgrade"><strong>Regen</strong><small>Regen more health</small></button>
-                <button data-upgrade-index = "10" selectedButton = "false" onclick="selectUpgrade('Armor', 10)" id="armorUpgrade"><strong>Armor</strong><small>Take less damage</small></button>
-                <button data-upgrade-index = "11" selectedButton = "false" onclick="selectUpgrade('Passive Coin', 11)" id="passiveCoinUpgrade"><strong>Passive Coin</strong><small>Earn coins every round</small></button>
-                <button data-upgrade-index = "12" selectedButton = "false" onclick="selectUpgrade('Coin Magnet', 12)" id="coinMagnetUpgrade"><strong>Coin Magnet</strong><small>Coins attract faster</small></button>
+            <div class="upgradeGrid">
+                <button onclick="selectUpgrade('Damage', 1)" id="damageUpgrade"><strong>Damage</strong><small>More power per hit</small></button>
+                <button onclick="selectUpgrade('Capacity', 2)" id="capacityUpgrade"><strong>Capacity</strong><small>More shots per magazine</small></button>
+                <button onclick="selectUpgrade('Speed', 3)" id="speedUpgrade"><strong>Speed</strong><small>Move and dash faster</small></button>
+                <button onclick="selectUpgrade('Penetration', 4)" id="penetrationUpgrade"><strong>Penetration</strong><small>Pierce through enemies</small></button>
+                <button onclick="selectUpgrade('Life Steal', 5)" id="lifeStealUpgrade"><strong>Life Steal</strong><small>Heal more on hits</small></button>
+                <button onclick="selectUpgrade('Crit %', 6)" id="critUpgrade"><strong>Crit %</strong><small>Critical hit chance</small></button>
+                <button onclick="selectUpgrade('Dodge %', 7)" id="dodgeUpgrade"><strong>Dodge %</strong><small>Increas dodge chance</small></button>
+                <button onclick="selectUpgrade('Health', 8)" id="healthUpgrade"><strong>Health</strong><small>Bigger health pool</small></button>
+                <button onclick="selectUpgrade('Regen', 9)" id="regenUpgrade"><strong>Regen</strong><small>Regen more health</small></button>
+                <button onclick="selectUpgrade('Armor', 10)" id="armorUpgrade"><strong>Armor</strong><small>Take less damage</small></button>
+                <button onclick="selectUpgrade('Passive Coin', 11)" id="passiveCoinUpgrade"><strong>Passive Coin</strong><small>Earn coins every round</small></button>
+                <button onclick="selectUpgrade('Coin Magnet', 12)" id="coinMagnetUpgrade"><strong>Coin Magnet</strong><small>Coins attract faster</small></button>
             </div>
             <h2 id="chosenUpgrade">No upgrade chosen</h2>
             <button id="upgradePurchase" onclick="purchaseUpgrade(selectedUpgradeString, selectedUpgradeNum); this.style.display = 'none'" style="display: none">Purchase</button><br><br>
@@ -72,41 +72,36 @@
             <h1>Weapon Select</h1>
             <h2 id="currentGear">Gear: Not chosen</h2>
             <p id="weaponInfo">Select a gadget to see its stats.</p>
-            <div id="weaponOptions" class="weaponGrid">
-                <button data-gadget-index = "1" selectedButton = "false" onclick="selectGadget('Blast', 1)">Blast</button>
-                <button data-gadget-index = "2" selectedButton = "false" onclick="selectGadget('Cycler', 2)">Cycler</button>
-                <button data-gadget-index = "3" selectedButton = "false" onclick="selectGadget('Beam', 3)">Beam</button>
-                <button data-gadget-index = "4" selectedButton = "false" onclick="selectGadget('Spark', 4)">Spark</button>
+            <div class="weaponGrid">
+                <button onclick="selectGadget('Blast')">Blast</button>
+                <button onclick="selectGadget('Cycler')">Cycler</button>
+                <button onclick="selectGadget('Beam')">Beam</button>
+                <button onclick="selectGadget('Spark')">Spark</button>
             </div>
             <h2>Difficulty:</h2> 
             <input type="range" min="1" max="5" step="1" value="3" class="slider" id="difficultySlider"><br>
             <h2 id="difficultyOutput"></h2>
-            <button id="traitEntryButton" onclick="websiteGoTo('traitSelect')">Trait: None</button><br><br>
             <button id="weaponSelectContinue" onclick="playLevel(1)" style="display: none;">Continue</button><br><br>
             <!--<button onclick="websiteGoTo('shop'); document.getElementById('coinsCount').textContent = `Coins: ${coins}`">Skins</button><br><br>-->
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button><br>
         </div>
 
-        <div id="traitSelect" style="display: none;">
-            <h1>Choose Trait</h1>
-            <h2 id="traitName">Trait: None</h2>
-            <p id="traitInfo">Select a trait to see what it does.</p>
-            <div id="traitOptions" class="traitGrid">
-                <button data-trait-index="0" selectedButton="true" onclick="selectTrait(0)">None</button>
-                <button data-trait-index="1" selectedButton="false" onclick="selectTrait(1)">Tank</button>
-                <button data-trait-index="2" selectedButton="false" onclick="selectTrait(2)">Reckless</button>
-                <button data-trait-index="3" selectedButton="false" onclick="selectTrait(3)">Insatiable</button>
-                <button data-trait-index="4" selectedButton="false" onclick="selectTrait(4)">Lucky</button>
-                <button data-trait-index="5" selectedButton="false" onclick="selectTrait(5)">Combonautic</button>
-                <button data-trait-index="6" selectedButton="false" onclick="selectTrait(6)">Catastrophiser</button>
-                <button data-trait-index="7" selectedButton="false" onclick="selectTrait(7)">Indecisive</button>
-                <button data-trait-index="8" selectedButton="false" onclick="selectTrait(8)">Mercenary</button>
-                <button data-trait-index="9" selectedButton="false" onclick="selectTrait(9)">Precise</button>
+        <div id="abilitySelect" style="display: none;">
+            <h1>Choose Ability</h1>
+            <h2 id="currentGear">Ability: Not chosen</h2>
+            <p id="weaponInfo">Select an ability to see what it does.</p>
+            <div class="buttonContainer">
+                <button onclick="purchaseSkin('piskel', 0, this)">bean</button><br>
+                <button onclick="purchaseSkin('dino', 20, this)">dino (20)</button><br>
+                <button onclick="purchaseSkin('bag', 35, this)">bag (35)</button><br>
+                <button onclick="purchaseSkin('ghosty', 50, this)">ghosty (50)</button><br>
+                <!--<button onclick="purchaseSkin('mark', 200, this)">mark (200)</button><br>-->
+                <button onclick="purchaseSkin('gigagantrum', 500, this)">gigagantrum (500)</button><br>
             </div>
             <button onclick="websiteGoTo('weaponSelect')">Continue</button>
         </div>
 
-        <!--<div id="shop" style="display: none;">
+        <div id="shop" style="display: none;">
             <h1>Shop</h1>
             <h2 id="coinsCount">coins not found</h2>
             <h2 id="currentSkin">Skin: bean</h2>
@@ -116,19 +111,22 @@
                 <button onclick="purchaseSkin('dino', 20, this)">dino (20)</button><br>
                 <button onclick="purchaseSkin('bag', 35, this)">bag (35)</button><br>
                 <button onclick="purchaseSkin('ghosty', 50, this)">ghosty (50)</button><br>
+                <!--<button onclick="purchaseSkin('mark', 200, this)">mark (200)</button><br>-->
                 <button onclick="purchaseSkin('gigagantrum', 500, this)">gigagantrum (500)</button><br>
             </div>
             <button onclick="websiteGoTo('weaponSelect')">Continue</button>
-        </div>-->
+        </div>
 
         <div id="questions" style="display: none;">
             <h1>Questionnaire</h1><br>
             <h2 id="answerStreak">Answer Streak #</h2>
             <h2 id="question"></h2><br>
-            <div id="answerOptions" class="answerGrid">
-                <button id="answer1" onclick="checkAnswer(1)"></button>
+            <div class="answerButtonContainer">
+                <button id="answer1" onclick="checkAnswer(1)"></button><br>
                 <button id="answer2" onclick="checkAnswer(2)"></button>
-                <button id="answer3" onclick="checkAnswer(3)"></button>
+            </div><br><br>
+            <div class="answerButtonContainer">
+                <button id="answer3" onclick="checkAnswer(3)"></button><br>
                 <button id="answer4" onclick="checkAnswer(4)"></button>
             </div><br><br>
             <button id="continueButton" onclick="startQuestion()" style="display: none;">Continue</button>
@@ -146,26 +144,22 @@
             <input type="radio" name="darkMode" onclick="document.getElementById('body').style.backgroundColor = rgb(232, 232, 232); document.getElementById('body').style.color = rgb(80, 80, 80); red = 232; green = 232; blue = 232" checked>Off
             <input type="radio" name="darkMode" onclick="document.getElementById('body').style.backgroundColor = 'black'; document.getElementById('body').style.color = 'white'; red = 0; green = 0; blue = 0">On
             <br>
-            <h2>Pixelate Game:</h3>
-            <input type="radio" name="pixelate" onclick="pixelate = false" checked>Off
-            <input type="radio" name="pixelate" onclick="pixelate = true">On
-            <br>
             <h2>Controls</h3>
             <p id="controlStatus">Select a control, then press a key.</p>
-            <div id="controlOptions" class="controlsGrid">
-                <button data-control-index="1" selectedButton="false" onclick="beginControlBind('up', 1)">Move up: <span id="control-up">W</span></button>
-                <button data-control-index="2" selectedButton="false" onclick="beginControlBind('left', 2)">Move left: <span id="control-left">A</span></button>
-                <button data-control-index="3" selectedButton="false" onclick="beginControlBind('down', 3)">Move down: <span id="control-down">S</span></button>
-                <button data-control-index="4" selectedButton="false" onclick="beginControlBind('right', 4)">Move right: <span id="control-right">D</span></button>
-                <button data-control-index="5" selectedButton="false" onclick="beginControlBind('dash', 5)">Dash: <span id="control-dash">Q</span></button>
-                <button data-control-index="6" selectedButton="false" onclick="beginControlBind('reload', 6)">Reload: <span id="control-reload">E</span></button>
+            <div id="controlsMenu" class="controlsGrid">
+                <button onclick="beginControlBind('up')">Move up: <span id="control-up">W</span></button>
+                <button onclick="beginControlBind('left')">Move left: <span id="control-left">A</span></button>
+                <button onclick="beginControlBind('down')">Move down: <span id="control-down">S</span></button>
+                <button onclick="beginControlBind('right')">Move right: <span id="control-right">D</span></button>
+                <button onclick="beginControlBind('dash')">Dash: <span id="control-dash">Q</span></button>
+                <button onclick="beginControlBind('reload')">Reload: <span id="control-reload">E</span></button>
             </div>
             <br>
             <h2>Change questions:</h3>
             <textarea id="customQuestions" placeholder="<Format:> 
 Question1,CorrectAnswer,Answer,Answer,Answer
 Question2,CorrectAnswer,Answer,Answer,Answer" rows="18" cols="45"></textarea><br>
-            <button onclick="if(document.getElementById('customQuestions').value != ''){questions = changeQuestions()}">Use Custom Questions</button>
+            <button onclick="if(document.getElementById('customQuestions').value != ''){questions = changeQuestions()}else{alert('Cannot use no questions!')}">Use Custom Questions</button>
             <br>
             <br>
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
