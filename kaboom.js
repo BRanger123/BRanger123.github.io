@@ -872,7 +872,8 @@ scene(1, () => {
             if(!isPaused){
                 //Move enemy either to player with charge, by speed or away if too close
                 let direction = player.pos.sub(enemy.pos).unit()
-                if(enemy.isBoss){direction = playerPredictedPos.sub(enemy.pos).unit()}
+                //Bosses track when far from player
+                if(enemy.isBoss && enemy.pos.dist(player.pos) > 200){direction = playerPredictedPos.sub(enemy.pos).unit()}
                 if(enemy.enemyType === "charger"){
                     if(enemy.chargeTimer <= 0){ //If cooldown over then start new charge
                         enemy.chargeDirection = direction
@@ -920,7 +921,8 @@ scene(1, () => {
         const unitVec = dir.unit()  //Vector normalisation (fixes diagonals)
         if(extraSpeed){player.move(unitVec.scale(player.speed*1.3))}
         player.move(unitVec.scale(player.speed))    //Moves in dir by speed every frame
-        playerPredictedPos = player.pos.add(vec2(unitVec.scale(player.speed)))
+        playerPredictedPos = player.pos.add(vec2(unitVec.scale(player.speed)))   //Predict player position for boss aiming
+        //addKaboom(playerPredictedPos) //For tracking predicted pos
 
         //Animation logic
         if(dir.x !== 0 && !player.is("dash")){
