@@ -1,4 +1,6 @@
 //Import kaboom.js
+//Electron or Cordova
+//
 import kaboom from "https://unpkg.com/kaboom@3000.0.1/dist/kaboom.mjs"
  
 //Get the canvas element
@@ -168,6 +170,8 @@ scene(1, () => {
     upgradesPurchased = 0
     const beamSprite = `${selectedGadget.toLowerCase()}Bullet`  //Choose what sprite to use
 
+    let playerPredictedPos
+
     //Code for beam gadget class
     class BeamGadget{
         constructor(beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto = false, fireRate = 100, penetration = 0, critChance){
@@ -300,7 +304,7 @@ scene(1, () => {
     }
 
     function attackPlayer(damage){
-        if(Math.random()*100 < (player.dodge/(player.dodge+50))){   //Diminishing returns
+        if(Math.random() < (player.dodge/(player.dodge+50))){   //Diminishing returns
             spawnText(player.pos, "Dodge!")
         }
         else{
@@ -592,6 +596,7 @@ scene(1, () => {
         if(makeBoss){
             enemySprite = "boss"
             enemyHealth = 300 * difficulty
+            enemySpeed *= 1.7
             enemyDamage *= 2.5
             coinsDropped *= 5
             boss = true
@@ -866,7 +871,8 @@ scene(1, () => {
             }
             if(!isPaused){
                 //Move enemy either to player with charge, by speed or away if too close
-                const direction = player.pos.sub(enemy.pos).unit()
+                let direction = player.pos.sub(enemy.pos).unit()
+                if(enemy.isBoss){direction = playerPredictedPos.sub(enemy.pos).unit()}
                 if(enemy.enemyType === "charger"){
                     if(enemy.chargeTimer <= 0){ //If cooldown over then start new charge
                         enemy.chargeDirection = direction
@@ -914,6 +920,7 @@ scene(1, () => {
         const unitVec = dir.unit()  //Vector normalisation (fixes diagonals)
         if(extraSpeed){player.move(unitVec.scale(player.speed*1.3))}
         player.move(unitVec.scale(player.speed))    //Moves in dir by speed every frame
+        playerPredictedPos = player.pos.add(vec2(unitVec.scale(player.speed)))
 
         //Animation logic
         if(dir.x !== 0 && !player.is("dash")){

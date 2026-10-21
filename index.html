@@ -81,7 +81,7 @@
             <h2>Difficulty:</h2> 
             <input type="range" min="1" max="5" step="1" value="3" class="slider" id="difficultySlider"><br>
             <h2 id="difficultyOutput"></h2>
-            <button id="traitEntryButton" onclick="websiteGoTo('traitSelect')" style="background-color: #f8da46;">Trait: None</button><br><br>
+            <button id="traitEntryButton" onclick="websiteGoTo('traitSelect')">Trait: None</button><br><br>
             <button id="weaponSelectContinue" onclick="playLevel(1)" style="display: none;">Continue</button><br><br>
             <!--<button onclick="websiteGoTo('shop'); document.getElementById('coinsCount').textContent = `Coins: ${coins}`">Skins</button><br><br>-->
             <button onclick="websiteGoTo('menu')" id="backButton">Back</button><br>
@@ -148,13 +148,13 @@
             <br>
             <h2>Controls</h3>
             <p id="controlStatus">Select a control, then press a key.</p>
-            <div id="controlsMenu" class="controlsGrid">
-                <button onclick="beginControlBind('up')">Move up: <span id="control-up">W</span></button>
-                <button onclick="beginControlBind('left')">Move left: <span id="control-left">A</span></button>
-                <button onclick="beginControlBind('down')">Move down: <span id="control-down">S</span></button>
-                <button onclick="beginControlBind('right')">Move right: <span id="control-right">D</span></button>
-                <button onclick="beginControlBind('dash')">Dash: <span id="control-dash">Q</span></button>
-                <button onclick="beginControlBind('reload')">Reload: <span id="control-reload">E</span></button>
+            <div id="controlOptions" class="controlsGrid">
+                <button data-control-index="1" selectedButton="false" onclick="beginControlBind('up', 1)">Move up: <span id="control-up">W</span></button>
+                <button data-control-index="2" selectedButton="false" onclick="beginControlBind('left', 2)">Move left: <span id="control-left">A</span></button>
+                <button data-control-index="3" selectedButton="false" onclick="beginControlBind('down', 3)">Move down: <span id="control-down">S</span></button>
+                <button data-control-index="4" selectedButton="false" onclick="beginControlBind('right', 4)">Move right: <span id="control-right">D</span></button>
+                <button data-control-index="5" selectedButton="false" onclick="beginControlBind('dash', 5)">Dash: <span id="control-dash">Q</span></button>
+                <button data-control-index="6" selectedButton="false" onclick="beginControlBind('reload', 6)">Reload: <span id="control-reload">E</span></button>
             </div>
             <br>
             <h2>Change questions:</h3>

@@ -163,6 +163,9 @@ input.addEventListener("keydown", function(event){
     controlBindings[bindingTarget] = event.key.toLowerCase()
     document.getElementById(`control-${bindingTarget}`).textContent = event.key.toUpperCase()
     document.getElementById('controlStatus').textContent = 'Control updated.'
+    document.querySelectorAll('#controlOptions button').forEach((button) => {
+        button.setAttribute('selectedButton', "false")
+    })
     bindingTarget = null
 })
 input.addEventListener("keypress", function(event){
@@ -378,7 +381,10 @@ function selectGadget(gearName, buttonId){
     document.getElementById('weaponSelectContinue').style.display = "inline-block"        
 }
 
-function beginControlBind(control) {
+function beginControlBind(control, buttonId) {
+    document.querySelectorAll('#controlOptions button').forEach((button) => {
+        button.setAttribute('selectedButton', String(Number(button.dataset.controlIndex) === buttonId))
+    })
     bindingTarget = control
     document.getElementById('controlStatus').textContent = `Press a key for ${control}.`
 }
