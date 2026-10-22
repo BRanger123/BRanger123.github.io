@@ -1,4 +1,6 @@
 //Import kaboom.js
+//Electron or Cordova
+//
 import kaboom from "https://unpkg.com/kaboom@3000.0.1/dist/kaboom.mjs"
  
 //Get the canvas element
@@ -12,6 +14,30 @@ kaboom({
     background: [red, green, blue],
     letterBox: true,    //Prevent resize abuse
 })
+
+loadShader("vignette", null, `
+    uniform float u_radius;
+    uniform float u_softness;
+    vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
+        vec4 baseColor = def_frag();
+        vec2 center = vec2(0.5, 0.5);
+        float dist = distance(uv, center);
+        float vignette = smoothstep(u_radius, u_radius - u_softness, dist);
+        return vec4(baseColor.rgb * vignette, baseColor.a);
+    }
+`)
+
+loadShader("pixelate", null, `
+    uniform float u_size;
+    uniform vec2 u_resolution;
+    vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
+        if (u_size <= 0.0) return def_frag();
+        vec2 nsize = vec2(u_size / u_resolution.x, u_size / u_resolution.y);
+        float x = floor(uv.x / nsize.x + 0.5);
+        float y = floor(uv.y / nsize.y + 0.5);
+        return texture2D(tex, vec2(x, y) * nsize) * color;
+    }
+`)
 
 loadFont("jersey", "customFont.ttf", {})    //Custom font, o means outlined
 loadFont("jerseyo", "customFont.ttf", { 
@@ -105,6 +131,15 @@ scene(1, () => {
     setBackground(rgb(0, 0, 0))
     setGravity(0)
 
+usePostEffect("vignette", {
+    "u_radius": 0.9, 
+    "u_softness": 0.45
+})
+
+if(pixelate){
+    usePostEffect("pixelate", { "u_resolution": vec2(width(), height()), "u_size": 3 })
+}
+
     //Define map size
     const minX = 0
     const minY = 0
@@ -141,9 +176,10 @@ scene(1, () => {
             color(mapRGB),
         ])
     }
-
-    let round = 0
+    const trait = window.traitInfo[traitValue]
+    let round = trait.startingRound || 0
     let isRoundSpecial = false
+    let roundComplete = false
     //Calculate added difficulty level
     let diffLevel = Number(document.getElementById('difficultySlider').value)
     diffLevel *= diffLevel  //Make values fall at a greater range
@@ -152,7 +188,6 @@ scene(1, () => {
     const enemies = []      //Used for movement and attack logic
     const spawnDist = 500
     let enemiesLeft
-    let roundComplete = false
     let enemiesDied = 0
     let enemiesDiedCounter = 0
     upgradesToApply = []
@@ -167,7 +202,9 @@ scene(1, () => {
     document.getElementById('chosenUpgrade').textContent = 'No upgrade chosen'
     upgradesPurchased = 0
     const beamSprite = `${selectedGadget.toLowerCase()}Bullet`  //Choose what sprite to use
-    
+
+    let playerPredictedPos
+
     //Code for beam gadget class
     class BeamGadget{
         constructor(beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto = false, fireRate = 100, penetration = 0, critChance){
@@ -228,6 +265,9 @@ scene(1, () => {
             }
             shake(0.004*(this.recoilForce))
             const baseDir = toWorld(mousePos()).sub(player.pos).unit()  //toWorld() lets func work outside initial map boundaries for camera code
+            const damage = this.beamDamage
+                * (trait.damageMultiplier ?? 1)
+                * (1 + player.dodge * (trait.damagePerDodge ?? 0))
             
             //Apply recoil
             const recoilDir = baseDir.scale(-this.recoilForce)  //Opposite to beam fire direction
@@ -251,21 +291,29 @@ scene(1, () => {
                 ])
                 beam.onUpdate(() => {if(!isPaused){beam.move(beam.dir.scale(this.beamSpeed))}})    //Moves in dir by speed every frame
                 beam.onCollide("enemy", (enemy) => {
-                    if(Math.random() <= this.critChance){       //If critical hit
-                        if(this.lifeSteal > 0){healPlayer(this.lifeSteal*3)}
-                        enemy.hurt(this.beamDamage*3)
+                    if(this.critChance > 1){    //Special crit
+                        if(this.lifeSteal > 0){healPlayer(this.lifeSteal*2)}
+                        else{enemy.hurt(damage*2*this.critChance)}
+                        spawnText(enemy.pos, (damage*2*this.critChance).toFixed(0), rgb(0, 255, 242))
                         if(beam.penetration > 0){beam.penetration--}
                         else{beam.destroy()}
                     }
-                    else{
+                    else if(Math.random() <= this.critChance){       //Crit
+                        if(this.lifeSteal > 0){healPlayer(this.lifeSteal*2)}
+                        enemy.hurt(damage*2)
+                        spawnText(enemy.pos, (damage*2).toFixed(0), rgb(255, 255, 0))
+                        if(beam.penetration > 0){beam.penetration--}
+                        else{beam.destroy()}
+                    }
+                    else{   //Normal hit
                         if(this.lifeSteal > 0){healPlayer(this.lifeSteal)}
-                        spawnText(enemy.pos, this.beamDamage)
-                        enemy.hurt(this.beamDamage)
+                        spawnText(enemy.pos, damage.toFixed(0))
+                        enemy.hurt(damage)
                         if(beam.penetration > 0){beam.penetration--}
                         else{beam.destroy()}
                     }
                     enemy.use(color(rgb(255, 0, 0)))
-                    wait(0.2, () => {
+                    wait(0.1, () => {
                         enemy.use(color(enemy.colorRGB))
                     })
                 })
@@ -280,7 +328,7 @@ scene(1, () => {
             anchor("center"),
             text(textContent, { 
                 font: "jerseyo",
-                size: 32 
+                size: 37 
             }),
             pos(position.x+Math.random()*20, position.y+Math.random()*20),  //Rand so numbers do not overlap (shotgun)
             color(colour || textColor),
@@ -297,18 +345,31 @@ scene(1, () => {
     }
 
     function attackPlayer(damage){
-        if(Math.random()*100 < (player.dodge/(player.dodge+50))){   //Diminishing returns
+        if(Math.random() < (player.dodge/(player.dodge+50))){   //Diminishing returns
             spawnText(player.pos, "Dodge!")
         }
         else{
             damage *= (1-(player.armor/(player.armor+50)))  //Diminishing returns
             damage = Math.floor(damage)
+            if(trait.coinsAsHealth && coins > 0){
+                const coinsSpent = Math.min(coins, damage)
+                coins -= coinsSpent
+                damage -= coinsSpent
+                coinsLabel.text = `Coins: ${coins}`
+                document.getElementById("coinsCount").textContent = `Coins: ${coins}`
+                if(coinsSpent > 0){
+                    spawnText(player.pos, `-${coinsSpent} coins`, rgb(255, 191, 0))
+                }
+            }
+            if(damage <= 0){
+                return
+            }
             player.hurt(damage)
             healthLabel.text = `Health: ${Math.floor(player.hp())}` //Update health label
             shake(damage)
             spawnText(player.pos, `-${damage}`, rgb(255, 0, 0))
             player.use(color(rgb(255, 0, 0)))
-            wait(0.2, () => {
+            wait(0.1, () => {
                 player.use(color(rgb(255, 255, 255)))
             })
         }
@@ -327,13 +388,19 @@ scene(1, () => {
         }
         healthLabel.text = `Health: ${player.hp()}`
         player.use(color(rgb(0, 255, 0)))
-        wait(0.2, () => {
+        wait(0.1, () => {
             player.use(color(rgb(255, 255, 255)))
         })
     }
 
 
     function spawnCoin(xy){ //Argument cannot be "pos"
+        if(trait.autoCollectCoins){
+            coins += doubleCoins ? 2 : 1
+            coinsLabel.text = `Coins: ${coins}`
+            document.getElementById("coinsCount").textContent = `Coins: ${coins}`
+            return
+        }
         const coin = add([
             sprite("coin"),
             anchor("center"),
@@ -384,15 +451,16 @@ scene(1, () => {
         scale(1.2),
         pos(maxX/2, maxY/2),
         area(),
-        anchor("center"),   //Gadget sprite tracks this point
+        anchor(vec2(0,0.2)),
         body(),
         color(255, 255, 255),
-        health(100),
+        health(100 * (trait.maxHealthMultiplier ?? 1)),
         "player",   //For collision detection
         "object",
         //For easy OOP traits/ trackers below
-        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0, regenValue: 0, armor: 0, passiveCoin: 0 },
+        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100 * (trait.maxHealthMultiplier ?? 1), cooldown: 0, dodge: 0, regenValue: 0, armor: 0, passiveCoin: 0 },
     ])
+    
     let playerAnimation = "idle"
     let facingLeft = false
     player.play(playerAnimation)
@@ -442,7 +510,7 @@ scene(1, () => {
     sparkBlasterGlobal = sparkBlaster
     let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 4000, 1.5, false, 100, 1, 0.15)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 8, 30, 1, 5, 1000, 2, true, 70, 4, 0.1)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 10, 30, 1, 5, 1000, 2, true, 70, 4, 0.3)
     cyclerBlasterGlobal = cyclerBlaster
     let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 2.5, false, 200, 2, 0.2)
     beamBlasterGlobal = beamBlaster
@@ -459,7 +527,7 @@ scene(1, () => {
         gadgetGlobal = cyclerBlasterGlobal
         blasterSprite.use(sprite("cycler"))
         blasterSprite.use(scale(2))
-        blasterSprite.use(anchor("top"))
+        blasterSprite.use(anchor("center"))
     }
     if(selectedGadgetName=="Beam"){
         gadgetGlobal = beamBlasterGlobal
@@ -472,6 +540,8 @@ scene(1, () => {
         gadgetGlobal = sparkBlasterGlobal
         selectedGadget = "Spark"
     }
+    gadgetGlobal.beamsFired *= trait.projectileMultiplier || 1
+    gadgetGlobal.critChance = gadgetGlobal.critChance + (trait.critChance || 0)
 
     //Initialize labels
     const coinsLabel = add([
@@ -561,18 +631,19 @@ scene(1, () => {
         let enemyType = "chaser"
         let randColor = rgb(Math.random() * 255 + 100, Math.random() * 100 + 100, Math.random() * 100 + 100)
         let maxAttackCooldown = 2
-        let enemyDamage = Math.floor(2 * difficulty)
+        let enemyDamage = Math.floor(2*difficulty)
         let coinsDropped = Math.ceil(0.5*difficulty)
 
         //Override values
         if(makeBoss){
             enemySprite = "boss"
-            enemyHealth = 300 * difficulty
+            enemyHealth = 250 * difficulty
+            enemySpeed *= 1.7
             enemyDamage *= 2.5
             coinsDropped *= 5
             boss = true
         }
-        else if(Math.random() < 0.25){
+        else if(Math.random() < 0.25 || trait.enemyType == "charger"){
             enemySprite = "bag"
             enemyType = "charger"
             enemySpeed *= 1.2
@@ -580,7 +651,7 @@ scene(1, () => {
             maxAttackCooldown = 1.5
             enemyDamage *= 1.5
         }
-        else if(Math.random() < 0.25){
+        else if(Math.random() < 0.25 || trait.enemyType == "shooter"){
             enemySprite = "dino"
             enemyType = "shooter"
             enemySpeed *= 0.7
@@ -588,6 +659,15 @@ scene(1, () => {
             maxAttackCooldown = 3
             enemyDamage *= 2
         }
+        /*All enemies become dinos? or should they just be shooters but keep their stats?
+        if(trait.enemyType){
+            enemySprite = "dino"
+            enemyType = "shooter"
+            enemySpeed *= 0.7
+            enemyHealth *= 0.7
+            maxAttackCooldown = 3
+            enemyDamage *= 2
+        }*/
 
         const enemy = add([
             sprite(`${enemySprite}`),
@@ -653,19 +733,34 @@ scene(1, () => {
             "damage","capacity","speed","penetration","lifeSteal","crit",
             "dodge","health","regen","armor","passiveCoin","coinMagnet"
         ]
+        document.getElementById('chosenUpgrade').textContent = 'No upgrade chosen'
+        document.getElementById('upgradePurchase').style.display = 'none'
+        document.querySelectorAll('#upgradeOptions button').forEach((button) => {
+            button.setAttribute('selectedButton', "false")
+        })
         //Hide all upgrades
         for(let i=0; i<upgradeStrings.length; i++){
             document.getElementById(`${upgradeStrings[i]}Upgrade`).style.display = "none"
         }
-        let randomUpgrades = []
-        let randomUpgradeNum = -1
-        while(randomUpgrades.length != 4){  //Find random 4 numbers
-            randomUpgradeNum = Math.floor((Math.random()*upgradeStrings.length))
-            if(!randomUpgrades.includes(randomUpgradeNum)){randomUpgrades.push(randomUpgradeNum)}   //Only allow new numbers
+        const availableUpgrades = upgradeStrings
+            .map((_, index) => index)
+            .filter((index) => !(trait.noArmor && index === 9))
+        for(let i = availableUpgrades.length - 1; i > 0; i--){
+            const randomIndex = Math.floor(Math.random() * (i + 1))
+            const upgradeToSwap = availableUpgrades[i]
+            availableUpgrades[i] = availableUpgrades[randomIndex]
+            availableUpgrades[randomIndex] = upgradeToSwap
         }
-        //Show the random 4 upgrades
-        for(let i=0; i<randomUpgrades.length; i++){
-            document.getElementById(`${upgradeStrings[randomUpgrades[i]]}Upgrade`).style.display = "flex"
+        const upgradeCount = trait.automaticUpgradesPerRound ?? trait.upgradeChoiceCount ?? 4
+        const randomUpgrades = availableUpgrades.slice(0, upgradeCount)
+        if(trait.automaticUpgradesPerRound){
+            upgradesToApply.push(...randomUpgrades.map((index) => index + 1))
+            document.getElementById('chosenUpgrade').textContent = `Lucky selected ${randomUpgrades.length} upgrades for you.`
+        }
+        else{
+            for(const index of randomUpgrades){
+                document.getElementById(`${upgradeStrings[index]}Upgrade`).style.display = "flex"
+            }
         }
         if(questionsInGame){startQuestion()}
         else{websiteGoTo('upgrade')}
@@ -683,7 +778,7 @@ scene(1, () => {
             const clock = add([timer()])
             clock.loop(1, () => {
                 if(!isPaused){
-                    roundLabel.text = `Time untill next wave: ${nextWaveTime}`
+                    roundLabel.text = `Time until next wave: ${nextWaveTime}`
                     waiting = true
                     nextWaveTime = nextWaveTime - 1
                     if(nextWaveTime <= -1){ //If clock cycled completely
@@ -703,18 +798,24 @@ scene(1, () => {
         for(let i = 0; i<arrayLength; i++){
             let nextUpgrade = upgradesToApply.pop()
             //Find and apply upgrade
-            if(nextUpgrade==1){gadgetGlobal.beamDamage += Math.ceil(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
+            if(nextUpgrade==1){
+                gadgetGlobal.beamDamage += Math.ceil(0.3*upgradeQuality*gadgetGlobal.beamDamage)
+                player.dodge += (trait.dodgePerDamageUpgrade ?? 0) * upgradeQuality
+            }
             if(nextUpgrade==2){gadgetGlobal.magSize += Math.ceil(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
             if(nextUpgrade==3){player.speed += Math.ceil(0.3*upgradeQuality*player.speed)}
             if(nextUpgrade==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
             if(nextUpgrade==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
-            if(nextUpgrade==6){gadgetGlobal.critChance += 0.05*upgradeQuality}
+            if(nextUpgrade==6){gadgetGlobal.critChance += 0.07*upgradeQuality}
             if(nextUpgrade==7){player.dodge += 10*upgradeQuality}
             if(nextUpgrade==8){player.maxHealth += Math.floor(player.maxHealth*0.25*upgradeQuality)}
-            if(nextUpgrade==9){player.regenValue += Math.floor(2*upgradeQuality)}
-            if(nextUpgrade==10){player.armor += Math.floor(10*upgradeQuality)}
+            if(nextUpgrade==9){player.regenValue += Math.floor(5*upgradeQuality)}
+            if(nextUpgrade==10 && !trait.noArmor){player.armor += Math.floor(10*upgradeQuality)}
             if(nextUpgrade==11){player.passiveCoin += Math.floor(5*upgradeQuality)}
-            if(upgradeValue==12){coinMagForce += Math.floor(coinMagForce*0.6*upgradeQuality); coinsMagDist += Math.floor(coinMageDist*0.8*upgradeQuality)}
+            if(nextUpgrade==12){
+                coinMagForce += Math.floor(coinMagForce*0.6*upgradeQuality)
+                coinMagnetDist += Math.floor(coinMagnetDist*0.8*upgradeQuality)
+            }
         }
         upgradeQuality = 1
         upgradesToApply = []
@@ -725,14 +826,14 @@ scene(1, () => {
         //Bosses spawn first before clock starts
         //Every loop spawn enemies up to enemyNum
         for(let i=0; i<bosses; i++){
-            spawnEnemy(difficulty, true)
+            spawnEnemy(difficulty, true)    //True means enemy is a boss
         }
         const clock = add([timer()])
         clock.loop(time, () => {
             if(roundComplete){destroy(clock)}
             else{
                 for(let i=0; i<enemyNum; i++){
-                    spawnEnemy(difficulty, false)   //False means not boss
+                    if(!isPaused && player.exists() && !roundComplete){spawnEnemy(difficulty, false)}
                 }
             }
         })
@@ -766,7 +867,7 @@ scene(1, () => {
         //Decide round stats
         let enemyNum = Math.floor(2 + round * 1.5)
         let waves = Math.min(5, 1 + Math.floor(round / 3))
-        let difficulty = 0.8 + round * 0.4
+        let difficulty = 0.4 + round * 0.6
         difficulty *= diffLevel
         let bosses = Math.floor(round/5)
         //if(true){     //For testing special rounds
@@ -778,7 +879,7 @@ scene(1, () => {
         if(doubleEnemies){enemyNum *= 2; bosses *= 2}
         
         enemiesLeft = (waves * enemyNum) + bosses
-        spawnWave((round*2)+1, waves, enemyNum, difficulty, bosses)
+        spawnWave(3, waves, enemyNum, difficulty, bosses)
         //Refresh mushrooms
         for(let i = 0; i<5; i++){
             spawnMushroom(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100), difficulty)
@@ -812,7 +913,9 @@ scene(1, () => {
             }
             if(!isPaused){
                 //Move enemy either to player with charge, by speed or away if too close
-                const direction = player.pos.sub(enemy.pos).unit()
+                let direction = player.pos.sub(enemy.pos).unit()
+                //Bosses track when far from player
+                if(enemy.isBoss && enemy.pos.dist(player.pos) > 200){direction = playerPredictedPos.sub(enemy.pos).unit()}
                 if(enemy.enemyType === "charger"){
                     if(enemy.chargeTimer <= 0){ //If cooldown over then start new charge
                         enemy.chargeDirection = direction
@@ -860,6 +963,8 @@ scene(1, () => {
         const unitVec = dir.unit()  //Vector normalisation (fixes diagonals)
         if(extraSpeed){player.move(unitVec.scale(player.speed*1.3))}
         player.move(unitVec.scale(player.speed))    //Moves in dir by speed every frame
+        playerPredictedPos = player.pos.add(vec2(unitVec.scale(player.speed)))   //Predict player position for boss aiming
+        //addKaboom(playerPredictedPos) //For tracking predicted pos
 
         //Animation logic
         if(dir.x !== 0 && !player.is("dash")){
@@ -1049,6 +1154,8 @@ scene(1, () => {
         let angle = Math.atan2(diff.y, diff.x)*(180/Math.PI)    //Convert to degrees
         blasterSprite.angle = angle
         blasterSprite.pos = player.pos.add(Vec2.fromAngle(angle).scale(30))
+        let facingLeft = diff.x < 0
+        blasterSprite.flipY = facingLeft
     })
 
     let deathScreenShown = false
@@ -1058,6 +1165,7 @@ scene(1, () => {
         }
         deathScreenShown = true
         isPaused = true
+        roundComplete = true
         gameQuestions = false
 
         add([
@@ -1105,6 +1213,7 @@ scene(1, () => {
         })
         backBtn.onClick(() => {
             websiteGoTo("menu")
+            go("startButton")
         })
 
         const resetBtn = add([

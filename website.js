@@ -53,11 +53,76 @@ let questions
 let questionsInGame = false 
 let gameQuestions = false
 let darkMode = false
+let pixelate = false
 let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }     //Easier to change bindings this way
 let bindingTarget = null
 let upgradesPurchased = 0
 let selectedUpgradeString
 let selectedUpgradeNum
+let traitName = "None"
+let traitValue = 0
+const traitInfo = [
+    {
+        name: "None",
+        description: "You are ordinary.",
+    },
+    {
+        name: "Tank",
+        description: "Start with 50% more health and deal 25% less damage.",
+        maxHealthMultiplier: 1.5,
+        damageMultiplier: 0.75,
+    },
+    {
+        name: "Reckless",
+        description: "Deal 50% more damage, but start with 40% less health.",
+        maxHealthMultiplier: 0.6,
+        damageMultiplier: 1.5,
+    },
+    {
+        name: "Insatiable",
+        description: "Coins absorb incoming damage before your health does.",
+        coinsAsHealth: true,
+    },
+    {
+        name: "Lucky",
+        description: "Receive two random upgrades each round instead of choosing upgrades.",
+        automaticUpgradesPerRound: 2,
+    },
+    {
+        name: "Combonautic",
+        description: "Dodge increases damage, damage upgrades increase dodge, and armor is unavailable.",
+        damagePerDodge: 0.01,
+        dodgePerDamageUpgrade: 5,
+        noArmor: true,
+    },
+    {
+        name: "Catastrophiser",
+        description: "Fire twice as many shots, but choose from only two upgrades each round.",
+        projectileMultiplier: 2,
+        upgradeChoiceCount: 2,
+    },
+    {
+        name: "Indecisive",
+        description: "Choose from six upgrades each round. All enemies are chargers.",
+        upgradeChoiceCount: 6,
+        enemyType: "charger",
+    },
+    {
+        name: "Mercenary",
+        description: "Collect coins as soon as they drop. All enemies are shooters.",
+        autoCollectCoins: true,
+        enemyType: "shooter",
+    },
+    {
+        name: "Precise",
+        description: "Every shot is a critical hit, but enemies start at round 3 difficulty.",
+        critChance: 1,
+        startingRound: 2,
+    },
+]
+window.traitInfo = traitInfo
+
+
 let red = 232
 let green = 232
 let blue = 232
@@ -99,6 +164,9 @@ input.addEventListener("keydown", function(event){
     controlBindings[bindingTarget] = event.key.toLowerCase()
     document.getElementById(`control-${bindingTarget}`).textContent = event.key.toUpperCase()
     document.getElementById('controlStatus').textContent = 'Control updated.'
+    document.querySelectorAll('#controlOptions button').forEach((button) => {
+        button.setAttribute('selectedButton', "false")
+    })
     bindingTarget = null
 })
 input.addEventListener("keypress", function(event){
@@ -111,13 +179,14 @@ input.addEventListener("keypress", function(event){
         resetInputs()
         document.getElementById('gameWindow').style.display = 'none'
         websiteGoTo('menu')
+        go("startButton")
     }
 })
 
 const originalTitle = document.title
 document.addEventListener("visibilitychange", () => {
     //Change title if user left page
-    document.title = document.hidden ? "Come back :(" : originalTitle
+    if(document.hidden){document.title = "Come back :("}else{document.title = originalTitle}
 })
 
 function websiteGoTo(divId){
@@ -125,6 +194,18 @@ function websiteGoTo(divId){
     document.getElementById(currentDivId).style.display = "none"
     document.getElementById(divId).style.display = "inline-block"
     currentDivId = divId
+}
+
+function selectTrait(traitId){
+    const trait = traitInfo[traitId]
+    traitValue = traitId
+    traitName = trait.name
+    document.getElementById('traitName').textContent = `Trait: ${trait.name}`
+    document.getElementById('traitInfo').textContent = trait.description
+    document.getElementById('traitEntryButton').textContent = `Trait: ${trait.name}`
+    document.querySelectorAll('#traitOptions button').forEach((button) => {
+        button.setAttribute('selectedButton', String(Number(button.dataset.traitIndex) === traitId))
+    })
 }
 
 function playLevel(level){
@@ -137,13 +218,16 @@ function playLevel(level){
 }
 
 function selectUpgrade(upgradeString, upgradeNum){
+    document.querySelectorAll('#upgradeOptions button').forEach((button) => {
+        button.setAttribute('selectedButton', String(Number(button.dataset.upgradeIndex) === upgradeNum))
+    })
     selectedUpgradeString = upgradeString; selectedUpgradeNum = upgradeNum  //Can be used later when purchasing upgrade
     document.getElementById('upgradePurchase').style.display = "inline-block"
     document.getElementById('upgradePurchase').textContent = `Purchase ${upgradeString}`
 }
 
 function purchaseUpgrade(upgradeString, upgradeNum){
-    let price = upgradesPurchased*5
+    let price = upgradesPurchased*3
     if(price<=coins){
         coins = coins-price
         playerSprite = sprite
@@ -154,7 +238,7 @@ function purchaseUpgrade(upgradeString, upgradeNum){
         //Else add the string value of the purchased upgrade
         if(document.getElementById('chosenUpgrade').textContent == "No upgrade chosen"){document.getElementById('chosenUpgrade').textContent = `${upgradeString}`}
         else{document.getElementById('chosenUpgrade').textContent = `${document.getElementById('chosenUpgrade').textContent}, ${upgradeString}`}
-        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
+        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*3} coins`
         document.getElementById('coinsCount').textContent = `Coins: ${coins}`
     }
     //Cant afford
@@ -280,7 +364,10 @@ function updateStats(){
     document.getElementById('enemiesDiedStat').textContent = `${highestEnemiesDied}` || ''
 }
 
-function selectGadget(gearName) {
+function selectGadget(gearName, buttonId){
+    document.querySelectorAll('#weaponOptions button').forEach((button) => {
+        button.setAttribute('selectedButton', String(Number(button.dataset.gadgetIndex) === buttonId))
+    })
     selectedGadget = `${gearName}`
     //Update div elements to display choice and info
     document.getElementById('currentGear').textContent = `Gear: ${gearName}` || ''
@@ -295,7 +382,10 @@ function selectGadget(gearName) {
     document.getElementById('weaponSelectContinue').style.display = "inline-block"        
 }
 
-function beginControlBind(control) {
+function beginControlBind(control, buttonId) {
+    document.querySelectorAll('#controlOptions button').forEach((button) => {
+        button.setAttribute('selectedButton', String(Number(button.dataset.controlIndex) === buttonId))
+    })
     bindingTarget = control
     document.getElementById('controlStatus').textContent = `Press a key for ${control}.`
 }
@@ -324,4 +414,5 @@ slider.oninput = function() {
 }
 
 websiteGoTo('menu')
+selectTrait(traitValue)
 document.getElementById("difficultyOutput").textContent = `${diffNames[slider.value-slider.step]}`
