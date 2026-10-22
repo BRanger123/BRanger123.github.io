@@ -293,7 +293,7 @@ if(pixelate){
                 beam.onCollide("enemy", (enemy) => {
                     if(this.critChance > 1){    //Special crit
                         if(this.lifeSteal > 0){healPlayer(this.lifeSteal*2)}
-                        else{enemy.hurt(damage*2*this.critChance)}
+                        enemy.hurt(damage*2*this.critChance)
                         spawnText(enemy.pos, damage*2*this.critChance, rgb(0, 255, 242))
                         if(beam.penetration > 0){beam.penetration--}
                         else{beam.destroy()}
@@ -712,7 +712,7 @@ if(pixelate){
         destroyAll("enemy")
         destroyAll("spawnMarker")
         destroyAll("mushroom")
-        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
+        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*3} coins`
         document.getElementById("coinsCount").textContent = `Coins: ${Math.floor(coins).toFixed(0)}`
         resetInputs()   //Avoid sticky key behaviour
         player.play("idle")
@@ -727,7 +727,7 @@ if(pixelate){
         roundLabel.color = rgb(255, 255, 255)
         specialRoundLabel.text = ``
         controlsLabel.text = `Click to continue with upgrade`
-        gameQuestions = true    //If quiz happens, tells website it was caused by game and shoudl return upgradeQuality
+        gameQuestions = true    //If quiz happens, tells website it was caused by game and should return upgradeQuality
 
         let upgradeStrings = [
             "damage","capacity","speed","penetration","lifeSteal","crit",
@@ -963,7 +963,7 @@ if(pixelate){
         const unitVec = dir.unit()  //Vector normalisation (fixes diagonals)
         if(extraSpeed){player.move(unitVec.scale(player.speed*1.3))}
         player.move(unitVec.scale(player.speed))    //Moves in dir by speed every frame
-        playerPredictedPos = player.pos.add(vec2(unitVec.scale(player.speed)))   //Predict player position for boss aiming
+        playerPredictedPos = player.pos.add(vec2(unitVec.scale(player.speed*0.5)))   //Predict player position for boss aiming
         //addKaboom(playerPredictedPos) //For tracking predicted pos
 
         //Animation logic
