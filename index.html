@@ -68,6 +68,13 @@
             <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); document.getElementById('chosenUpgrade').textContent = 'No upgrade chosen'">Continue</button>
         </div>
 
+        <div id="playerStats" style="display: none;">
+            <h1>Player Stats</h1>
+            <h2 id="chosenUpgrade">No upgrade chosen</h2>
+            <button id="upgradePurchase" onclick="purchaseUpgrade(selectedUpgradeString, selectedUpgradeNum); this.style.display = 'none'" style="display: none">Purchase</button><br><br>
+            <button id="upgradeContinue" onclick="websiteGoTo('gameWindow'); document.getElementById('chosenUpgrade').textContent = 'No upgrade chosen'">Continue</button>
+        </div>
+
         <div id="weaponSelect" style="display: none;">
             <h1>Weapon Select</h1>
             <h2 id="currentGear">Gear: Not chosen</h2>

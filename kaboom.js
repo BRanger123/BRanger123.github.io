@@ -265,10 +265,10 @@ if(pixelate){
             }
             shake(0.004*(this.recoilForce))
             const baseDir = toWorld(mousePos()).sub(player.pos).unit()  //toWorld() lets func work outside initial map boundaries for camera code
-            const damage = this.beamDamage
+            let damage = this.beamDamage
                 * (trait.damageMultiplier ?? 1)
                 * (1 + player.dodge * (trait.damagePerDodge ?? 0))
-            
+
             //Apply recoil
             const recoilDir = baseDir.scale(-this.recoilForce)  //Opposite to beam fire direction
             player.recoil = player.recoil.add(recoilDir)
@@ -294,20 +294,20 @@ if(pixelate){
                     if(this.critChance > 1){    //Special crit
                         if(this.lifeSteal > 0){healPlayer(this.lifeSteal*2)}
                         enemy.hurt(damage*2*this.critChance)
-                        spawnText(enemy.pos, damage*2*this.critChance, rgb(0, 255, 242))
+                        spawnText(enemy.pos, (damage*2*this.critChance).toFixed(0), rgb(0, 255, 242))
                         if(beam.penetration > 0){beam.penetration--}
                         else{beam.destroy()}
                     }
                     else if(Math.random() <= this.critChance){       //Crit
                         if(this.lifeSteal > 0){healPlayer(this.lifeSteal*2)}
                         enemy.hurt(damage*2)
-                        spawnText(enemy.pos, damage*2, rgb(255, 255, 0))
+                        spawnText(enemy.pos, (damage*2).toFixed(0), rgb(255, 255, 0))
                         if(beam.penetration > 0){beam.penetration--}
                         else{beam.destroy()}
                     }
                     else{   //Normal hit
                         if(this.lifeSteal > 0){healPlayer(this.lifeSteal)}
-                        spawnText(enemy.pos, damage)
+                        spawnText(enemy.pos, (damage).toFixed(0))
                         enemy.hurt(damage)
                         if(beam.penetration > 0){beam.penetration--}
                         else{beam.destroy()}
@@ -350,7 +350,7 @@ if(pixelate){
         }
         else{
             damage *= (1-(player.armor/(player.armor+50)))  //Diminishing returns
-            damage = Math.floor(damage)
+            damage = Math.round(damage)
             if(trait.coinsAsHealth && coins > 0){
                 const coinsSpent = Math.min(coins, damage)
                 coins -= coinsSpent
@@ -376,6 +376,7 @@ if(pixelate){
     }
 
     function healPlayer(healValue){
+        healValue = Math.round(healValue)
         if(doubleHeal){healValue *= 2}
         if(player.hp() == player.maxHealth){return} //Return if full health
         if(player.maxHealth - player.hp() < healValue){     //If heal > hp missing
@@ -508,11 +509,11 @@ if(pixelate){
     //beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto = false, fireRate = 100, penetration = 0, critChance
     let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 3, 1000, 1, false, 200, 0, 0.5)
     sparkBlasterGlobal = sparkBlaster
-    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 4000, 1.5, false, 100, 1, 0.15)
+    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 4000, 1.5, false, 100, 1, 0.05)
     blastBlasterGlobal = blastBlaster
-    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 10, 30, 1, 5, 1000, 2, true, 70, 4, 0.3)
+    let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 10, 30, 1, 5, 1000, 2, true, 70, 4, 0.2)
     cyclerBlasterGlobal = cyclerBlaster
-    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 2.5, false, 200, 2, 0.2)
+    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 2.5, false, 200, 2, 0.3)
     beamBlasterGlobal = beamBlaster
 
     //Fit sprites indivisually since they are different sizes
@@ -867,7 +868,7 @@ if(pixelate){
         //Decide round stats
         let enemyNum = Math.floor(2 + round * 1.5)
         let waves = Math.min(5, 1 + Math.floor(round / 3))
-        let difficulty = 0.4 + round * 0.6
+        let difficulty = 0.4 + round * 0.8
         difficulty *= diffLevel
         let bosses = Math.floor(round/5)
         //if(true){     //For testing special rounds
@@ -1176,7 +1177,7 @@ if(pixelate){
             opacity(0.8),
         ])
         add([
-            text(`Round: ${round-1}`, { 
+            text(`Round: ${round}`, { 
                 font: "jerseyo",
                 size: 65 
             }),
@@ -1247,6 +1248,7 @@ if(pixelate){
             resetInputs()
             if(levelGlobal == 1){
                 websiteGoTo('weaponSelect')
+                go("startButton")
             }
             else{
                 go(levelGlobal)
