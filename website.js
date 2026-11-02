@@ -3,7 +3,7 @@ const colors = [
     "c56b59","6eb83d","f194b4","c5ebc3","6fbcec",
     "aafac8","c7ffed","ffa770","d3c1d2","cb769e",
     "ff6b35","f7c59f","6fd08c","b47eb3","17b2b5",
-    "fffd98","339989","7f4fba","c6d4ff",
+    "fffd98","339989","c6d4ff",
     "9d9143","999e57","0afff7","cad8de",
     "d4e09b","f6f4d2","cbdfbd","f19c79","f991cc"
 ]
@@ -59,6 +59,7 @@ let bindingTarget = null
 let upgradesPurchased = 0
 let selectedUpgradeString
 let selectedUpgradeNum
+let upgradeText
 let traitName = "None"
 let traitValue = 0
 const traitInfo = [
@@ -227,7 +228,7 @@ function selectUpgrade(upgradeString, upgradeNum){
 }
 
 function purchaseUpgrade(upgradeString, upgradeNum){
-    let price = upgradesPurchased*3
+    let price = upgradesPurchased*5
     if(price<=coins){
         coins = coins-price
         playerSprite = sprite
@@ -238,7 +239,8 @@ function purchaseUpgrade(upgradeString, upgradeNum){
         //Else add the string value of the purchased upgrade
         if(document.getElementById('chosenUpgrade').textContent == "No upgrade chosen"){document.getElementById('chosenUpgrade').textContent = `${upgradeString}`}
         else{document.getElementById('chosenUpgrade').textContent = `${document.getElementById('chosenUpgrade').textContent}, ${upgradeString}`}
-        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*3} coins`
+        upgradeText = document.getElementById('chosenUpgrade').textContent
+        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
         document.getElementById('coinsCount').textContent = `Coins: ${coins}`
     }
     //Cant afford

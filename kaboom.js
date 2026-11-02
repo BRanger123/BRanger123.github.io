@@ -190,6 +190,7 @@ if(pixelate){
     let enemiesLeft
     let enemiesDied = 0
     let enemiesDiedCounter = 0
+    upgradeText = "error"
     upgradesToApply = []
     upgradeQuality = 1
     let isPaused = false
@@ -773,7 +774,10 @@ if(pixelate){
             coinsLabel.text = `Coins: ${coins}`
             controlsLabel.text = ``
             upgrade()
-            if(player.hp() != player.maxHealth){healPlayer(player.maxHealth - player.hp())} //Heal if missing hp
+            if(player.hp() != player.maxHealth){
+                player.heal(player.maxHealth - player.hp())
+                healthLabel.text = `Health: ${Math.floor(player.hp())}` //Update health label
+            } //Heal if missing hp
             let nextWaveTime = 5
             const clock = add([timer()])
             clock.loop(1, () => {
@@ -792,31 +796,42 @@ if(pixelate){
     }
 
     function upgrade(){
-        //Reads array of upgrade numbers and loops for length of array
-        //Remove each upgrade when complete
-        let arrayLength = upgradesToApply.length
-        for(let i = 0; i<arrayLength; i++){
-            let nextUpgrade = upgradesToApply.pop()
-            //Find and apply upgrade
-            if(nextUpgrade==1){
-                gadgetGlobal.beamDamage += Math.ceil(0.3*upgradeQuality*gadgetGlobal.beamDamage)
-                player.dodge += (trait.dodgePerDamageUpgrade ?? 0) * upgradeQuality
+        if(upgradesToApply.length !== 0){
+            //Reads array of upgrade numbers and loops for length of array
+            //Remove each upgrade when complete
+            let upgradesLength = upgradesToApply.length
+            for(let i = 0; i<upgradesLength; i++){
+                let nextUpgrade = upgradesToApply.pop()
+                //Find and apply upgrade
+                if(nextUpgrade==1){
+                    gadgetGlobal.beamDamage += Math.ceil(0.3*upgradeQuality*gadgetGlobal.beamDamage)
+                    player.dodge += (trait.dodgePerDamageUpgrade ?? 0) * upgradeQuality
+                }
+                if(nextUpgrade==2){gadgetGlobal.magSize += Math.ceil(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
+                if(nextUpgrade==3){player.speed += Math.ceil(0.3*upgradeQuality*player.speed)}
+                if(nextUpgrade==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
+                if(nextUpgrade==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
+                if(nextUpgrade==6){gadgetGlobal.critChance += 0.07*upgradeQuality}
+                if(nextUpgrade==7){player.dodge += 10*upgradeQuality}
+                if(nextUpgrade==8){player.maxHealth += Math.floor(player.maxHealth*0.25*upgradeQuality)}
+                if(nextUpgrade==9){player.regenValue += Math.floor(5*upgradeQuality)}
+                if(nextUpgrade==10 && !trait.noArmor){player.armor += Math.floor(10*upgradeQuality)}
+                if(nextUpgrade==11){player.passiveCoin += Math.floor(5*upgradeQuality)}
+                if(nextUpgrade==12){
+                    coinMagForce += Math.floor(coinMagForce*0.6*upgradeQuality)
+                    coinMagnetDist += Math.floor(coinMagnetDist*0.8*upgradeQuality)
+                }
             }
-            if(nextUpgrade==2){gadgetGlobal.magSize += Math.ceil(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
-            if(nextUpgrade==3){player.speed += Math.ceil(0.3*upgradeQuality*player.speed)}
-            if(nextUpgrade==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
-            if(nextUpgrade==5){gadgetGlobal.lifeSteal += 1 * upgradeQuality}
-            if(nextUpgrade==6){gadgetGlobal.critChance += 0.07*upgradeQuality}
-            if(nextUpgrade==7){player.dodge += 10*upgradeQuality}
-            if(nextUpgrade==8){player.maxHealth += Math.floor(player.maxHealth*0.25*upgradeQuality)}
-            if(nextUpgrade==9){player.regenValue += Math.floor(5*upgradeQuality)}
-            if(nextUpgrade==10 && !trait.noArmor){player.armor += Math.floor(10*upgradeQuality)}
-            if(nextUpgrade==11){player.passiveCoin += Math.floor(5*upgradeQuality)}
-            if(nextUpgrade==12){
-                coinMagForce += Math.floor(coinMagForce*0.6*upgradeQuality)
-                coinMagnetDist += Math.floor(coinMagnetDist*0.8*upgradeQuality)
+            let upgradeTexts = upgradeText.split(",")
+            for (let i = 0; i < upgradesLength; i++) {
+                const angle = (i / upgradesLength) * Math.PI * 2
+                const radius = 150
+                const offset = vec2(Math.cos(angle) * radius, Math.sin(angle) * radius)
+                spawnText(player.pos.add(offset), upgradeTexts[i], rgb(255, 242, 0))
             }
         }
+
+
         upgradeQuality = 1
         upgradesToApply = []
     }
@@ -1023,7 +1038,6 @@ if(pixelate){
         }
         controlsLabel.text = `` //Click to zap hint hidden
         hintLabel.text = ``
-        upgrade()
     })
 
     onMouseDown("left", () => {
@@ -1125,7 +1139,7 @@ if(pixelate){
         spawnText(player.pos, blabber())
         burp()
     })
-
+    
     //Collision with enemy
     onCollideUpdate("player", "enemy", (player, enemy) => {
         if(enemy.attackCooldown > 0 || enemy.enemyType == "shooter"){
