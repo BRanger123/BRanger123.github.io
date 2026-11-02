@@ -169,8 +169,8 @@ button:active{
     cursor: grabbing;
 }
 
-#startButton{background-color: rgb(135, 255, 249);}
-#questionButton{background-color: rgb(255, 255, 125);}
+#startButton{background-color: rgb(156, 167, 255);}
+#questionButton{background-color: rgb(255, 238, 125);}
 #statsButton{background-color: white;}
 #settingsButton{background-color: rgb(121, 255, 121);}
 #extrasButton{background-color: rgb(255, 80, 80); color: white;}
