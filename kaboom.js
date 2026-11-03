@@ -743,6 +743,7 @@ if(pixelate){
         for(let i=0; i<upgradeStrings.length; i++){
             document.getElementById(`${upgradeStrings[i]}Upgrade`).style.display = "none"
         }
+
         const availableUpgrades = upgradeStrings
             .map((_, index) => index)
             .filter((index) => !(trait.noArmor && index === 9))
@@ -763,6 +764,7 @@ if(pixelate){
                 document.getElementById(`${upgradeStrings[index]}Upgrade`).style.display = "flex"
             }
         }
+        
         if(questionsInGame){startQuestion()}
         else{websiteGoTo('upgrade')}
         onClick(() => prepareStart())
