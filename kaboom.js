@@ -492,6 +492,7 @@ if(pixelate){
         body(),
         color(255, 255, 255),
         health(100 * (trait.maxHealthMultiplier ?? 1)),
+        opacity(1),
         "player",   //For collision detection
         "object",
         //For easy OOP traits/ trackers below
@@ -1136,11 +1137,13 @@ if(pixelate){
             player.play("slide")
             playerAnimation = "slide"
             player.use("dash")
+            player.use(opacity(0.5))
             spawnText(player.pos, "Dash")
             spawnParticles(player.pos, dashDirection.angle(), 5, false, 1)
             //Dash for 0.3 seconds with collision ingore tag
             wait(0.3, () => {
                 player.unuse("dash")
+                player.use(opacity(1))
             })
         }
     })
