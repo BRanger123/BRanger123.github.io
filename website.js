@@ -58,9 +58,9 @@ let bindingTarget = null
 let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }     //Easier to change bindings this way
 
 
-let red = 232
-let green = 232
-let blue = 232
+let red = 255
+let green = 215
+let blue = 151
 
 
 function getQuestions() {

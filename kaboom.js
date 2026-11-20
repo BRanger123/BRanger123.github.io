@@ -81,7 +81,7 @@ scene("startButton", () => {
         color(232, 232, 232),
     ])
     btn.add([
-        text(`Start`, { 
+        text(`START`, { 
             font: "jersey",
             size: 50 
         }),
@@ -1214,7 +1214,7 @@ if(pixelate){
             color(220, 220, 220),
         ])
         backBtn.add([
-            text(`Menu`, { 
+            text(`MENU`, { 
                 font: "jerseyo",
                 size: 50 
             }),
@@ -1246,7 +1246,7 @@ if(pixelate){
             color(220, 220, 220),
         ])
         resetBtn.add([
-            text(`Restart?`, { 
+            text(`RESTART`, { 
                 font: "jerseyo",
                 size: 40 
             }),
