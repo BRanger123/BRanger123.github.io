@@ -60,6 +60,7 @@ let upgradesPurchased = 0
 let selectedUpgradeString
 let selectedUpgradeNum
 let upgradeText
+let particleEffects = true
 let traitName = "None"
 let traitValue = 0
 const traitInfo = [

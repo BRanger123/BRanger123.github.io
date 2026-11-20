@@ -32,7 +32,7 @@
                 <button onclick="playLevel(3)">Cubism</button><br>
                 <button onclick="playLevel(4)">Original (V1)</button><br>
             </div>
-            <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
+            <button onclick="websiteGoTo('menu')" id="backButton">BACK</button>
         </div>
 
         <div id="stats" style="display: none">
@@ -42,7 +42,7 @@
             <h2>Most Enemies Defeated:</h2>
             <h2 id="enemiesDiedStat">Not found</h2><br>
             <br><br>
-            <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
+            <button onclick="websiteGoTo('menu')" id="backButton">BACK</button>
         </div>
 
         <div id="upgrade" style="display: none;">
@@ -81,10 +81,10 @@
             <h2>Difficulty:</h2> 
             <input type="range" min="1" max="5" step="1" value="3" class="slider" id="difficultySlider"><br>
             <h2 id="difficultyOutput"></h2>
-            <button id="traitEntryButton" onclick="websiteGoTo('traitSelect')">Trait: None</button><br><br>
+            <!--<button id="traitEntryButton" onclick="websiteGoTo('traitSelect')">Trait: None</button><br><br>-->
             <button id="weaponSelectContinue" onclick="playLevel(1)" style="display: none;">Continue</button><br><br>
             <!--<button onclick="websiteGoTo('shop'); document.getElementById('coinsCount').textContent = `Coins: ${coins}`">Skins</button><br><br>-->
-            <button onclick="websiteGoTo('menu')" id="backButton">Back</button><br>
+            <button onclick="websiteGoTo('menu')" id="backButton">BACK</button><br>
         </div>
 
         <div id="traitSelect" style="display: none;">
@@ -133,7 +133,7 @@
             </div><br><br>
             <button id="continueButton" onclick="startQuestion()" style="display: none;">Continue</button>
             <button id="continueGameButton" onclick="document.getElementById('backButton').style.display = 'inline-block'; gameQuestions=false; websiteGoTo('upgrade')" style="display: none;">Continue</button><br><br>
-            <button onclick="websiteGoTo('menu')" id="questionBackButton">Back</button><br>
+            <button onclick="websiteGoTo('menu')" id="questionBackButton">BACK</button><br>
         </div>
 
         <div id="settings" style="display: none;">
@@ -149,6 +149,10 @@
             <h2>Pixelate Game:</h2>
             <input type="radio" name="pixelate" onclick="pixelate = false" checked>Off
             <input type="radio" name="pixelate" onclick="pixelate = true">On
+            <br>
+            <h2>Particle Effects:</h2>
+            <input type="radio" name="particleEffects" onclick="particleEffects=false">Off
+            <input type="radio" name="particleEffects" onclick="particleEffects=true" checked>On
             <br>
             <h2>Controls</h2>
             <p id="controlStatus">Select a control, then press a key.</p>
@@ -168,7 +172,7 @@ Question2,CorrectAnswer,Answer,Answer,Answer" rows="18" cols="45"></textarea><br
             <button onclick="if(document.getElementById('customQuestions').value != ''){questions = changeQuestions()}">Use Custom Questions</button>
             <br>
             <br>
-            <button onclick="websiteGoTo('menu')" id="backButton">Back</button>
+            <button onclick="websiteGoTo('menu')" id="backButton">BACK</button>
         </div>
 
         <script type="module" src="kaboom.js"></script>

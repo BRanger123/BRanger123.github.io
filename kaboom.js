@@ -268,6 +268,7 @@ if(pixelate){
                     scale(0.6),
                     rotate(angle),
                     area(),
+                    anchor("center"),
                     "beam",   //For collision detection
                     "object",
                     { speed: this.beamSpeed, dir: direction, penetration: this.penetration },
@@ -276,6 +277,11 @@ if(pixelate){
                 beam.onUpdate(() => {
                     //Moves in dir by speed every frame
                     if(!isPaused){beam.move(beam.dir.scale(this.beamSpeed))}
+                })
+                let trailEffect = loop(0.08, () => {
+                    //Beam trail particles
+                    if(!beam.exists()){trailEffect.cancel();return}
+                    else{spawnParticles(beam.pos, beam.angle+180, 2, false, 0)}
                 })
                 beam.onCollide("enemy", (enemy) => {
                     if(this.critChance > 1){    //Special crit
@@ -305,20 +311,26 @@ if(pixelate){
                     })
                 })
             }
-            spawnMuzzleParticles(player.pos.add(Vec2.fromAngle(baseDir.angle()).scale(blasterSprite.width)), blasterSprite.angle)
+            spawnParticles(player.pos.add(Vec2.fromAngle(baseDir.angle()).scale(blasterSprite.width)), blasterSprite.angle, 3, false, 0)
             this.ammoInMag--    //Decrease charge count in magazine
             return true //Success
         }
     }
 
-    function spawnMuzzleParticles(spawnPos, fireAngle) {
-        const count = 15
-        const spread = 25
-        const minSpeed = 150
-        const maxSpeed = 800
-        const colors = [rgb(255, 240, 150), rgb(255, 160, 40), rgb(255, 80, 20)]
-        const life = 0.25
-        const size = 8
+    function spawnParticles(spawnPos, fireAngle, intensity, areaEffect, colorsIndex){
+        if(!particleEffects){return}
+        let count = 5 * intensity
+        let minSpeed = 50 * intensity
+        let maxSpeed = 260 * intensity
+        let life = 0.08 * intensity
+        let size = 2 * intensity
+        let spread = 8 * intensity
+        if(areaEffect){spread = 360; count *= 4}   //If area effect, spread in all directions
+        let baseColors = [
+            [rgb(255, 240, 150), rgb(255, 160, 40), rgb(255, 80, 20)],
+            [rgb(189, 189, 189), rgb(122, 122, 122), rgb(9, 9, 9)]
+        ]
+        let colors = baseColors[colorsIndex]
 
         for (let i = 0; i < count; i++) {
             const angleOffset = rand(-spread / 2, spread / 2)
@@ -926,7 +938,7 @@ if(pixelate){
             spawnMushroom(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100), difficulty)
         }
         //Clock to track how long round will last
-        let roundTimer = (round*2+6) + Math.ceil(1/(diffLevel))
+        let roundTimer = (round*2+6) + Math.ceil(1/(diffLevel))*2
         const roundClock = add([timer()])
         roundClock.loop(1, () => {
             if(!isPaused){
@@ -1125,7 +1137,7 @@ if(pixelate){
             playerAnimation = "slide"
             player.use("dash")
             spawnText(player.pos, "Dash")
-            
+            spawnParticles(player.pos, dashDirection.angle(), 5, false, 1)
             //Dash for 0.3 seconds with collision ingore tag
             wait(0.3, () => {
                 player.unuse("dash")
