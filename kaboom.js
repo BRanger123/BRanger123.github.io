@@ -168,6 +168,7 @@ if(pixelate){
     let diffLevel = Number(document.getElementById('difficultySlider').value)
     diffLevel *= diffLevel  //Make values fall at a greater range
     diffLevel /= 9
+    diffLevel = diffLevel.toFixed(1)
 
     const enemies = []      //Used for movement and attack logic
     const spawnDist = 500
@@ -181,6 +182,7 @@ if(pixelate){
     let mouseDown = false
     let waiting = false
     coins = 0
+    upgradeCostIncrease = Number(document.getElementById('difficultySlider').value)
     let coinMagForce = 20000
     let coinMagnetDist = 300
     document.getElementById("coinsCount").textContent = `Coins: ${coins}`
@@ -277,7 +279,7 @@ if(pixelate){
                     //Moves in dir by speed every frame
                     if(!isPaused){beam.move(beam.dir.scale(this.beamSpeed))}
                 })
-                let trailEffect = loop(0.08, () => {
+                let trailEffect = loop(0.16, () => {
                     //Beam trail particles
                     if(!beam.exists()){trailEffect.cancel();return}
                     else{spawnParticles(beam.pos, beam.angle+180, 2, false, 0)}
@@ -318,7 +320,7 @@ if(pixelate){
 
     function spawnParticles(spawnPos, fireAngle, intensity, areaEffect, colorsIndex){
         if(!particleEffects){return}
-        let count = 5 * intensity
+        let count = 2 * intensity
         let minSpeed = 50 * intensity
         let maxSpeed = 260 * intensity
         let life = 0.08 * intensity
@@ -327,7 +329,8 @@ if(pixelate){
         if(areaEffect){spread = 360; count *= 4}   //If area effect, spread in all directions
         let baseColors = [
             [rgb(255, 240, 150), rgb(255, 160, 40), rgb(255, 80, 20)],
-            [rgb(189, 189, 189), rgb(122, 122, 122), rgb(9, 9, 9)]
+            [rgb(189, 189, 189), rgb(122, 122, 122), rgb(9, 9, 9)],
+            [rgb(150, 234, 255), rgb(40, 133, 255), rgb(20, 59, 255)],
         ]
         let colors = baseColors[colorsIndex]
 
@@ -527,13 +530,13 @@ if(pixelate){
 
     //Constructor below
     //beamSpeed, beamColor, beamDamage, magSize, beamsFired, spread, recoilForce, reloadTime, isFullAuto = false, fireRate = 100, penetration = 0, critChance
-    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 35, 6, 1, 3, 1000, 1, false, 200, 0, 0.5)
+    let sparkBlaster = new BeamGadget(1000, rgb(0, 0, 0), 55, 6, 1, 3, 1000, 1, false, 200, 0, 0.5)
     sparkBlasterGlobal = sparkBlaster
-    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 10, 2, 8, 15, 4000, 1.5, false, 100, 1, 0.15)
+    let blastBlaster = new BeamGadget(700, rgb(0, 0, 0), 20, 2, 8, 15, 4000, 1.5, false, 100, 1, 0)
     blastBlasterGlobal = blastBlaster
     let cyclerBlaster = new BeamGadget(800, rgb(0, 0, 0), 10, 30, 1, 5, 1000, 2, true, 70, 4, 0.3)
     cyclerBlasterGlobal = cyclerBlaster
-    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 100, 5, 1, 0, 5000, 2.5, false, 200, 2, 0.2)
+    let beamBlaster = new BeamGadget(2000, rgb(0, 0, 0), 150, 5, 1, 0, 5000, 2.5, false, 200, 2, 0.2)
     beamBlasterGlobal = beamBlaster
 
     //Fit sprites indivisually since they are different sizes
@@ -731,7 +734,7 @@ if(pixelate){
         destroyAll("enemy")
         destroyAll("spawnMarker")
         destroyAll("mushroom")
-        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
+        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*upgradeCostIncrease} coins`
         document.getElementById("coinsCount").textContent = `Coins: ${Math.floor(coins).toFixed(0)}`
         resetInputs()   //Avoid sticky key behaviour
         player.play("idle")
@@ -903,7 +906,7 @@ if(pixelate){
             spawnMushroom(rand(minX + 100, maxX - 100), rand(minY + 100, maxY - 100), difficulty)
         }
         //Clock to track how long round will last
-        let roundTimer = (round*2+6) + Math.ceil(1/(diffLevel))*2
+        let roundTimer = (round*3+9)
         const roundClock = add([timer()])
         roundClock.loop(1, () => {
             if(!isPaused){
@@ -1142,7 +1145,7 @@ if(pixelate){
 
     onKeyPress("b", () => {
         //Used for testing text and sound output
-        spawnText(player.pos, blabber())
+        spawnText(player.pos, upgradeCostIncrease)
         burp()
     })
     

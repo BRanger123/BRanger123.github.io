@@ -37,6 +37,7 @@ let answerStreak = 0
 let highestAnswerStreak = 0
 let highestEnemiesDied = 0
 let coins = 0
+let upgradeCostIncrease = Number(document.getElementById('difficultySlider').value)
 let selectedGadget = ""
 let blastBlasterGlobal
 let sparkBlasterGlobal
@@ -150,7 +151,7 @@ function selectUpgrade(upgradeString, upgradeNum){
 }
 
 function purchaseUpgrade(upgradeString, upgradeNum){
-    let price = upgradesPurchased*5
+    let price = upgradesPurchased*upgradeCostIncrease
     if(price<=coins){
         coins = coins-price
         playerSprite = sprite
@@ -162,7 +163,7 @@ function purchaseUpgrade(upgradeString, upgradeNum){
         if(document.getElementById('chosenUpgrade').textContent == "No upgrade chosen"){document.getElementById('chosenUpgrade').textContent = `${upgradeString}`}
         else{document.getElementById('chosenUpgrade').textContent = `${document.getElementById('chosenUpgrade').textContent}, ${upgradeString}`}
         upgradeText = document.getElementById('chosenUpgrade').textContent
-        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*5} coins`
+        document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*upgradeCostIncrease} coins`
         document.getElementById('coinsCount').textContent = `Coins: ${coins}`
     }
     //Cant afford
