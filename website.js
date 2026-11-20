@@ -8,14 +8,6 @@ const colors = [
     "d4e09b","f6f4d2","cbdfbd","f19c79","f991cc"
 ]
 
-/* Random colour buttons
-document.getElementById("startButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
-document.getElementById("questionButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
-document.getElementById("statsButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
-document.getElementById("settingsButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
-document.getElementById("extrasButton").style.backgroundColor = `#${colors[Math.floor(Math.random()*colors.length)]}`
-*/
-
 function blabber(){
     //Random word function for testing text
     const consonants = "bcdfghjklmnpqrstvwxyz"
@@ -33,6 +25,7 @@ function blabber(){
     return word.charAt(0).toUpperCase() + word.slice(1)
 }
 
+//Regular variables
 let gadgetGlobal
 let playerSprite = "piskel"
 let spritesOwned = ["bean"]
@@ -50,79 +43,19 @@ let sparkBlasterGlobal
 let cyclerBlasterGlobal
 let beamBlasterGlobal
 let questions
-let questionsInGame = false 
 let gameQuestions = false
-let darkMode = false
-let pixelate = false
-let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }     //Easier to change bindings this way
-let bindingTarget = null
 let upgradesPurchased = 0
 let selectedUpgradeString
 let selectedUpgradeNum
 let upgradeText
+
+//Settings variables
+let questionsInGame = false 
+let darkMode = false
+let pixelate = false
 let particleEffects = true
-let traitName = "None"
-let traitValue = 0
-const traitInfo = [
-    {
-        name: "None",
-        description: "You are ordinary.",
-    },
-    {
-        name: "Tank",
-        description: "Start with 50% more health and deal 25% less damage.",
-        maxHealthMultiplier: 1.5,
-        damageMultiplier: 0.75,
-    },
-    {
-        name: "Reckless",
-        description: "Deal 50% more damage, but start with 40% less health.",
-        maxHealthMultiplier: 0.6,
-        damageMultiplier: 1.5,
-    },
-    {
-        name: "Insatiable",
-        description: "Coins absorb incoming damage before your health does.",
-        coinsAsHealth: true,
-    },
-    {
-        name: "Lucky",
-        description: "Receive two random upgrades each round instead of choosing upgrades.",
-        automaticUpgradesPerRound: 2,
-    },
-    {
-        name: "Combonautic",
-        description: "Dodge increases damage, damage upgrades increase dodge, and armor is unavailable.",
-        damagePerDodge: 0.01,
-        dodgePerDamageUpgrade: 5,
-        noArmor: true,
-    },
-    {
-        name: "Catastrophiser",
-        description: "Fire twice as many shots, but choose from only two upgrades each round.",
-        projectileMultiplier: 2,
-        upgradeChoiceCount: 2,
-    },
-    {
-        name: "Indecisive",
-        description: "Choose from six upgrades each round. All enemies are chargers.",
-        upgradeChoiceCount: 6,
-        enemyType: "charger",
-    },
-    {
-        name: "Mercenary",
-        description: "Collect coins as soon as they drop. All enemies are shooters.",
-        autoCollectCoins: true,
-        enemyType: "shooter",
-    },
-    {
-        name: "Precise",
-        description: "Every shot is a critical hit, but enemies start at round 3 difficulty.",
-        critChance: 1,
-        startingRound: 2,
-    },
-]
-window.traitInfo = traitInfo
+let bindingTarget = null
+let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }     //Easier to change bindings this way
 
 
 let red = 232
@@ -198,18 +131,6 @@ function websiteGoTo(divId){
     currentDivId = divId
 }
 
-function selectTrait(traitId){
-    const trait = traitInfo[traitId]
-    traitValue = traitId
-    traitName = trait.name
-    document.getElementById('traitName').textContent = `Trait: ${trait.name}`
-    document.getElementById('traitInfo').textContent = trait.description
-    document.getElementById('traitEntryButton').textContent = `Trait: ${trait.name}`
-    document.querySelectorAll('#traitOptions button').forEach((button) => {
-        button.setAttribute('selectedButton', String(Number(button.dataset.traitIndex) === traitId))
-    })
-}
-
 function playLevel(level){
     //Encapsulate go() to add div swapping and global tracking
     levelGlobal = level
@@ -247,26 +168,6 @@ function purchaseUpgrade(upgradeString, upgradeNum){
     //Cant afford
     else{document.getElementById('upgradePrice').textContent = `You cannot afford the ${upgradeString} upgrade.`}
 }
-
-//purchaseSkin func cannot be used now since there is only one sprite sheet
-/*function purchaseSkin(sprite, price, button){
-    if(spritesOwned.includes(sprite)){
-        document.getElementById('currentSkin').textContent = `Skin: ${sprite}` || ''
-        playerSprite = sprite
-    }    
-    else if(price<=coins){
-        coins = coins-price
-        playerSprite = sprite
-        document.getElementById('coinsCount').textContent = `Coins: ${coins}`
-        document.getElementById('currentSkin').textContent = `Skin: ${sprite}` || ''
-        button.textContent = sprite
-        spritesOwned.push(sprite)
-        //this.onclick = purchaseSkin(sprite, 0, this)  funny line of code, infinately called causing maximum cell exceeded
-    }
-    else{
-        alert(`You cannot afford ${sprite} skin.`)
-    }
-}*/
 
 function shuffleArray(array){
     for (let i = array.length - 1; i > 0; i--) {
@@ -417,5 +318,4 @@ slider.oninput = function() {
 }
 
 websiteGoTo('menu')
-selectTrait(traitValue)
 document.getElementById("difficultyOutput").textContent = `${diffNames[slider.value-slider.step]}`

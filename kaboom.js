@@ -159,8 +159,8 @@ if(pixelate){
             color(mapRGB),
         ])
     }
-    const trait = window.traitInfo[traitValue]
-    let round = trait.startingRound || 0
+
+    let round = 0
     let isRoundSpecial = false
     let roundComplete = false
     //Calculate added difficulty level
@@ -250,8 +250,6 @@ if(pixelate){
             shake(0.004*(this.recoilForce))
             const baseDir = toWorld(mousePos()).sub(player.pos).unit()  //toWorld() lets func work outside initial map boundaries for camera code
             const damage = this.beamDamage
-                * (trait.damageMultiplier ?? 1)
-                * (1 + player.dodge * (trait.damagePerDodge ?? 0))
             
             //Apply recoil
             const recoilDir = baseDir.scale(-this.recoilForce)  //Opposite to beam fire direction
@@ -388,16 +386,6 @@ if(pixelate){
         else{
             damage *= (1-(player.armor/(player.armor+50)))  //Diminishing returns
             damage = Math.floor(damage)
-            if(trait.coinsAsHealth && coins > 0){
-                const coinsSpent = Math.min(coins, damage)
-                coins -= coinsSpent
-                damage -= coinsSpent
-                coinsLabel.text = `Coins: ${coins}`
-                document.getElementById("coinsCount").textContent = `Coins: ${coins}`
-                if(coinsSpent > 0){
-                    spawnText(player.pos, `-${coinsSpent} coins`, rgb(255, 191, 0))
-                }
-            }
             if(damage <= 0){
                 return
             }
@@ -432,12 +420,6 @@ if(pixelate){
 
 
     function spawnCoin(xy){ //Argument cannot be "pos"
-        if(trait.autoCollectCoins){
-            coins += doubleCoins ? 2 : 1
-            coinsLabel.text = `Coins: ${coins}`
-            document.getElementById("coinsCount").textContent = `Coins: ${coins}`
-            return
-        }
         const coin = add([
             sprite("coin"),
             anchor("center"),
@@ -491,12 +473,12 @@ if(pixelate){
         anchor(vec2(0,0.2)),
         body(),
         color(255, 255, 255),
-        health(100 * (trait.maxHealthMultiplier ?? 1)),
+        health(100),
         opacity(1),
         "player",   //For collision detection
         "object",
         //For easy OOP traits/ trackers below
-        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100 * (trait.maxHealthMultiplier ?? 1), cooldown: 0, dodge: 0, regenValue: 0, armor: 0, passiveCoin: 0 },
+        { speed: 400, recoil: vec2(0, 0), momentum: vec2(0,0), maxHealth: 100, cooldown: 0, dodge: 0, regenValue: 0, armor: 0, passiveCoin: 0 },
     ])
     
     let playerAnimation = "idle"
@@ -578,8 +560,6 @@ if(pixelate){
         gadgetGlobal = sparkBlasterGlobal
         selectedGadget = "Spark"
     }
-    gadgetGlobal.beamsFired *= trait.projectileMultiplier || 1
-    gadgetGlobal.critChance = gadgetGlobal.critChance + (trait.critChance || 0)
 
     //Initialize labels
     const coinsLabel = add([
@@ -681,7 +661,7 @@ if(pixelate){
             coinsDropped *= 5
             boss = true
         }
-        else if(Math.random() < 0.25 || trait.enemyType == "charger"){
+        else if(Math.random() < 0.25){
             enemySprite = "bag"
             enemyType = "charger"
             enemySpeed *= 1.2
@@ -689,7 +669,7 @@ if(pixelate){
             maxAttackCooldown = 1.5
             enemyDamage *= 1.5
         }
-        else if(Math.random() < 0.25 || trait.enemyType == "shooter"){
+        else if(Math.random() < 0.25){
             enemySprite = "dino"
             enemyType = "shooter"
             enemySpeed *= 0.7
@@ -780,28 +760,16 @@ if(pixelate){
         for(let i=0; i<upgradeStrings.length; i++){
             document.getElementById(`${upgradeStrings[i]}Upgrade`).style.display = "none"
         }
-
-        const availableUpgrades = upgradeStrings
-            .map((_, index) => index)
-            .filter((index) => !(trait.noArmor && index === 9))
-        for(let i = availableUpgrades.length - 1; i > 0; i--){
-            const randomIndex = Math.floor(Math.random() * (i + 1))
-            const upgradeToSwap = availableUpgrades[i]
-            availableUpgrades[i] = availableUpgrades[randomIndex]
-            availableUpgrades[randomIndex] = upgradeToSwap
+        let randomUpgrades = []
+        let randomUpgradeNum = -1
+        while(randomUpgrades.length != 4){  //Find random 4 numbers
+            randomUpgradeNum = Math.floor((Math.random()*upgradeStrings.length))
+            if(!randomUpgrades.includes(randomUpgradeNum)){randomUpgrades.push(randomUpgradeNum)}   //Only allow new numbers
         }
-        const upgradeCount = trait.automaticUpgradesPerRound ?? trait.upgradeChoiceCount ?? 4
-        const randomUpgrades = availableUpgrades.slice(0, upgradeCount)
-        if(trait.automaticUpgradesPerRound){
-            upgradesToApply.push(...randomUpgrades.map((index) => index + 1))
-            document.getElementById('chosenUpgrade').textContent = `Lucky selected ${randomUpgrades.length} upgrades for you.`
+        //Show the random 4 upgrades
+        for(let i=0; i<randomUpgrades.length; i++){
+            document.getElementById(`${upgradeStrings[randomUpgrades[i]]}Upgrade`).style.display = "flex"
         }
-        else{
-            for(const index of randomUpgrades){
-                document.getElementById(`${upgradeStrings[index]}Upgrade`).style.display = "flex"
-            }
-        }
-        
         if(questionsInGame){startQuestion()}
         else{websiteGoTo('upgrade')}
         onClick(() => prepareStart())
@@ -842,10 +810,7 @@ if(pixelate){
             for(let i = 0; i<upgradesLength; i++){
                 let nextUpgrade = upgradesToApply.pop()
                 //Find and apply upgrade
-                if(nextUpgrade==1){
-                    gadgetGlobal.beamDamage += Math.ceil(0.3*upgradeQuality*gadgetGlobal.beamDamage)
-                    player.dodge += (trait.dodgePerDamageUpgrade ?? 0) * upgradeQuality
-                }
+                if(nextUpgrade==1){gadgetGlobal.beamDamage += Math.ceil(0.3*upgradeQuality*gadgetGlobal.beamDamage)}
                 if(nextUpgrade==2){gadgetGlobal.magSize += Math.ceil(0.3*upgradeQuality*gadgetGlobal.magSize); ammoLabel.text = `${gadgetGlobal.ammoInMag}/${gadgetGlobal.magSize}`}
                 if(nextUpgrade==3){player.speed += Math.ceil(0.3*upgradeQuality*player.speed)}
                 if(nextUpgrade==4){gadgetGlobal.penetration += Math.floor(1*upgradeQuality)}
@@ -854,7 +819,7 @@ if(pixelate){
                 if(nextUpgrade==7){player.dodge += 10*upgradeQuality}
                 if(nextUpgrade==8){player.maxHealth += Math.floor(player.maxHealth*0.25*upgradeQuality)}
                 if(nextUpgrade==9){player.regenValue += Math.floor(5*upgradeQuality)}
-                if(nextUpgrade==10 && !trait.noArmor){player.armor += Math.floor(10*upgradeQuality)}
+                if(nextUpgrade==10){player.armor += Math.floor(10*upgradeQuality)}
                 if(nextUpgrade==11){player.passiveCoin += Math.floor(5*upgradeQuality)}
                 if(nextUpgrade==12){
                     coinMagForce += Math.floor(coinMagForce*0.6*upgradeQuality)
@@ -862,15 +827,13 @@ if(pixelate){
                 }
             }
             let upgradeTexts = upgradeText.split(",")
-            for (let i = 0; i < upgradesLength; i++) {
+            for (let i = 0; i < upgradesLength; i++){
                 const angle = (i / upgradesLength) * Math.PI * 2
                 const radius = 150
                 const offset = vec2(Math.cos(angle) * radius, Math.sin(angle) * radius)
                 spawnText(player.pos.add(offset), upgradeTexts[i], rgb(255, 242, 0))
             }
         }
-
-
         upgradeQuality = 1
         upgradesToApply = []
     }
