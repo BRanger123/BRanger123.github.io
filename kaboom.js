@@ -8,6 +8,7 @@ const canvas = document.getElementById('gameCanvas')
 
 //Initialize kaboom with canvas element
 kaboom({
+    pixelDensity: 1,    //Possibly improves mobile performance
     canvas: canvas,
     width: window.innerWidth,
     height: window.innerHeight,
