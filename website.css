@@ -25,6 +25,9 @@ h1{
         -4px 4px 0 #000,
         4px 4px 0 #000;*/
 }
+#bannerText{
+    font-size: 150px;
+}
 h2{
     font-size: 30px;
 }
@@ -169,11 +172,11 @@ button:active{
     cursor: grabbing;
 }
 
-#startButton{background-color: rgb(156, 167, 255);}
-#questionButton{background-color: rgb(255, 238, 125);}
-#statsButton{background-color: white;}
-#settingsButton{background-color: rgb(121, 255, 121);}
-#extrasButton{background-color: rgb(255, 80, 80); color: white;}
+#startButton{background-color: #c90000; color: white;}
+#questionButton{background-color: #004c86; color: white;}
+#statsButton{background-color: #007d02; color: white;}
+#settingsButton{background-color: #ffffff;}
+#extrasButton{background-color: #7e4c00; color: white;}
 
 #customQuestions{
     border: 1px solid #818181;

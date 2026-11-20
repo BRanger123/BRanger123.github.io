@@ -15,18 +15,6 @@ kaboom({
     letterBox: true,    //Prevent resize abuse
 })
 
-loadShader("vignette", null, `
-    uniform float u_radius;
-    uniform float u_softness;
-    vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
-        vec4 baseColor = def_frag();
-        vec2 center = vec2(0.5, 0.5);
-        float dist = distance(uv, center);
-        float vignette = smoothstep(u_radius, u_radius - u_softness, dist);
-        return vec4(baseColor.rgb * vignette, baseColor.a);
-    }
-`)
-
 loadShader("pixelate", null, `
     uniform float u_size;
     uniform vec2 u_resolution;
@@ -130,11 +118,6 @@ scene(1, () => {
     //else{red = 255; green = 255; blue = 255; textColor = rgb(255, 255, 255)}
     setBackground(rgb(0, 0, 0))
     setGravity(0)
-
-usePostEffect("vignette", {
-    "u_radius": 0.9, 
-    "u_softness": 0.45
-})
 
 if(pixelate){
     usePostEffect("pixelate", { "u_resolution": vec2(width(), height()), "u_size": 3 })
@@ -290,7 +273,10 @@ if(pixelate){
                     { speed: this.beamSpeed, dir: direction, penetration: this.penetration },
                     offscreen({ destroy: true }),   //Save processing power
                 ])
-                beam.onUpdate(() => {if(!isPaused){beam.move(beam.dir.scale(this.beamSpeed))}})    //Moves in dir by speed every frame
+                beam.onUpdate(() => {
+                    //Moves in dir by speed every frame
+                    if(!isPaused){beam.move(beam.dir.scale(this.beamSpeed))}
+                })
                 beam.onCollide("enemy", (enemy) => {
                     if(this.critChance > 1){    //Special crit
                         if(this.lifeSteal > 0){healPlayer(this.lifeSteal*2)}
@@ -319,8 +305,46 @@ if(pixelate){
                     })
                 })
             }
+            spawnMuzzleParticles(player.pos.add(Vec2.fromAngle(baseDir.angle()).scale(blasterSprite.width)), blasterSprite.angle)
             this.ammoInMag--    //Decrease charge count in magazine
             return true //Success
+        }
+    }
+
+    function spawnMuzzleParticles(spawnPos, fireAngle) {
+        const count = 15
+        const spread = 25
+        const minSpeed = 150
+        const maxSpeed = 800
+        const colors = [rgb(255, 240, 150), rgb(255, 160, 40), rgb(255, 80, 20)]
+        const life = 0.25
+        const size = 8
+
+        for (let i = 0; i < count; i++) {
+            const angleOffset = rand(-spread / 2, spread / 2)
+            const finalAngle = fireAngle + angleOffset
+            
+            const dir = Vec2.fromAngle(finalAngle)
+            const speed = rand(minSpeed, maxSpeed)
+
+            const particle = add([
+                pos(spawnPos),
+                rect(size, size),
+                color(choose(colors)),
+                opacity(1),
+                anchor("center"),
+                rotate(finalAngle),
+                lifespan(life, { fade: life * 0.8 }),
+                z(10),
+                {
+                    vel: dir.scale(speed),
+                }
+            ])
+
+            particle.onUpdate(() => {
+                particle.move(particle.vel)
+                particle.vel = particle.vel.scale(Math.pow(0.05, dt()))
+            })
         }
     }
     
@@ -1101,6 +1125,7 @@ if(pixelate){
             playerAnimation = "slide"
             player.use("dash")
             spawnText(player.pos, "Dash")
+            
             //Dash for 0.3 seconds with collision ingore tag
             wait(0.3, () => {
                 player.unuse("dash")
