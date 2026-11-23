@@ -65,10 +65,12 @@ loadSprite("sparkBullet", "sparkBullet.png")
 loadSprite("blastBullet", "blastBullet.png")
 loadSprite("cyclerBullet", "cyclerBullet.png")
 loadSprite("enemyBullet", "enemyBullet.png")
+loadSprite("crosshair", "crosshair.png")
 //loadSprite("treasure", "treasure.png")
 loadBean()
 
 scene("startButton", () => {
+    setCursor("default")
     let textColor = rgb(0, 0, 0)
     setBackground(rgb(red, green, blue))
     const btn = add([
@@ -111,6 +113,7 @@ scene("startButton", () => {
 })
 
 scene(1, () => {
+    setCursor("none")
     let red = 255
     let green = 255
     let blue = 255
@@ -282,7 +285,7 @@ if(pixelate){
                 let trailEffect = loop(0.16, () => {
                     //Beam trail particles
                     if(!beam.exists()){trailEffect.cancel();return}
-                    else{spawnParticles(beam.pos, beam.angle+180, 2, false, 0)}
+                    else{spawnParticles(beam.pos, beam.angle+180, beamTrailEffect)}
                 })
                 beam.onCollide("enemy", (enemy) => {
                     if(this.critChance > 1){    //Special crit
@@ -312,27 +315,53 @@ if(pixelate){
                     })
                 })
             }
-            spawnParticles(player.pos.add(Vec2.fromAngle(baseDir.angle()).scale(blasterSprite.width)), blasterSprite.angle, 3, false, 0)
+            spawnParticles(player.pos.add(Vec2.fromAngle(baseDir.angle()).scale(blasterSprite.width)), blasterSprite.angle, muzzelEffect)
             this.ammoInMag--    //Decrease charge count in magazine
             return true //Success
         }
     }
 
-    function spawnParticles(spawnPos, fireAngle, intensity, areaEffect, colorsIndex){
+    let muzzelEffect = {
+        count: 6,
+        minSpeed: 150,
+        maxSpeed: 800,
+        life: 0.24,
+        size: 6,
+        spread : 24,
+        colors: [rgb(255, 240, 150), rgb(255, 160, 40), rgb(255, 80, 20)],
+    }
+
+    let beamTrailEffect = {
+        count: 4,
+        minSpeed: 100,
+        maxSpeed: 600,
+        life: 0.16,
+        size: 4,
+        spread : 16,
+        colors: [rgb(255, 240, 150), rgb(255, 160, 40), rgb(255, 80, 20)],
+    }
+
+    let dashEffect = {
+        count: 15,
+        minSpeed: 1500,
+        maxSpeed: 2500,
+        life: 0.4,
+        size: 10,
+        spread : 24,
+        colors: [rgb(189, 189, 189), rgb(122, 122, 122), rgb(9, 9, 9)],
+    }
+
+    //[rgb(150, 234, 255), rgb(40, 133, 255), rgb(20, 59, 255)],
+
+    function spawnParticles(spawnPos, fireAngle, particleData){
         if(!particleEffects){return}
-        let count = 2 * intensity
-        let minSpeed = 50 * intensity
-        let maxSpeed = 260 * intensity
-        let life = 0.08 * intensity
-        let size = 2 * intensity
-        let spread = 8 * intensity
-        if(areaEffect){spread = 360; count *= 4}   //If area effect, spread in all directions
-        let baseColors = [
-            [rgb(255, 240, 150), rgb(255, 160, 40), rgb(255, 80, 20)],
-            [rgb(189, 189, 189), rgb(122, 122, 122), rgb(9, 9, 9)],
-            [rgb(150, 234, 255), rgb(40, 133, 255), rgb(20, 59, 255)],
-        ]
-        let colors = baseColors[colorsIndex]
+        let count = particleData.count
+        let minSpeed = particleData.minSpeed
+        let maxSpeed = particleData.maxSpeed
+        let life = particleData.life
+        let size = particleData.size
+        let spread = particleData.spread
+        let colors = particleData.colors
 
         for (let i = 0; i < count; i++) {
             const angleOffset = rand(-spread / 2, spread / 2)
@@ -351,13 +380,13 @@ if(pixelate){
                 lifespan(life, { fade: life * 0.8 }),
                 z(10),
                 {
-                    vel: dir.scale(speed),
+                    velocity: dir.scale(speed),
                 }
             ])
 
             particle.onUpdate(() => {
-                particle.move(particle.vel)
-                particle.vel = particle.vel.scale(Math.pow(0.05, dt()))
+                particle.move(particle.velocity)
+                particle.velocity = particle.velocity.scale(Math.pow(0.05, dt()))
             })
         }
     }
@@ -526,6 +555,12 @@ if(pixelate){
         area({ collisionIgnore: ["object"],}),
         "object"
         //scale(0.2) //only for large sprites or could use .use(scale(0.2))
+    ])
+
+    const crosshairSprite = add([
+        sprite("crosshair"),
+        pos(mousePos()),
+        anchor("center"),   //Close to player
     ])
 
     //Constructor below
@@ -1106,7 +1141,7 @@ if(pixelate){
             player.use("dash")
             player.use(opacity(0.5))
             spawnText(player.pos, "Dash")
-            spawnParticles(player.pos, dashDirection.angle(), 5, false, 1)
+            spawnParticles(player.pos, dashDirection.angle(), dashEffect)
             //Dash for 0.3 seconds with collision ingore tag
             wait(0.3, () => {
                 player.unuse("dash")
@@ -1166,6 +1201,7 @@ if(pixelate){
 
         //Make labels stay relative to camera
         toWorld(camPos())   //Set world origin to camPos()
+        crosshairSprite.pos = toWorld(mousePos())
         coinsLabel.pos = camPos().add(vec2(width()/2 - 20, height()/2 - 30))
         ammoLabel.pos = toWorld(mousePos().add(vec2(0, 30)))
         healthLabel.pos = camPos().add(vec2(-width()/2 + 20, height()/2 - 30))
@@ -1190,6 +1226,8 @@ if(pixelate){
         isPaused = true
         roundComplete = true
         gameQuestions = false
+
+        setCursor("default")
 
         add([
             rect(width(), height()),

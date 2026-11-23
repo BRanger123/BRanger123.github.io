@@ -20,6 +20,29 @@ h1{
 #bannerText{
     font-size: 150px;
 }
+/*Animation for title*/
+.title span {
+    display: inline-block;
+    animation: float 2.5s ease-in-out infinite;
+    transition: transform 0.15s cubic-bezier(0.2, 1.5, 0.5, 1);
+}
+
+.title span:hover {
+    animation: none;
+    transform: translateY(-10px) rotate(4deg) scale(1.1);
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+.title span:nth-child(2n) {
+    animation-delay: 0.2s;
+}
+
+.title span:nth-child(3n) {
+    animation-delay: 0.4s;
+}
 h2{
     font-size: 30px;
 }
@@ -229,28 +252,4 @@ textarea{
         width: 160px;
         height: 60px;
     }
-}
-
-
-.title span {
-    display: inline-block;
-    animation: float 2.5s ease-in-out infinite;
-    transition: transform 0.15s cubic-bezier(0.2, 1.5, 0.5, 1);
-}
-
-.title span:hover {
-    animation: none;
-    transform: translateY(-10px) rotate(4deg) scale(1.1);
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
-}
-.title span:nth-child(2n) {
-    animation-delay: 0.2s;
-}
-
-.title span:nth-child(3n) {
-    animation-delay: 0.4s;
 }
