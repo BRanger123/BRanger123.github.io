@@ -175,15 +175,12 @@ if(pixelate){
 
     const enemies = []      //Used for movement and attack logic
     const spawnDist = 500
-    let enemiesLeft
     let enemiesDied = 0
-    let enemiesDiedCounter = 0
     upgradeText = "error"
     upgradesToApply = []
     upgradeQuality = 1
     let isPaused = false
     let mouseDown = false
-    let waiting = false
     coins = 0
     upgradeCostIncrease = Number(document.getElementById('difficultySlider').value)
     let coinMagForce = 20000
@@ -323,6 +320,8 @@ if(pixelate){
         }
     }
 
+    //Particle effect presets, should lower counts in future for performance
+    //or find other solution
     let superCriticalHitEffect = {
         count: 18,
         minSpeed: 150,
@@ -332,7 +331,6 @@ if(pixelate){
         spread : 360,
         colors: [rgb(150, 234, 255), rgb(40, 133, 255), rgb(20, 59, 255)],
     }
-
     let criticalHitEffect = {
         count: 18,
         minSpeed: 150,
@@ -342,7 +340,6 @@ if(pixelate){
         spread : 360,
         colors: [rgb(255, 240, 150), rgb(255, 255, 61), rgb(255, 231, 20)],
     }
-
     let muzzelEffect = {
         count: 6,
         minSpeed: 150,
@@ -352,7 +349,6 @@ if(pixelate){
         spread : 24,
         colors: [rgb(255, 240, 150), rgb(255, 160, 40), rgb(255, 80, 20)],
     }
-
     let beamTrailEffect = {
         count: 4,
         minSpeed: 100,
@@ -362,7 +358,6 @@ if(pixelate){
         spread : 16,
         colors: [rgb(255, 240, 150), rgb(255, 160, 40), rgb(255, 80, 20)],
     }
-
     let dashEffect = {
         count: 15,
         minSpeed: 1500,
@@ -372,7 +367,6 @@ if(pixelate){
         spread : 24,
         colors: [rgb(189, 189, 189), rgb(122, 122, 122), rgb(9, 9, 9)],
     }
-
     let playerHitEffect = {
         count: 12,
         minSpeed: 350,
@@ -383,8 +377,8 @@ if(pixelate){
         colors: [rgb(255, 105, 105), rgb(151, 53, 53), rgb(255, 0, 0)],
     }
 
-    //[rgb(150, 234, 255), rgb(40, 133, 255), rgb(20, 59, 255)],
 
+    //Must add default angle rather than rely on the blasterSprite.angle being used
     function spawnParticles(spawnPos, fireAngle, particleData){
         if(!particleEffects){return}
         let count = particleData.count
@@ -776,7 +770,6 @@ if(pixelate){
         ])
 
         enemy.on("death", () => {
-            enemiesLeft--
             //if(Math.random()*1 < 0.7){  //70% chance of explosion
                 addKaboom(enemy.pos)
                 shake(8)
@@ -785,7 +778,6 @@ if(pixelate){
                 //}
             //}
             for(let i=0; i<enemy.coinsDropped; i++){spawnCoin(enemy.pos)}
-            enemiesDiedCounter++
             destroy(enemy)
             enemiesDied++
             if(enemiesDied > highestEnemiesDied){highestEnemiesDied = enemiesDied}  //Update stats if new highscore
@@ -864,10 +856,8 @@ if(pixelate){
             clock.loop(1, () => {
                 if(!isPaused){
                     roundLabel.text = `Time until next wave: ${nextWaveTime}`
-                    waiting = true
                     nextWaveTime = nextWaveTime - 1
                     if(nextWaveTime <= -1){ //If clock cycled completely
-                        waiting = false
                         startRound()
                         destroy(clock)
                     }
@@ -969,7 +959,6 @@ if(pixelate){
         if(doubleDifficulty){difficulty *= 2}
         if(doubleEnemies){enemyNum *= 2; bosses *= 2}
         
-        enemiesLeft = (waves * enemyNum) + bosses
         spawnWave(3, waves, enemyNum, difficulty, bosses)
         //Refresh mushrooms
         for(let i = 0; i<5; i++){
@@ -1215,7 +1204,7 @@ if(pixelate){
 
     onKeyPress("b", () => {
         //Used for testing text and sound output
-        spawnText(player.pos, upgradeCostIncrease)
+        spawnText(player.pos, blabber())
         burp()
     })
     
@@ -1362,7 +1351,9 @@ if(pixelate){
 
     player.on("death", () => {
         destroy(player)
-        showDeathScreen({ score: enemiesDied*coins, round: Math.max(1, round - 1) })
+        roundComplete = true
+        isPaused = true
+        showDeathScreen({ score: enemiesDied*coins*diffLevel*round, round: Math.max(1, round - 1) })
     })
 })
 

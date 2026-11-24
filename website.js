@@ -1,3 +1,42 @@
+//Website variables
+let levelGlobal = -1        //Globals so Kaboom objects can be seen in entire src
+let currentDivId = "menu"
+let questions
+let gameQuestions = false
+let answerStreak = 0
+let highestAnswerStreak = 0
+let highestEnemiesDied = 0
+
+//Game variables
+let coins = 0
+let gadgetGlobal
+let selectedGadget = ""
+let blastBlasterGlobal
+let sparkBlasterGlobal
+let cyclerBlasterGlobal
+let beamBlasterGlobal
+
+//Upgrade variables
+let upgradesToApply = []
+let upgradeQuality = 1
+let selectedUpgradeString
+let selectedUpgradeNum
+let upgradesPurchased = 0
+let upgradeCostIncrease = Number(document.getElementById('difficultySlider').value)
+let upgradeText
+
+//Settings variables
+let questionsInGame = false 
+let darkMode = false
+let pixelate = false
+let particleEffects = true
+let bindingTarget = null
+let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }     //Easier to change bindings this way
+
+//Colors
+let red = 255
+let green = 215
+let blue = 151
 const colors = [
     "2191fb","b9faf8","dc6acf","f3c969","ffffff",
     "c56b59","6eb83d","f194b4","c5ebc3","6fbcec",
@@ -7,6 +46,7 @@ const colors = [
     "9d9143","999e57","0afff7","cad8de",
     "d4e09b","f6f4d2","cbdfbd","f19c79","f991cc"
 ]
+
 
 function blabber(){
     //Random word function for testing text
@@ -24,45 +64,6 @@ function blabber(){
     }
     return word.charAt(0).toUpperCase() + word.slice(1)
 }
-
-//Regular variables
-let gadgetGlobal
-let playerSprite = "piskel"
-let spritesOwned = ["bean"]
-let upgradesToApply = []
-let upgradeQuality = 1
-let levelGlobal = -1        //Globals so Kaboom objects can be seen in entire src
-let currentDivId = "menu"
-let answerStreak = 0
-let highestAnswerStreak = 0
-let highestEnemiesDied = 0
-let coins = 0
-let upgradeCostIncrease = Number(document.getElementById('difficultySlider').value)
-let selectedGadget = ""
-let blastBlasterGlobal
-let sparkBlasterGlobal
-let cyclerBlasterGlobal
-let beamBlasterGlobal
-let questions
-let gameQuestions = false
-let upgradesPurchased = 0
-let selectedUpgradeString
-let selectedUpgradeNum
-let upgradeText
-
-//Settings variables
-let questionsInGame = false 
-let darkMode = false
-let pixelate = false
-let particleEffects = true
-let bindingTarget = null
-let controlBindings = { up: 'w', left: 'a', down: 's', right: 'd', dash: 'q', reload: 'e' }     //Easier to change bindings this way
-
-
-let red = 255
-let green = 215
-let blue = 151
-
 
 function getQuestions() {
     const xhr = new XMLHttpRequest()
