@@ -291,6 +291,7 @@ if(pixelate){
                     if(this.critChance > 1){    //Special crit
                         if(this.lifeSteal > 0){healPlayer(this.lifeSteal*2)}
                         else{enemy.hurt(damage*2*this.critChance)}
+                        spawnParticles(enemy.pos, blasterSprite.angle, superCriticalHitEffect)
                         spawnText(enemy.pos, (damage*2*this.critChance).toFixed(0), rgb(0, 255, 242))
                         if(beam.penetration > 0){beam.penetration--}
                         else{beam.destroy()}
@@ -298,6 +299,7 @@ if(pixelate){
                     else if(Math.random() <= this.critChance){       //Crit
                         if(this.lifeSteal > 0){healPlayer(this.lifeSteal*2)}
                         enemy.hurt(damage*2)
+                        spawnParticles(enemy.pos, blasterSprite.angle, criticalHitEffect)
                         spawnText(enemy.pos, (damage*2).toFixed(0), rgb(255, 255, 0))
                         if(beam.penetration > 0){beam.penetration--}
                         else{beam.destroy()}
@@ -319,6 +321,26 @@ if(pixelate){
             this.ammoInMag--    //Decrease charge count in magazine
             return true //Success
         }
+    }
+
+    let superCriticalHitEffect = {
+        count: 18,
+        minSpeed: 150,
+        maxSpeed: 800,
+        life: 0.4,
+        size: 10,
+        spread : 360,
+        colors: [rgb(150, 234, 255), rgb(40, 133, 255), rgb(20, 59, 255)],
+    }
+
+    let criticalHitEffect = {
+        count: 18,
+        minSpeed: 150,
+        maxSpeed: 800,
+        life: 0.4,
+        size: 10,
+        spread : 360,
+        colors: [rgb(255, 240, 150), rgb(255, 255, 61), rgb(255, 231, 20)],
     }
 
     let muzzelEffect = {
@@ -351,6 +373,16 @@ if(pixelate){
         colors: [rgb(189, 189, 189), rgb(122, 122, 122), rgb(9, 9, 9)],
     }
 
+    let playerHitEffect = {
+        count: 12,
+        minSpeed: 350,
+        maxSpeed: 1000,
+        life: 0.1,
+        size: 10,
+        spread : 360,
+        colors: [rgb(255, 105, 105), rgb(151, 53, 53), rgb(255, 0, 0)],
+    }
+
     //[rgb(150, 234, 255), rgb(40, 133, 255), rgb(20, 59, 255)],
 
     function spawnParticles(spawnPos, fireAngle, particleData){
@@ -381,7 +413,8 @@ if(pixelate){
                 z(10),
                 {
                     velocity: dir.scale(speed),
-                }
+                },
+                "particle"
             ])
 
             particle.onUpdate(() => {
@@ -425,6 +458,7 @@ if(pixelate){
             player.hurt(damage)
             healthLabel.text = `Health: ${Math.floor(player.hp())}` //Update health label
             shake(damage)
+            spawnParticles(player.pos, blasterSprite.angle, playerHitEffect)
             spawnText(player.pos, `-${damage}`, rgb(255, 0, 0))
             player.use(color(rgb(255, 0, 0)))
             wait(0.1, () => {
@@ -769,6 +803,7 @@ if(pixelate){
         destroyAll("enemy")
         destroyAll("spawnMarker")
         destroyAll("mushroom")
+        destroyAll("particle")
         document.getElementById('upgradePrice').textContent = `Upgrade will cost ${upgradesPurchased*upgradeCostIncrease} coins`
         document.getElementById("coinsCount").textContent = `Coins: ${Math.floor(coins).toFixed(0)}`
         resetInputs()   //Avoid sticky key behaviour
