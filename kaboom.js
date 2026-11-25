@@ -40,8 +40,10 @@ loadSprite("piskel", "piskel.png", {
     sliceX : 2,
     sliceY : 3,
     anims: {
+        //Identify animation frames
+        //Speed cannot be 0 for static animations
         idle: { from: 0, to: 1, speed: 4, loop: true },
-        run: { from: 2, to: 3, speed: 5, loop: true },      //Identify animation frames
+        run: { from: 2, to: 3, speed: 5, loop: true },
         slide: { from: 4, to: 4, speed: 1, loop: true },
     }
 })
@@ -350,7 +352,7 @@ if(pixelate){
         colors: [rgb(255, 240, 150), rgb(255, 160, 40), rgb(255, 80, 20)],
     }
     let beamTrailEffect = {
-        count: 4,
+        count: 2,
         minSpeed: 100,
         maxSpeed: 600,
         life: 0.16,
@@ -609,18 +611,28 @@ if(pixelate){
         blasterSprite.use(sprite("blast"))
         blasterSprite.use(scale(2))
         blasterSprite.use(anchor("center"))
+        beamTrailEffect.count = 1
     }
     if(selectedGadgetName=="Cycler"){
         gadgetGlobal = cyclerBlasterGlobal
         blasterSprite.use(sprite("cycler"))
         blasterSprite.use(scale(2))
         blasterSprite.use(anchor("center"))
+        muzzelEffect.count = 2
+        muzzelEffect.colors = [rgb(150, 234, 255), rgb(40, 133, 255), rgb(20, 59, 255)]
+        beamTrailEffect.count = 1
+        beamTrailEffect.colors = [rgb(150, 234, 255), rgb(40, 133, 255), rgb(20, 59, 255)]
     }
     if(selectedGadgetName=="Beam"){
         gadgetGlobal = beamBlasterGlobal
         blasterSprite.use(sprite("beam"))
         blasterSprite.use(scale(1.6))
         blasterSprite.use(anchor("center"))
+        muzzelEffect.count *= 3
+        muzzelEffect.colors = [rgb(51, 51, 51), rgb(255, 244, 40), rgb(94, 74, 8)]
+        muzzelEffect.minSpeed -= 100
+        muzzelEffect.maxSpeed += 200
+        beamTrailEffect.count = 1
     }
     if(selectedGadgetName=="Spark"){gadgetGlobal = sparkBlasterGlobal}
     if(!gadgetGlobal){
